@@ -38,6 +38,8 @@ public class World extends JComponent {
 	/**
 	 * This constructs the world by pushing the starting screen onto the screen stack
 	 * and initializing the game's state.
+	 * 
+	 * @param playerIn the player
 	 */
 	public World(Player playerIn) {
 		super();
@@ -103,6 +105,8 @@ public class World extends JComponent {
 	 * key events.
 	 * 
 	 * @param keyListener the KeyListener to register
+	 * 
+	 * @see JComponent#addKeyListener(KeyListener)
 	 */
 	public void registerKeyListener(KeyListener keyListener) {
 		addKeyListener(keyListener);
@@ -113,6 +117,8 @@ public class World extends JComponent {
 	 * no longer receive key events.
 	 * 
 	 * @param keyListener the KeyListener to unregister
+	 * 
+	 * @see JComponent#removeKeyListener(KeyListener)
 	 */
 	public void unregisterKeyListener(KeyListener keyListener) {
 		removeKeyListener(keyListener);
