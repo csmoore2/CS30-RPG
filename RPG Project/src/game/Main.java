@@ -17,7 +17,7 @@ public class Main {
 	/**
 	 * The height of the game's window.
 	 */
-	public static final int SCREEN_HEIGHT = 736;
+	public static final int SCREEN_HEIGHT = 720;
 	
 	/**
 	 * The number of frames rendered in one second.

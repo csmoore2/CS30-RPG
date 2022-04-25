@@ -4,7 +4,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyListener;
-import java.nio.file.Paths;
+import java.io.File;
 import java.util.Stack;
 
 import javax.swing.JComponent;
@@ -49,7 +49,7 @@ public class World extends JComponent {
 		player.setWorld(this);
 		
 		// Push the starting screen onto the screen stack
-		screenStack.push(new AreaScreen(Paths.get("res", "test.map")));
+		screenStack.push(new AreaScreen(new File("res/test.jpg")));
 	}
 	
 	/**
