@@ -5,6 +5,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -26,6 +28,16 @@ public class AreaScreen implements IScreen {
 	public static final int ROWS_OF_TILES = Main.SCREEN_HEIGHT / Tile.TILE_SIZE;
 	
 	/**
+	 * This is a cache of all the previously loaded area screens so they can be reused.
+	 */
+	public static final Map<String, AreaScreen> AREA_SCREEN_CACHE = new HashMap<>();
+	
+	/**
+	 * This keeps track of whether or not the AreaScreen's tile map has been populated.
+	 */
+	private boolean tileMapPopulated = false;
+	
+	/**
 	 * The is the area's background image.
 	 */
 	private final BufferedImage mapImage;
@@ -33,25 +45,40 @@ public class AreaScreen implements IScreen {
 	/**
 	 * This is the map of special tiles that is populated by the map file.
 	 */
-	private final Tile[][] tileMap = new Tile[ROWS_OF_TILES][TILES_PER_ROW]; 
+	private final Tile[][] tileMap = new Tile[ROWS_OF_TILES][TILES_PER_ROW];
+	
+	/**
+	 * This method is what is called by other classes to create instances
+	 * of AreaScreen. This method will create a new AreaScreen if an AreaScreen
+	 * with the same background has not been previously created. Otherwise this
+	 * method return the previously created AreaScreen.
+	 * 
+	 * @param mapImagePathIn the path to the area's background image
+	 * 
+	 * @return an AreaScreen that uses the given background image
+	 */
+	public static AreaScreen createNewAreaScreen(String mapImagePathIn) {
+		// Either get or create the AreaScreen
+		AreaScreen screen = AREA_SCREEN_CACHE.computeIfAbsent(mapImagePathIn, AreaScreen::new);
+		
+		// Populate the area's tile map (if it has not already been populated)
+		screen.populateTileMap(mapImagePathIn);
+		
+		// Return the AreaScreen
+		return screen;
+	}
 	
 	/**
 	 * This creates an AreaScreen by loading the given map image
 	 * and populating the tile map with any special tiles specified
 	 * by the map file.
 	 * 
-	 * @param mapImageIn the area's background image file
+	 * @param mapImagePathIn the path to the area's background image
 	 */
-	public AreaScreen(File mapImageIn) {
-		// Initially we can to fill the tile map with the empty
-		// tile so that we never retrieve null from the tile map
-		for (Tile[] row : tileMap) {
-			Arrays.fill(row, Tile.EMPTY);
-		}
-
+	private AreaScreen(String mapImagePathIn) {
 		// Try to load the given map image file
 		try {
-			mapImage = ImageIO.read(mapImageIn);
+			mapImage = ImageIO.read(new File(mapImagePathIn));
 		} catch (IOException e) {
 			// There was an error loading the image so we cannot continue
 			throw new RuntimeException("Error loading area background image!", e);
@@ -76,6 +103,43 @@ public class AreaScreen implements IScreen {
 				)
 			);
 		}
+		
+		// Initially we can to fill the tile map with the empty
+		// tile so that we never retrieve null from the tile map
+		for (Tile[] row : tileMap) {
+			Arrays.fill(row, Tile.EMPTY_TILE);
+		}
+	}
+	
+	/**
+	 * This method populates the tile map from the background image's accompanying
+	 * map file.
+	 */
+	private void populateTileMap(String mapImagePathIn) {
+		// If the tile map has already been populated or is being populated then do nothing
+		if (tileMapPopulated) return;
+		
+		// Update 'tileMapPopulated'
+		tileMapPopulated = true;
+		
+		// This is temporary code for testing
+		if (mapImagePathIn == "res/test.jpg") {
+			tileMap[0][TILES_PER_ROW-1] = new Tile.LoadingZone("res/test2.jpg", 0, 0);
+		} else if (mapImagePathIn == "res/test2.jpg") {
+			tileMap[0][TILES_PER_ROW-1] = new Tile.LoadingZone("res/test.jpg", 0, 0);
+		}
+	}
+	
+	/**
+	 * This method returns the tile at the given position.
+	 * 
+	 * @param x the x-position of the tile
+	 * @param y the y-position of the tile
+	 * 
+	 * @return the tile at the given position
+	 */
+	public Tile getTileAtPos(int x, int y) {
+		return tileMap[y][x];
 	}
 	
 	/**
@@ -89,5 +153,16 @@ public class AreaScreen implements IScreen {
 	public void paint(Graphics2D g2d) {
 		// Draw the area's background image
 		g2d.drawImage(mapImage, null, 0, 0);
+		
+		// Loop through each tile in the tile map
+		for (int row = 0; row < ROWS_OF_TILES; row++) {
+			for (int col = 0; col < TILES_PER_ROW; col++) {
+				// Check if the tile should be painted
+				if (tileMap[row][col].shouldPaint()) {
+					// The tile should be painted, so paint it
+					tileMap[row][col].paint(g2d, row*Tile.TILE_SIZE, col*Tile.TILE_SIZE);
+				}
+			}
+		}
 	}
 }

@@ -75,6 +75,21 @@ public class Player implements KeyListener {
 		// Register us as a listener for key events from the world
 		world.registerKeyListener(this);
 	}
+	
+	/**
+	 * This method updates the player's position to the given coordinates.
+	 * 
+	 * @param newX the player's new x-position
+	 * @param newY the player's new y-position
+	 */
+	public void updatePosition(int newX, int newY) {
+		// Update our position
+		xPos = newX;
+		yPos = newY;
+		
+		// Inform the world of our change in position
+		world.onPlayerPositionChange(newX, newY);
+	}
 
 	/**
 	 * This method is invoked when a key is pressed. This class
@@ -95,18 +110,18 @@ public class Player implements KeyListener {
 		switch (e.getKeyChar()) {
 			// Vertical Movement (0 = top)
 			case 'w':
-				yPos = Math.max(yPos-1, MIN_Y_POS);
+				updatePosition(xPos, Math.max(yPos-1, MIN_Y_POS));
 				break;
 			case 's':
-				yPos = Math.min(yPos+1, MAX_Y_POS);
+				updatePosition(xPos, Math.min(yPos+1, MAX_Y_POS));
 				break;
 
 			// Horizontal Movement (0 = Right)
 			case 'a':
-				xPos = Math.max(xPos-1, MIN_X_POS);
+				updatePosition(Math.max(xPos-1, MIN_X_POS), yPos);
 				break;
 			case 'd':
-				xPos = Math.min(xPos+1, MAX_X_POS);
+				updatePosition(Math.min(xPos+1, MAX_X_POS), yPos);
 				break;
 				
 			// If the key was not one that updates the player's position

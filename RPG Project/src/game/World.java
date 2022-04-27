@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyListener;
-import java.io.File;
 import java.util.Stack;
 
 import javax.swing.JComponent;
@@ -49,7 +48,7 @@ public class World extends JComponent {
 		player.setWorld(this);
 		
 		// Push the starting screen onto the screen stack
-		screenStack.push(new AreaScreen(new File("res/test.jpg")));
+		screenStack.push(AreaScreen.createNewAreaScreen("res/test.jpg"));
 	}
 	
 	/**
@@ -98,6 +97,56 @@ public class World extends JComponent {
 	 * This updates the world.
 	 */
 	public void update() {
+	}
+	
+	/**
+	 * This method is called by the player when their position updates
+	 * so that we can perform any necessary interaction with the tile
+	 * the player is moving onto.
+	 * 
+	 * @param newX the player's new x-position
+	 * @param newY the player's new y-position
+	 */
+	public void onPlayerPositionChange(int newX, int newY) {
+		// We only need to perform an interaction if the current screen is an AreaScreen
+		if (screenStack.peek() instanceof AreaScreen) {
+			// Get the current AreaScreen
+			AreaScreen currentArea = (AreaScreen)screenStack.peek();
+			
+			// Get the tile at the player's new position
+			Tile newTile = currentArea.getTileAtPos(newX, newY);
+			
+			// Perform the interaction with the tile at the player's new position
+			newTile.performAction(player, this);
+		}
+	}
+
+	/**
+	 * This method changes the current area and updates the player's
+	 * position to where they should start in the new area.
+	 * 
+	 * @param newArea the area to change to
+	 * @param newX    the player's new x-position
+	 * @param newY    the player's new y-position
+	 */
+	public void changeArea(AreaScreen newArea, int newX, int newY) {
+		// Ensure the player's new x-position will be within the screen's bounds
+		if (newX < 0 || newX > AreaScreen.TILES_PER_ROW) {
+			throw new IllegalArgumentException(
+					"The player's x-position must be within the screen's bounds after an area change!");
+		}
+
+		// Ensure the player's new y-position will be within the screen's bounds
+		if (newY < 0 || newY > AreaScreen.ROWS_OF_TILES) {
+			throw new IllegalArgumentException(
+					"The player's y-position must be within the screen's bounds after an area change!");
+		}
+		
+		// Push the new area onto the screen stack
+		screenStack.push(newArea);
+		
+		// Update the player's position
+		player.updatePosition(newX, newY);
 	}
 	
 	/**
