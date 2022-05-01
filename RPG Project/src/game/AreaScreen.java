@@ -11,10 +11,10 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 /**
- * This class is a subclass of Screen that is used to display
- * an area specified by an image and a map file. The image is
- * used as the area's background and the map file specifies the
- * location of any special tiles.
+ * This class implements IScreen and is used to display an area
+ * specified by an image and a map file. The image is used as the
+ * area's background and the map file specifies the location of
+ * any special tiles.
  */
 public class AreaScreen implements IScreen {
 	/**

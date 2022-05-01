@@ -10,6 +10,11 @@ import javax.swing.Timer;
  */
 public class Main {
 	/**
+	 * This is the name of the game.
+	 */
+	public static final String GAME_NAME = "EleMages: Battle Edition";
+
+	/**
 	 * The width of the game's window.
 	 */
 	public static final int SCREEN_WIDTH = 1280;
@@ -22,12 +27,22 @@ public class Main {
 	/**
 	 * The number of frames rendered in one second.
 	 */
-	public static int FRAMES_PER_SECOND = 60;
+	public static final int FRAMES_PER_SECOND = 60;
 	
 	/**
 	 * The number of milliseconds per frame.
 	 */
-	public static int MILLISECONDS_PER_FRAME = 1000/FRAMES_PER_SECOND;
+	public static final int MILLISECONDS_PER_FRAME = 1000/FRAMES_PER_SECOND;
+
+	/**
+	 * This is the main thread.
+	 */
+	public static final Thread MAIN_THREAD = Thread.currentThread();
+
+	/**
+	 * This is the game's window.
+	 */
+	public static JFrame window = null;
 	
 	/**
 	 * This is the entry point into the program.
@@ -36,21 +51,36 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		// Create the window and configure it
-		JFrame window = new JFrame();
-		window.setTitle("EleMages: Battle Edition");
+		window = new JFrame();
+		window.setTitle(GAME_NAME);
 		window.setResizable(false);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		// Create the player
-		Player player = new Player();
+		// Display the character creation screen so the player can create their character
+		// and set it up to call the 'startGame' method when the player is ready to start
+		window.add(new CharacterCreationScreen(Main::startGame));
+		window.pack();
+
+		// Center the window and show it
+		window.setLocationRelativeTo(null);
+		window.setVisible(true);
+	}
+
+	private static void startGame(Player player) {
+		// Hide the window and then completely reinitialize it
+		window.setVisible(false);
+		window = new JFrame();
+		window.setTitle(GAME_NAME);
+		window.setResizable(false);
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		// Create the world
 		World world = new World(player);
-		
+
 		// Add the world to the window and make the window the correct size
 		window.add(world);
 		window.pack();
-		
+
 		// Center the window and show it
 		window.setLocationRelativeTo(null);
 		window.setVisible(true);
@@ -63,10 +93,16 @@ public class Main {
 		// Start the world repaint timer on the Event Dispatch Thread (EDT)
 		SwingUtilities.invokeLater(worldRepaintTimer::start);
 		
-		// This is the game loop
-		while (true) {
-			// Update the world
-			world.update();
-		}
+		// This is the game loop. We start it running on a daemon thread so that it does not block this thread,
+		// which should be the Event Dispatch Thread (EDT) used by Java Swing, and so that it ends when the other
+		// threads in this program stop
+		Thread gameLoopThread = new Thread(() -> {
+			while (true) {
+				// Update the world
+				world.update();
+			}
+		});
+		gameLoopThread.setDaemon(true);
+		gameLoopThread.start();
 	}
 }
