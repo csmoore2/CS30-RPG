@@ -4,6 +4,9 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import game.entities.Player;
+import game.ui.CharacterCreationScreen;
+
 /**
  * This class contains the entry point into the game; it is where
  * the initial setup takes place and the game starts.
@@ -33,11 +36,6 @@ public class Main {
 	 * The number of milliseconds per frame.
 	 */
 	public static final int MILLISECONDS_PER_FRAME = 1000/FRAMES_PER_SECOND;
-
-	/**
-	 * This is the main thread.
-	 */
-	public static final Thread MAIN_THREAD = Thread.currentThread();
 
 	/**
 	 * This is the game's window.

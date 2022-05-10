@@ -2,6 +2,10 @@ package game;
 
 import java.awt.Graphics2D;
 
+import game.entities.ILivingEntity;
+import game.entities.Player;
+import game.ui.AreaScreen;
+
 /**
  * This class will be used as the superclass for all the
  * special tiles that are placed over an area's background image to trigger events.
@@ -46,7 +50,7 @@ public class Tile {
 	
 	/**
 	 * This class represents a loading zone tile. This tile is not
-	 * painted but when the player steps on it, this tile moves the
+	 * painted, but when the player steps on it this tile moves the
 	 * player to a new map.
 	 */
 	public static final class LoadingZone extends Tile {
@@ -94,6 +98,46 @@ public class Tile {
 		@Override
 		public void performAction(Player player, World world) {
 			world.changeArea(newScreen, playerNewX, playerNewY);
+		}
+	}
+	
+	/**
+	 * This class represents a battle trigger tile. This tile is not painted,
+	 * but when the player steps on it a battle is triggered.
+	 */
+	public static final class BattleTrigger extends Tile {
+		/**
+		 * This is the enemy that the player will have to fight when
+		 * they step on this tile.
+		 */
+		private final ILivingEntity enemy;
+
+		/**
+		 * This constructs a new BattleTrigger tile with the given entity
+		 * as the enemy the player will have the fight when they step on
+		 * this tile.
+		 * 
+		 * @param enemyIn the enemy the player has to fight when they step
+		 *                on this tile
+		 */
+		public BattleTrigger(ILivingEntity enemyIn) {
+			enemy = enemyIn;
+		}
+
+		/**
+		 * This method is called when the player steps on this tile. In this
+		 * case, that triggers a battle between the player and th enemy stored
+		 * by 'enemy'.
+		 * 
+		 * @param player the player
+		 * @param world  the player's world
+		 * 
+		 * @see Tile#performAction(Player, World)
+		 */
+		@Override
+		public void performAction(Player player, World world) {
+			// Initiate a battle between the player and the enemy stored by 'enemy'
+			world.initiateBattle(enemy);
 		}
 	}
 }

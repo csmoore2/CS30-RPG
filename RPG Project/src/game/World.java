@@ -7,6 +7,13 @@ import java.awt.event.KeyListener;
 import java.util.Stack;
 
 import javax.swing.JComponent;
+import javax.swing.SpringLayout;
+
+import game.entities.ILivingEntity;
+import game.entities.Player;
+import game.ui.AreaScreen;
+import game.ui.BattleScreen;
+import game.ui.IScreen;
 
 /**
  * This class represents the world the player is playing in. This class
@@ -24,9 +31,20 @@ public class World extends JComponent {
 	private final Stack<IScreen> screenStack = new Stack<>();
 	
 	/**
+	 * This is the SpringLayout used by the world.
+	 */
+	private final SpringLayout springLayout;
+	
+	/**
 	 * This is the player.
 	 */
 	private final Player player;
+	
+	/**
+	 * This keeps track of whether or not the player is currently
+	 * engaged in a battle.
+	 */
+	private boolean inBattle = false;
 	
 	/**
 	 * This keeps track of whether or not the world needs to be repainted,
@@ -42,6 +60,11 @@ public class World extends JComponent {
 	 */
 	public World(Player playerIn) {
 		super();
+		
+		// Set our layout to be a SpringLayout so that if anything needs to add JComponents to
+		// us they will easily be able to lay them out
+		springLayout = new SpringLayout();
+		setLayout(springLayout);
 		
 		// Store a reference to the player and update the player's world
 		player = playerIn;
@@ -59,6 +82,8 @@ public class World extends JComponent {
 	 */
 	@Override
 	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		
 		// Ensure we were passed an instance of Graphics2D
 		if (g instanceof Graphics2D) {
 			// Convert the Graphics instance to a Graphics2D instance
@@ -70,8 +95,10 @@ public class World extends JComponent {
 				screenStack.peek().paint(g2d);
 			}
 			
-			// Paint the player
-			player.paint(g2d);
+			// If we are not in a battle then paint the player
+			if (!inBattle) {
+				player.paint(g2d);
+			}
 			
 			// Update 'repaintRequired'
 			repaintRequired = false;
@@ -80,8 +107,8 @@ public class World extends JComponent {
 	
 	@Override
 	public void repaint() {
-		// If we do not need to repaint the window then exit
-		if (!repaintRequired) return;
+		// If we do not need to repaint the window and are not in a battle then exit
+		if (!repaintRequired && !inBattle) return;
 		
 		super.repaint();
 	}
@@ -97,6 +124,20 @@ public class World extends JComponent {
 	 * This updates the world.
 	 */
 	public void update() {
+		// If the current screen is a BattleScreen then we need to
+		// update its state
+		if (screenStack.peek() instanceof BattleScreen) {
+			((BattleScreen) screenStack.peek()).update();
+		}
+	}
+	
+	/**
+	 * This method returns the SpringLayout used by the world.
+	 * 
+	 * @return the SpringLayout used by the world
+	 */
+	public SpringLayout getSpringLayout() {
+		return springLayout;
 	}
 	
 	/**
@@ -142,11 +183,29 @@ public class World extends JComponent {
 					"The player's y-position must be within the screen's bounds after an area change!");
 		}
 		
-		// Push the new area onto the screen stack
+		// Pop the previous area off the screen stack and push the new area onto the screen stack
+		screenStack.pop();
 		screenStack.push(newArea);
 		
 		// Update the player's position
 		player.updatePosition(newX, newY);
+	}
+	
+	/**
+	 * This method initiates a battle between the player and the
+	 * given enemy.
+	 * 
+	 * @param enemy the enemy the player is fighting
+	 */
+	public void initiateBattle(ILivingEntity enemy) {
+		// Push a battle screen onto the screen stack
+		screenStack.push(new BattleScreen(this, player, enemy));
+		
+		// Tell the player they are now in a battle
+		player.onBattleStart();
+		
+		// Update the world's state
+		inBattle = true;
 	}
 	
 	/**

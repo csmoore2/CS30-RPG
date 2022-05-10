@@ -1,4 +1,4 @@
-package game;
+package game.ui;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -15,6 +15,9 @@ import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+
+import game.Main;
+import game.entities.Player;
 
 import static javax.swing.SpringLayout.*;
 

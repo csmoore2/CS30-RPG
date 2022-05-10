@@ -1,4 +1,4 @@
-package game;
+package game.ui;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -9,6 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+
+import game.Main;
+import game.Tile;
+import game.entities.Enemy;
 
 /**
  * This class implements IScreen and is used to display an area
@@ -125,6 +129,7 @@ public class AreaScreen implements IScreen {
 		// This is temporary code for testing
 		if (mapImagePathIn == "res/test.jpg") {
 			tileMap[0][TILES_PER_ROW-1] = new Tile.LoadingZone("res/test2.jpg", 0, 0);
+			tileMap[1][0] = new Tile.BattleTrigger(new Enemy(0));
 		} else if (mapImagePathIn == "res/test2.jpg") {
 			tileMap[0][TILES_PER_ROW-1] = new Tile.LoadingZone("res/test.jpg", 0, 0);
 		}
