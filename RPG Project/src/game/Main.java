@@ -6,6 +6,7 @@ import javax.swing.Timer;
 
 import game.entities.Player;
 import game.ui.CharacterCreationScreen;
+import game.ui.StartScreen;
 
 /**
  * This class contains the entry point into the game; it is where
@@ -54,6 +55,25 @@ public class Main {
 		window.setResizable(false);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		// Display the start screen and have it call the 'showCharacterSelectionScreen' method
+		// when the player is ready to begin the game
+		window.add(new StartScreen(Main::showCharacterSelectionScreen));
+		window.pack();
+
+		// Center the window and show it
+		window.setLocationRelativeTo(null);
+		window.setVisible(true);
+	}
+	
+	/**
+	 * This method is called by the start screen when the player is ready to
+	 * begin the game. This method shows the character selection screen and tells
+	 * it to call the 'startGame' method once the player has chosen a character.
+	 */
+	private static void showCharacterSelectionScreen() {
+		// Reinitialize the window
+		reinitializeWindow();
+		
 		// Display the character creation screen so the player can create their character
 		// and set it up to call the 'startGame' method when the player is ready to start
 		window.add(new CharacterCreationScreen(Main::startGame));
@@ -64,13 +84,17 @@ public class Main {
 		window.setVisible(true);
 	}
 
+	/**
+	 * This method is called by the character selection screen when the
+	 * player is ready to start the game. This method creates the world,
+	 * sets up the window, and beings both the game loop and world repaint
+	 * timer.
+	 * 
+	 * @param player the character chosen by the player
+	 */
 	private static void startGame(Player player) {
-		// Hide the window and then completely reinitialize it
-		window.setVisible(false);
-		window = new JFrame();
-		window.setTitle(GAME_NAME);
-		window.setResizable(false);
-		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		// Reinitialize the window
+		reinitializeWindow();
 		
 		// Create the world
 		World world = new World(player);
@@ -102,5 +126,18 @@ public class Main {
 		});
 		gameLoopThread.setDaemon(true);
 		gameLoopThread.start();
+	}
+	
+	/**
+	 * This method reinitializes the window. This method is required due
+	 * to issues when completely switching the content of the window.
+	 */
+	private static void reinitializeWindow() {
+		// Hide the window and then completely reinitialize it
+		window.setVisible(false);
+		window = new JFrame();
+		window.setTitle(GAME_NAME);
+		window.setResizable(false);
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 }

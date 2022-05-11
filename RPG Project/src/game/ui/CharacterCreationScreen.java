@@ -24,8 +24,8 @@ import static javax.swing.SpringLayout.*;
 /**
  * This class extends JComponent rather than implementing IScreen,
  * due to the fact that it needs to use other JComponents, and is
- * used to display the character selection screen which is shown when
- * the game first starts. Along with the graphics, this screen will
+ * used to display the character selection screen which is shown after
+ * the start screen is shown. Along with the graphics, this screen will
  * handle the logic for character selection.
  */
 @SuppressWarnings("serial")
