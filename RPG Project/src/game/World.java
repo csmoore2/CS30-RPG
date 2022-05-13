@@ -51,7 +51,7 @@ public class World extends JComponent {
 	 * or if repainting can be skipped next time the repaint method is called.
 	 */
 	private boolean repaintRequired = false;
-	
+
 	/**
 	 * This constructs the world by pushing the starting screen onto the screen stack
 	 * and initializing the game's state.
@@ -71,7 +71,8 @@ public class World extends JComponent {
 		player.setWorld(this);
 		
 		// Push the starting screen onto the screen stack
-		screenStack.push(AreaScreen.createNewAreaScreen("res/test.jpg"));
+		Main.currentLevel = 1;
+		screenStack.push(AreaScreen.createNewAreaScreen("res/greenzonebackground.png"));
 	}
 	
 	/**
@@ -188,7 +189,7 @@ public class World extends JComponent {
 		screenStack.push(newArea);
 		
 		// Update the player's position
-		player.updatePosition(newX, newY);
+		player.updatePosition(newX, newY, false);
 	}
 	
 	/**

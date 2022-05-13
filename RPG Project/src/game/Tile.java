@@ -14,7 +14,7 @@ public class Tile {
 	/**
 	 * This is the width and height of a single tile in pixels.
 	 */
-	public static final int TILE_SIZE = 20;
+	public static final int TILE_SIZE = Main.SCREEN_WIDTH/9;
 	
 	/**
 	 * This is an empty tile; it is not painted nor does it trigger anything.
@@ -44,7 +44,7 @@ public class Tile {
 	 * the tile.
 	 * 
 	 * @param player the player
-	 * @param world  the player's world
+	 * @param world the player's world
 	 */
 	public void performAction(Player player, World world) {}
 	
@@ -79,7 +79,8 @@ public class Tile {
 		 * @param playerNewYIn   this is the player's new y-position after
 		 *                       the area change
 		 */
-		public LoadingZone(String mapImagePathIn, int playerNewXIn, int playerNewYIn) {
+		public LoadingZone(String mapImagePathIn, int levelTo, int playerNewXIn, int playerNewYIn) {
+			Main.currentLevel = levelTo;
 			newScreen = AreaScreen.createNewAreaScreen(mapImagePathIn);
 			playerNewX = playerNewXIn;
 			playerNewY = playerNewYIn;

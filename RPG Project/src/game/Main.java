@@ -21,12 +21,12 @@ public class Main {
 	/**
 	 * The width of the game's window.
 	 */
-	public static final int SCREEN_WIDTH = 1280;
+	public static final int SCREEN_WIDTH = 1000;
 	
 	/**
 	 * The height of the game's window.
 	 */
-	public static final int SCREEN_HEIGHT = 720;
+	public static final int SCREEN_HEIGHT = 1000;
 	
 	/**
 	 * The number of frames rendered in one second.
@@ -42,6 +42,24 @@ public class Main {
 	 * This is the game's window.
 	 */
 	public static JFrame window = null;
+	
+	/**
+	 * This is the games current zone/screen.
+	 * 0 = Start screen
+	 * 1 = Green zone
+	 * 2 = Fire zone
+	 * 3 = Gem zone
+	 * 4 = Ice zone
+	 * 5 = Rock zone
+	 * 6 = Final boss zone
+	 */
+	public static int currentLevel = 0;
+	
+	/**
+	 * Array which converts values of currentLevel into Strings for display.
+	 */
+	public static final String[] levels = {"Start screen", "Green Zone / Hub", "Fire Zone", "Gem Zone", "Ice Zone", "Rock Zone"};
+	
 	
 	/**
 	 * This is the entry point into the program.
