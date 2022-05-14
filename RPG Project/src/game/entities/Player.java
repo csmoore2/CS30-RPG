@@ -2,7 +2,6 @@ package game.entities;
 
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -15,13 +14,14 @@ import game.Attribute;
 import game.Tile;
 import game.World;
 import game.ui.AreaScreen;
+import game.util.KeyPressedListener;
 
 /**
  * This class represents the player. It is responsible for keeping
  * track of the player's attributes and position, updating the player's
  * position, and drawing the player.
  */
-public class Player implements ILivingEntity, KeyListener {
+public class Player implements ILivingEntity {
 	/**
 	 * These players represent the different classes the player will have to choose from.
 	 */
@@ -42,6 +42,23 @@ public class Player implements ILivingEntity, KeyListener {
 			throw new RuntimeException("Unable to load image for character!", e);
 		}
 	}
+
+	/**
+	 * This is the number of attribute points the player starts with.
+	 */
+	public static final int NUM_INITIAL_ATTR_POINTS = 4;
+
+	/**
+	 * This is the number of experience points the player has to gain
+	 * to level up.
+	 */
+	public static final int EXPERIENCE_PER_LEVEL = 50;
+
+	/**
+	 * This is the number of attribute points the player gets to spend
+	 * each time they level up.
+	 */
+	public static final int ATTR_POINTS_PER_LEVEL = 2;
 	
 	/**
 	 * The minimum possible x-position of the player.
@@ -102,7 +119,7 @@ public class Player implements ILivingEntity, KeyListener {
 	/**
 	 * This is the player's current amount of experience.
 	 */
-	private int exp = 0;
+	private int experience = 0;
 	
 	/**
 	 * This is the value of the player's intelligence attribute (this is
@@ -170,9 +187,28 @@ public class Player implements ILivingEntity, KeyListener {
 	private int numProtectionTurnsRemaining = 0;
 	
 	/**
-	 * This constructs a player based off of the given parameters. Since we are
-	 * using premade classes there is no need for an instance of Player to ever
-	 * be created outside of this class, hence this constructor is private.
+	 * This constructs a dummy player with the given values for its attributes.
+	 * 
+	 * @param intelligenceIn this is the value of the player's intelligence attribute
+	 * @param healthPointsIn this is the value of the player's health points attribute
+	 * @param specialIn      this is the value of the player's special attribute
+	 * @param abilitiesIn    this is the value of the player's abilities attribute
+	 */
+	public Player(int intelligenceIn, int healthPointsIn, int specialIn, int abilitiesIn) {
+		// Assign values for the player's attributes
+		intelligenceAttr = intelligenceIn;
+		healthPointsAttr = healthPointsIn;
+		specialAttr = specialIn;
+		abilitiesAttr = abilitiesIn;
+
+		// These variabes are unnecessary for a nummy player
+		classType = null;
+		image = null;
+		imageScaleOp = null;
+	}
+	
+	/**
+	 * This constructs a player based off of the given parameters.
 	 * 
 	 * @param classTypeIn this is the player's class
 	 * @param imageIn     this is the player's character's image
@@ -208,6 +244,29 @@ public class Player implements ILivingEntity, KeyListener {
 	}
 	
 	/**
+	 * This method sets the player's world and registers us
+	 * as a listener for key events.
+	 * 
+	 * @param worldIn the player's new world
+	 */
+	public void setWorld(World worldIn) {
+		// If we currently have another world then we should stop
+		// listening for key events from it before we switch worlds
+		if (world != null) world.unregisterKeyListener((KeyPressedListener)this::movementKeyPressedListener);
+		
+		// Set the player's new world
+		world = worldIn;
+		
+		// Register the 'movementKeyPressedListener' method as a listener for
+		// key pressed events
+		world.registerKeyListener((KeyPressedListener)this::movementKeyPressedListener);
+	}
+
+	/*************************************************************************************/
+	/*                                 GRAPHICS METHODS                                  */
+	/*************************************************************************************/
+	
+	/**
 	 * This method paints the player at their current position using
 	 * the given instance of Graphics2D.
 	 * 
@@ -228,24 +287,10 @@ public class Player implements ILivingEntity, KeyListener {
 	public BufferedImage getImage() {
 		return image;
 	}
-	
-	/**
-	 * This method sets the player's world and registers us
-	 * as a listener for key events.
-	 * 
-	 * @param worldIn the player's new world
-	 */
-	public void setWorld(World worldIn) {
-		// If we currently have another world then we should stop
-		// listening for key events from it before we switch worlds
-		if (world != null) world.unregisterKeyListener(this);
-		
-		// Set the player's new world
-		world = worldIn;
-		
-		// Register us as a listener for key events from the world
-		world.registerKeyListener(this);
-	}
+
+	/*************************************************************************************/
+	/*                                     LISTENERS                                     */
+	/*************************************************************************************/
 	
 	/**
 	 * This method is called when the player enters a battle so the player's
@@ -253,7 +298,7 @@ public class Player implements ILivingEntity, KeyListener {
 	 */
 	public void onBattleStart() {
 		// Stop listening for key presses since we cannot move
-		world.removeKeyListener(this);
+		world.removeKeyListener((KeyPressedListener)this::movementKeyPressedListener);
 	}
 
 	/**
@@ -284,41 +329,9 @@ public class Player implements ILivingEntity, KeyListener {
 		}
 	}
 
-	/**
-	 * This method sets the player's name.
-	 * 
-	 * @param name the player's new name
-	 */
-	public void setName(String nameIn) {
-		name = nameIn;
-	}
-
-	/**
-	 * This method returns the player's name.
-	 * 
-	 * @return the player's name
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * This method returns the player's class.
-	 * 
-	 * @return the player's class
-	 */
-	public String getClassType() {
-		return classType;
-	}
-
-	/**
-	 * This method returns the player's current amount of experience.
-	 * 
-	 * @return the amount of experience the player has
-	 */
-	public int getExperience() {
-		return exp;
-	}
+	/*************************************************************************************/
+	/*                                    ATTRIBUTES                                     */
+	/*************************************************************************************/
 
 	@Override
 	public void setAttributeValue(Attribute attr, int newValue) {
@@ -379,17 +392,9 @@ public class Player implements ILivingEntity, KeyListener {
 			case MANA:
 				return 500 + (500 * intelligenceAttr);
 				
-			default: return -1;
+			default:
+				return -1;
 		}
-	}
-	
-	/**
-	 * This method returns the player's current amount of mana.
-	 * 
-	 * @return the player's current amount of mana
-	 */
-	public int getCurrentMana() {
-		return currentMana;
 	}
 
 	/**
@@ -400,16 +405,6 @@ public class Player implements ILivingEntity, KeyListener {
 	 */
 	public void removeMana(int amount) {
 		currentMana -= amount;
-	}
-	
-	/**
-	 * This method returns the player's current amount of health.
-	 * 
-	 * @return the player's current amount of health
-	 */
-	@Override
-	public int getCurrentHealth() {
-		return currentHealth;
 	}
 
 	/**
@@ -422,6 +417,10 @@ public class Player implements ILivingEntity, KeyListener {
 		currentHealth = Math.min(currentHealth + amount, (int)getScaledAttributeValue(Attribute.HEALTH_POINTS));
 	}
 
+	/*************************************************************************************/
+	/*                                   BATTLE METHODS                                  */
+	/*************************************************************************************/
+	
 	/**
 	 * This method applys a healing effect to the player. The player
 	 * will receive the specified amount of health each turn (including
@@ -465,7 +464,7 @@ public class Player implements ILivingEntity, KeyListener {
 	}
 
 	/**
-	 * This method retuns whether or not the player has an active
+	 * This method returns whether or not the player has an active
 	 * protection effect.
 	 * 
 	 * @return whether or not the player has an active protection effect
@@ -510,6 +509,59 @@ public class Player implements ILivingEntity, KeyListener {
 		// The player is dead if they have no health left
 		return currentHealth == 0;
 	}
+
+	/*************************************************************************************/
+	/*                                    LVELLING UP                                    */
+	/*************************************************************************************/
+
+	/**
+	 * This method returns the total number of attribute points
+	 * invested in the player's attributes.
+	 * 
+	 * @return the total number of attribute points invested in
+	 *         the player's attributes
+	 */
+	private int getTotalNumberOfAttributePoints() {
+		return intelligenceAttr + healthPointsAttr + specialAttr + abilitiesAttr;
+	}
+
+	/**
+	 * This method returns the number of attribute points the
+	 * player has gained from their experience points.
+	 * 
+	 * @return the number of attribute points the player has
+	 *         gained from their experience points
+	 */
+	private int getAttributePointsFromExperience() {
+		return (experience / EXPERIENCE_PER_LEVEL) * ATTR_POINTS_PER_LEVEL;
+	}
+
+	/**
+	 * This method returns whether or not the player can level
+	 * up (whether they have attribute points available to spend).
+	 * 
+	 * @return whether or not the player can level up
+	 */
+	public boolean canLevelUp() {
+		int numAvailableAttributePoints = NUM_INITIAL_ATTR_POINTS + getAttributePointsFromExperience();
+		return numAvailableAttributePoints - getTotalNumberOfAttributePoints() > 0;
+	}
+
+	/**
+	 * This method returns the number of attribute points that the
+	 * player has to spend on their attributes.
+	 * 
+	 * @return the number of attribute points the player has
+	 *         available to spend
+	 */
+	public int getNumSpendingAttrPoints() {
+		int numAvailableAttributePoints = NUM_INITIAL_ATTR_POINTS + getAttributePointsFromExperience();
+		return numAvailableAttributePoints - getTotalNumberOfAttributePoints();
+	}
+
+	/*************************************************************************************/
+	/*                                     MOVEMENT                                      */
+	/*************************************************************************************/
 	
 	/**
 	 * This method updates the player's position to the given coordinates.
@@ -536,10 +588,12 @@ public class Player implements ILivingEntity, KeyListener {
 	 * 
 	 * @see KeyListener#keyPressed(KeyEvent)
 	 */
-	@Override
-	public void keyPressed(KeyEvent e) {
+	private void movementKeyPressedListener(KeyEvent e) {
 		// If the player is not in a world then their position cannot change
 		if (world == null) return;
+		
+		// Do not allow movement if an overlay is currently being displayed
+		if (world.isOverlayDisplayed()) return;
 		
 		// Update the player's position according the the key pressed
 		switch (e.getKeyChar()) {
@@ -568,9 +622,62 @@ public class Player implements ILivingEntity, KeyListener {
 		world.markRepaintRequired();
 	}
 
-	@Override
-	public void keyTyped(KeyEvent e) {}
+	/*************************************************************************************/
+	/*                                GETTERS AND SETTERS                                */
+	/*************************************************************************************/
 
+	/**
+	 * This method sets the player's name.
+	 * 
+	 * @param name the player's new name
+	 */
+	public void setName(String nameIn) {
+		name = nameIn;
+	}
+
+	/**
+	 * This method returns the player's name.
+	 * 
+	 * @return the player's name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * This method returns the player's class.
+	 * 
+	 * @return the player's class
+	 */
+	public String getClassType() {
+		return classType;
+	}
+
+	/**
+	 * This method returns the player's current amount of experience.
+	 * 
+	 * @return the amount of experience the player has
+	 */
+	public int getExperience() {
+		return experience;
+	}
+	
+	/**
+	 * This method returns the player's current amount of mana.
+	 * 
+	 * @return the player's current amount of mana
+	 */
+	public int getCurrentMana() {
+		return currentMana;
+	}
+	
+	/**
+	 * This method returns the player's current amount of health.
+	 * 
+	 * @return the player's current amount of health
+	 */
 	@Override
-	public void keyReleased(KeyEvent e) {}
+	public int getCurrentHealth() {
+		return currentHealth;
+	}
 }
