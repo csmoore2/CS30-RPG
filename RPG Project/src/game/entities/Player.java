@@ -122,26 +122,22 @@ public class Player implements ILivingEntity {
 	private int experience = 0;
 	
 	/**
-	 * This is the value of the player's intelligence attribute (this is
-	 * not the scaled value).
+	 * This is the value of the player's intelligence primary attribute.
 	 */
 	private int intelligenceAttr;
 
 	/**
-	 * This is the value of the player's health points attribute (this is
-	 * not the scaled value).
+	 * This is the value of the player's health primary attribute.
 	 */
-	private int healthPointsAttr;
+	private int healthAttr;
 
 	/**
-	 * This is the value of the player's special attribute (this is
-	 * not the scaled value).
+	 * This is the value of the player's special primary attribute.
 	 */
 	private int specialAttr;
 
 	/**
-	 * This is the value of the player's abilities attribute (this is
-	 * not the scaled value).
+	 * This is the value of the player's abilities primary attribute.
 	 */
 	private int abilitiesAttr;
 	
@@ -197,7 +193,7 @@ public class Player implements ILivingEntity {
 	public Player(int intelligenceIn, int healthPointsIn, int specialIn, int abilitiesIn) {
 		// Assign values for the player's attributes
 		intelligenceAttr = intelligenceIn;
-		healthPointsAttr = healthPointsIn;
+		healthAttr = healthPointsIn;
 		specialAttr = specialIn;
 		abilitiesAttr = abilitiesIn;
 
@@ -224,7 +220,7 @@ public class Player implements ILivingEntity {
 		
 		// Assign initial values for the player's attributes
 		intelligenceAttr = intelligenceIn;
-		healthPointsAttr = healthPointsIn;
+		healthAttr = healthPointsIn;
 		specialAttr = specialIn;
 		abilitiesAttr = abilitiesIn;
 
@@ -240,7 +236,7 @@ public class Player implements ILivingEntity {
 		imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
 		
 		// Set the player's current amount of health to its maximum
-		currentHealth = (int)getScaledAttributeValue(Attribute.HEALTH_POINTS);
+		currentHealth = (int)getSecodaryAttributeValue(Attribute.HEALTH_POINTS);
 	}
 	
 	/**
@@ -334,7 +330,7 @@ public class Player implements ILivingEntity {
 	/*************************************************************************************/
 
 	@Override
-	public void setAttributeValue(Attribute attr, int newValue) {
+	public void setPrimaryAttributeValue(Attribute attr, int newValue) {
 		// Update the given attribute or, if the given attribute is a
 		// secondary attribute, throw an IllegalArgumentException
 		switch (attr) {
@@ -342,8 +338,8 @@ public class Player implements ILivingEntity {
 				intelligenceAttr = newValue;
 				break;
 				
-			case HEALTH_POINTS:
-				healthPointsAttr = newValue;
+			case HEALTH:
+				healthAttr = newValue;
 				break;
 				
 			case SPECIAL:
@@ -361,15 +357,15 @@ public class Player implements ILivingEntity {
 	}
 	
 	@Override
-	public int getAttributeValue(Attribute attr) {
+	public int getPrimaryAttributeValue(Attribute attr) {
 		// Return the unscaled value of the given attribute or, if the given
 		// attribute is a secondary attribute, throw an IllegalArgumentException
 		switch (attr) {
 			case INTELLIGENCE:
 				return intelligenceAttr;
 				
-			case HEALTH_POINTS:
-				return healthPointsAttr;
+			case HEALTH:
+				return healthAttr;
 				
 			case SPECIAL:
 				return specialAttr;
@@ -384,10 +380,10 @@ public class Player implements ILivingEntity {
 	}
 	
 	@Override
-	public double getScaledAttributeValue(Attribute attr) {
+	public double getSecodaryAttributeValue(Attribute attr) {
 		switch (attr) {
 			case HEALTH_POINTS:
-				return 1000 + (1000 * healthPointsAttr);
+				return 1000 + (1000 * healthAttr);
 			
 			case MANA:
 				return 500 + (500 * intelligenceAttr);
@@ -414,7 +410,7 @@ public class Player implements ILivingEntity {
 	 */
 	public void addHealth(int amount) {
 		// Give the player the specified amount of health but cap the player's health at its maximum
-		currentHealth = Math.min(currentHealth + amount, (int)getScaledAttributeValue(Attribute.HEALTH_POINTS));
+		currentHealth = Math.min(currentHealth + amount, (int)getSecodaryAttributeValue(Attribute.HEALTH_POINTS));
 	}
 
 	/*************************************************************************************/
@@ -522,7 +518,7 @@ public class Player implements ILivingEntity {
 	 *         the player's attributes
 	 */
 	private int getTotalNumberOfAttributePoints() {
-		return intelligenceAttr + healthPointsAttr + specialAttr + abilitiesAttr;
+		return intelligenceAttr + healthAttr + specialAttr + abilitiesAttr;
 	}
 
 	/**

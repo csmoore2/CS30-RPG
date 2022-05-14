@@ -6,25 +6,25 @@ package game;
  */
 public enum Attribute {
 	// Primary Attributes
-	INTELLIGENCE("Intelligence"), HEALTH_POINTS("Health Points"), SPECIAL("Special"),
+	HEALTH("Health"), INTELLIGENCE("Intelligence"), SPECIAL("Special"),
 	ABILITIES("Abilities"),
 	
 	// Secondary Attributes
-	MANA("Mana"), MANA_REGEN("Mana Regeneration"), CRIT_CHANCE("Critical Chance"),
-	DODGE_CHANCE("Dodge Chance"), SPECIAL_DAMAGE("Special Attack Damage");
+	HEALTH_POINTS("Health Points"), MANA("Mana"), MANA_REGEN("Mana Regeneration"),
+	CRIT_CHANCE("Critical Chance"), DODGE_CHANCE("Dodge Chance"), SPECIAL_DAMAGE("Special Attack Damage");
 	
 	/**
 	 * This array contains all the primary attributes.
 	 */
 	public static final Attribute[] PRIMARY_ATTRIBUTES = new Attribute[] {
-		INTELLIGENCE, HEALTH_POINTS, SPECIAL, ABILITIES
+		HEALTH, INTELLIGENCE, SPECIAL, ABILITIES
 	};
 	
 	/**
 	 * This array contains all the secondary attributes.
 	 */
 	public static final Attribute[] SECONDARY_ATTRIBUTES = new Attribute[] {
-		MANA, MANA_REGEN, CRIT_CHANCE, DODGE_CHANCE, SPECIAL_DAMAGE
+		HEALTH_POINTS, MANA, MANA_REGEN, CRIT_CHANCE, DODGE_CHANCE, SPECIAL_DAMAGE
 	};
 	
 	/**

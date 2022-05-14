@@ -98,12 +98,17 @@ public class Enemy implements ILivingEntity {
 	}
 
 	@Override
-	public int getAttributeValue(Attribute attr) {
-		throw new RuntimeException("Enemies do not have unscaled attribute values!");
+	public void setPrimaryAttributeValue(Attribute attr, int newValue) {
+		throw new RuntimeException("Enemies do not have primary attributes!");
 	}
 
 	@Override
-	public double getScaledAttributeValue(Attribute attr) {
+	public int getPrimaryAttributeValue(Attribute attr) {
+		throw new RuntimeException("Enemies do not have primary attributes!");
+	}
+
+	@Override
+	public double getSecodaryAttributeValue(Attribute attr) {
 		// Return the scaled attribute value based on the given attribute
 		switch (attr) {
 			// HEALTH_POINTS = maximum amount of health
@@ -123,11 +128,6 @@ public class Enemy implements ILivingEntity {
 				throw new IllegalArgumentException(
 					String.format("Attribute %s is unsupported by enemies!", attr.name()));
 		}
-	}
-
-	@Override
-	public void setAttributeValue(Attribute attr, int newValue) {
-		throw new RuntimeException("Enemies' attributes cannot be set; they can only be read!");
 	}
 
 	/**

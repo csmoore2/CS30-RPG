@@ -132,6 +132,8 @@ public class BattleScreen implements IScreen {
 	public BattleScreen(World worldIn, Player playerIn, ILivingEntity enemyIn) {
 		player = playerIn;
 		enemy = enemyIn;
+
+		// TODO: Change to use new methods in IScreen
 		
 		/******************************************************************
 		 *                          PLAYER IMAGE                          *
@@ -281,7 +283,7 @@ public class BattleScreen implements IScreen {
 		 ******************************************************************/
 		
 		// Create a QuantityBar displaying the player's mana and a label that will be displayed beside it
-		playerManaBar = new QuantityBar(0, (int)playerIn.getScaledAttributeValue(Attribute.MANA));
+		playerManaBar = new QuantityBar(0, (int)playerIn.getSecodaryAttributeValue(Attribute.MANA));
 		playerManaBar.setStringPainted(true);
 		
 		JLabel playerManaLabel = new JLabel();
@@ -307,7 +309,7 @@ public class BattleScreen implements IScreen {
 		 ******************************************************************/
 		
 		// Create a QuantityBar displaying the player's health and a label that will be displayed beside it
-		playerHealthBar = new QuantityBar(0, (int)playerIn.getScaledAttributeValue(Attribute.HEALTH_POINTS));
+		playerHealthBar = new QuantityBar(0, (int)playerIn.getSecodaryAttributeValue(Attribute.HEALTH_POINTS));
 		playerHealthBar.setStringPainted(true);
 		
 		JLabel playerHealthLabel = new JLabel();
@@ -334,7 +336,7 @@ public class BattleScreen implements IScreen {
 		
 		// Create a QuantityBar displaying the enemy's health and a label that will be displayed beside it
 		//UIManager.put("ProgressBar.horizontalSize", new DimensionUIResource(300, 300));
-		enemyHealthBar = new QuantityBar(0, (int)enemyIn.getScaledAttributeValue(Attribute.HEALTH_POINTS));
+		enemyHealthBar = new QuantityBar(0, (int)enemyIn.getSecodaryAttributeValue(Attribute.HEALTH_POINTS));
 		enemyHealthBar.setStringPainted(true);
 		
 		JLabel enemyHealthLabel = new JLabel();
@@ -381,7 +383,7 @@ public class BattleScreen implements IScreen {
 			
 			// Determine whether or not the player can do this action based on the number of ability points required. the mana cost,
 			// and whose turn it is
-			boolean buttonEnabled = player.getAttributeValue(Attribute.ABILITIES) >= action.getRequiredAbilityPoints()
+			boolean buttonEnabled = player.getPrimaryAttributeValue(Attribute.ABILITIES) >= action.getRequiredAbilityPoints()
 								 && player.getCurrentMana() >= action.getManaCost()
 								 && playerTurn;
 			

@@ -360,7 +360,7 @@ public class PauseScreenOverlay implements IScreen {
 			attrLabel.setPreferredSize(ATTRIBUTE_PANEL_ATTR_LABEL_SIZE);
 			
 			// Create a label to display the attribute's value
-			JLabel attrValue = new JLabel(String.valueOf(player.getAttributeValue(attr)));
+			JLabel attrValue = new JLabel(String.valueOf(player.getPrimaryAttributeValue(attr)));
 			attrValue.setFont(ATTR_VALUE_FONT);
 
 			// Align the atttribute label to be on the left side of the panel and
@@ -417,8 +417,8 @@ public class PauseScreenOverlay implements IScreen {
 			// Create the primary attribute's ui data record and insert it into the map
 			PrimaryAttributeUIData uiDataRecord = new PrimaryAttributeUIData(
 				attrValue,
-				new MutableInteger(player.getAttributeValue(attr)),
-				new MutableInteger(player.getAttributeValue(attr)),
+				new MutableInteger(player.getPrimaryAttributeValue(attr)),
+				new MutableInteger(player.getPrimaryAttributeValue(attr)),
 				decrementButton,
 				incrementButton
 			);
@@ -445,7 +445,7 @@ public class PauseScreenOverlay implements IScreen {
 			attrLabel.setPreferredSize(ATTRIBUTE_PANEL_ATTR_LABEL_SIZE);
 			
 			// Create a label to display the attribute's scaled value
-			JLabel attrValue = new JLabel(String.valueOf(player.getScaledAttributeValue(attr)));
+			JLabel attrValue = new JLabel(String.valueOf(player.getSecodaryAttributeValue(attr)));
 			attrValue.setFont(ATTR_VALUE_FONT);
 
 			// Align the atttribute label to be on the right side of the panel and
@@ -472,8 +472,8 @@ public class PauseScreenOverlay implements IScreen {
 			// Create the primary attribute's ui data record and insert it into the map
 			SecondaryAttributeUIData uiDataRecord = new SecondaryAttributeUIData(
 				attrValue,
-				new MutableDouble(player.getScaledAttributeValue(attr)),
-				new MutableDouble(player.getScaledAttributeValue(attr))
+				new MutableDouble(player.getSecodaryAttributeValue(attr)),
+				new MutableDouble(player.getSecodaryAttributeValue(attr))
 			);
 			secondaryAttributeUIDataMap.put(attr, uiDataRecord);
 		}
@@ -688,7 +688,7 @@ public class PauseScreenOverlay implements IScreen {
 		// would be with any changes the player has made
 		Player dummyPlayer = new Player(
 			primaryAttributeUIDataMap.get(Attribute.INTELLIGENCE).value.val,
-			primaryAttributeUIDataMap.get(Attribute.HEALTH_POINTS).value.val,
+			primaryAttributeUIDataMap.get(Attribute.HEALTH).value.val,
 			primaryAttributeUIDataMap.get(Attribute.SPECIAL).value.val,
 			primaryAttributeUIDataMap.get(Attribute.ABILITIES).value.val
 		);
@@ -696,7 +696,7 @@ public class PauseScreenOverlay implements IScreen {
 		// Loop through each secondary attribute, updating their values
 		for (Attribute attr : Attribute.SECONDARY_ATTRIBUTES) {
 			// Get the attribute's new value
-			double newValue = dummyPlayer.getScaledAttributeValue(attr);
+			double newValue = dummyPlayer.getSecodaryAttributeValue(attr);
 
 			// Get the attribute's ui data
 			SecondaryAttributeUIData attrUIData = secondaryAttributeUIDataMap.get(attr);
@@ -756,7 +756,7 @@ public class PauseScreenOverlay implements IScreen {
 			// its value for the player and revert its ui to its normal state
 			if (attrUIData.value.val != attrUIData.playerValue.val) {
 				// Update the attribute's value for the player
-				player.setAttributeValue(attr, attrUIData.value.val);
+				player.setPrimaryAttributeValue(attr, attrUIData.value.val);
 				attrUIData.playerValue.val = attrUIData.value.val;
 
 				// Update the ui
