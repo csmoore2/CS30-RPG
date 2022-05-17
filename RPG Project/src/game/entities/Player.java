@@ -8,10 +8,15 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 
 import javax.imageio.ImageIO;
 
 import game.Attribute;
+import game.Main;
 import game.Tile;
 import game.World;
 import game.ui.AreaScreen;
@@ -34,9 +39,9 @@ public class Player implements ILivingEntity, KeyListener {
 	static {
 		// A try-catch statement is used in case there is a problem loading one of the images
 		try {
-			PREMADE_PLAYERS[0] = new Player("Ice Mage", ImageIO.read(new File("res/test.jpg")), 2, 1, 1, 0);
-			PREMADE_PLAYERS[1] = new Player("Fire Mage", ImageIO.read(new File("res/test2.jpg")), 2, 1, 1, 0);
-			PREMADE_PLAYERS[2] = new Player("Nature Mage", ImageIO.read(new File("res/test.jpg")), 2, 1, 1, 0);
+			PREMADE_PLAYERS[0] = new Player("Mage 1", ImageIO.read(new File("res/char1.png")), 2, 1, 1, 0);
+			PREMADE_PLAYERS[1] = new Player("Mage 2", ImageIO.read(new File("res/char2.png")), 2, 1, 1, 0);
+			PREMADE_PLAYERS[2] = new Player("Mage 3", ImageIO.read(new File("res/char3.png")), 2, 1, 1, 0);
 		} catch (IOException e) {
 			// If there was an error loading one of the images then we need to quit the game
 			throw new RuntimeException("Unable to load image for character!", e);
@@ -519,6 +524,14 @@ public class Player implements ILivingEntity, KeyListener {
 	 */
 	public void updatePosition(int newX, int newY, boolean loading) {
 		// Update our position
+	
+		List<List<Integer>> walls1 = new ArrayList();
+		walls1.add(Arrays.asList(1,2));
+		
+		
+		//Main.currentLevel;
+		
+		//newX, newY
 		xPos = newX;
 		yPos = newY;
 		

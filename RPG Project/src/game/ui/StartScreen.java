@@ -52,7 +52,7 @@ public class StartScreen extends JComponent {
 	 * This is the path to the background image of this screen. Since this is hardcoded
 	 * we will assume that it is the correct size and does not need to be scaled.
 	 */
-	public static final String BACKGROUND_IMAGE_PATH = "res/test2.jpg";
+	public static final String BACKGROUND_IMAGE_PATH = "res/titleScreen.png";
 	
 	/**
 	 * This stores the background image of this screen.

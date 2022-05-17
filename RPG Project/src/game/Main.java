@@ -1,5 +1,8 @@
 package game;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -67,6 +70,16 @@ public class Main {
 	 * @param args command-line arguments
 	 */
 	public static void main(String[] args) {
+		try {
+			(new Walls()).printThis();
+		} catch (FileNotFoundException e) {
+			// Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		// Create the window and configure it
 		window = new JFrame();
 		window.setTitle(GAME_NAME);
