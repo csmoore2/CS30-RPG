@@ -1,4 +1,4 @@
-package game.ui;
+package game.ui.screens;
 
 import java.awt.Container;
 import java.awt.Graphics2D;

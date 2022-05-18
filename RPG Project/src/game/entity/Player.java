@@ -1,4 +1,4 @@
-package game.entities;
+package game.entity;
 
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
@@ -10,10 +10,9 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import game.Attribute;
-import game.Tile;
 import game.World;
-import game.ui.AreaScreen;
+import game.ui.Tile;
+import game.ui.screens.AreaScreen;
 import game.util.KeyPressedListener;
 
 /**

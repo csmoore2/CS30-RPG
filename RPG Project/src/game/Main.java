@@ -8,9 +8,9 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import game.entities.Player;
-import game.ui.CharacterCreationScreen;
-import game.ui.StartScreen;
+import game.entity.Player;
+import game.ui.screens.CharacterCreationScreen;
+import game.ui.screens.StartScreen;
 
 /**
  * This class contains the entry point into the game; it is where

@@ -1,4 +1,4 @@
-package game;
+package game.entity;
 
 /**
  * This enum declares all the different primary and secondary attributes

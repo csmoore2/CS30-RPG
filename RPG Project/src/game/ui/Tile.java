@@ -1,11 +1,12 @@
-package game;
+package game.ui;
 
 import java.awt.Graphics2D;
 import java.util.function.Function;
 
-import game.entities.IEnemy;
-import game.entities.Player;
-import game.ui.AreaScreen;
+import game.World;
+import game.entity.IEnemy;
+import game.entity.Player;
+import game.ui.screens.AreaScreen;
 
 /**
  * This class will be used as the superclass for all the

@@ -1,4 +1,4 @@
-package game.ui;
+package game.ui.overlays;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -11,7 +11,7 @@ import javax.swing.event.MouseInputListener;
 
 import game.Main;
 import game.World;
-import game.entities.Player;
+import game.entity.Player;
 
 /**
  * This class is the class that all overlays (such as the pause screen overlay)

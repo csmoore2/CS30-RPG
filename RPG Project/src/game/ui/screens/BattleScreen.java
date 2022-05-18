@@ -1,4 +1,4 @@
-package game.ui;
+package game.ui.screens;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -18,14 +18,15 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SpringLayout;
 
-import game.Action;
-import game.Attribute;
-import game.EnemyAction;
 import game.Main;
-import game.PlayerAction;
 import game.World;
-import game.entities.IEnemy;
-import game.entities.Player;
+import game.entity.Action;
+import game.entity.Attribute;
+import game.entity.EnemyAction;
+import game.entity.IEnemy;
+import game.entity.Player;
+import game.entity.PlayerAction;
+import game.ui.QuantityBar;
 
 import static javax.swing.SpringLayout.*;
 

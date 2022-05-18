@@ -1,7 +1,4 @@
-package game;
-
-import game.entities.IEnemy;
-import game.entities.Player;
+package game.entity;
 
 /**
  * This enum declares all the actions the player can take during

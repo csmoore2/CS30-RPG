@@ -1,8 +1,6 @@
-package game.entities;
+package game.entity;
 
 import java.awt.image.BufferedImage;
-
-import game.Attribute;
 
 /**
  * This interface specifies methods common to the player and

@@ -1,4 +1,4 @@
-package game.ui;
+package game.ui.screens;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -11,7 +11,7 @@ import javax.swing.SpringLayout;
 
 import game.Main;
 import game.World;
-import game.entities.IEnemy;
+import game.entity.IEnemy;
 
 import static javax.swing.SpringLayout.*;
 

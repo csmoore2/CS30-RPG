@@ -1,6 +1,4 @@
-package game.entities;
-
-import game.EnemyAction;
+package game.entity;
 
 /**
  * This interface extends ILivingEntity to inherit methods common

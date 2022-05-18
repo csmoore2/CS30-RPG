@@ -1,4 +1,4 @@
-package game.ui;
+package game.ui.overlays;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -15,10 +15,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
-import game.Attribute;
 import game.Main;
 import game.World;
-import game.entities.Player;
+import game.entity.Attribute;
+import game.entity.Player;
+import game.ui.screens.IScreen;
 import game.util.MutableDouble;
 import game.util.MutableInteger;
 

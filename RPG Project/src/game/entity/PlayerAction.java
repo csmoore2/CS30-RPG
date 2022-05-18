@@ -1,7 +1,6 @@
-package game;
+package game.entity;
 
-import game.entities.IEnemy;
-import game.entities.Player;
+import game.Main;
 
 /**
  * This class represents an action that can be preformed by the player. Currently

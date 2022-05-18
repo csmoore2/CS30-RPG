@@ -1,4 +1,4 @@
-package game.entities;
+package game.entity;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -6,9 +6,6 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import game.Action;
-import game.Attribute;
-import game.EnemyAction;
 import game.Main;
 
 /**

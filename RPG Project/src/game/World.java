@@ -11,14 +11,15 @@ import javax.swing.JComponent;
 import javax.swing.SpringLayout;
 import javax.swing.SwingUtilities;
 
-import game.entities.IEnemy;
-import game.entities.Player;
-import game.ui.AreaScreen;
-import game.ui.BattleScreen;
-import game.ui.IScreen;
-import game.ui.Overlay;
-import game.ui.PauseScreenOverlay;
-import game.ui.PlayerDeathScreen;
+import game.entity.IEnemy;
+import game.entity.Player;
+import game.ui.Tile;
+import game.ui.overlays.Overlay;
+import game.ui.overlays.PauseScreenOverlay;
+import game.ui.screens.AreaScreen;
+import game.ui.screens.BattleScreen;
+import game.ui.screens.IScreen;
+import game.ui.screens.PlayerDeathScreen;
 import game.util.KeyPressedListener;
 
 /**
