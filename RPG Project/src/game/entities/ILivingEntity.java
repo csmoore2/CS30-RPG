@@ -37,7 +37,7 @@ public interface ILivingEntity {
 	 * 
 	 * @return the current scaled value of the given attribute
 	 */
-	double getSecodaryAttributeValue(Attribute attr);
+	double getSecondaryAttributeValue(Attribute attr);
 
 	/**
 	 * This method is called at the start of this entity's turn
@@ -53,6 +53,15 @@ public interface ILivingEntity {
 	 * @return the amount of health this entity currently has
 	 */
 	int getCurrentHealth();
+
+	/**
+	 * This methods gives the entity the specified amount of health,
+	 * ensuring that the entity does not have more than their maximum
+	 * amount of health.
+	 * 
+	 * @param amount the amount of health to give the entity
+	 */
+	void addHealth(int amount);
 
 	/**
 	 * This method inflicts the specified amount of damage on

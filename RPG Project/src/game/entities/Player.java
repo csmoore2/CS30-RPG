@@ -44,6 +44,12 @@ public class Player implements ILivingEntity {
 	}
 
 	/**
+	 * This is the initial amount of mana the player starts with at
+	 * the beginning of each battle.
+	 */
+	public static final int INITIAL_MANA = 500;
+
+	/**
 	 * This is the number of attribute points the player starts with.
 	 */
 	public static final int NUM_INITIAL_ATTR_POINTS = 4;
@@ -144,7 +150,7 @@ public class Player implements ILivingEntity {
 	/**
 	 * This stores the player's current amount of mana.
 	 */
-	private int currentMana = 500;
+	private int currentMana = INITIAL_MANA;
 	
 	/**
 	 * This stores the player's current amount of health.
@@ -197,7 +203,7 @@ public class Player implements ILivingEntity {
 		specialAttr = specialIn;
 		abilitiesAttr = abilitiesIn;
 
-		// These variabes are unnecessary for a nummy player
+		// These variabes are unnecessary for a dummy player
 		classType = null;
 		image = null;
 		imageScaleOp = null;
@@ -236,7 +242,7 @@ public class Player implements ILivingEntity {
 		imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
 		
 		// Set the player's current amount of health to its maximum
-		currentHealth = (int)getSecodaryAttributeValue(Attribute.HEALTH_POINTS);
+		currentHealth = (int)getSecondaryAttributeValue(Attribute.HEALTH_POINTS);
 	}
 	
 	/**
@@ -285,7 +291,126 @@ public class Player implements ILivingEntity {
 	}
 
 	/*************************************************************************************/
-	/*                                     LISTENERS                                     */
+	/*                                    ATTRIBUTES                                     */
+	/*************************************************************************************/
+
+	@Override
+	public void setPrimaryAttributeValue(Attribute attr, int newValue) {
+		// Update the given primary attribute or, if the given attribute
+		// is a secondary attribute, throw an IllegalArgumentException
+		switch (attr) {
+			case INTELLIGENCE:
+				intelligenceAttr = newValue;
+				break;
+				
+			case HEALTH:
+				healthAttr = newValue;
+				break;
+				
+			case SPECIAL:
+				specialAttr = newValue;
+				break;
+				
+			case ABILITIES:
+				abilitiesAttr = newValue;
+				break;
+				
+			default:
+				throw new IllegalArgumentException(
+					"Only primary attributes can be used with this method!");
+		}
+	}
+	
+	@Override
+	public int getPrimaryAttributeValue(Attribute attr) {
+		// Return the value of the given primary attribute or, if the given
+		// attribute is a secondary attribute, throw an IllegalArgumentException
+		switch (attr) {
+			case INTELLIGENCE:
+				return intelligenceAttr;
+				
+			case HEALTH:
+				return healthAttr;
+				
+			case SPECIAL:
+				return specialAttr;
+				
+			case ABILITIES:
+				return abilitiesAttr;
+				
+			default:
+				throw new IllegalArgumentException(
+					"Only primary attributes can be used with this method!");
+		}
+	}
+	
+	@Override
+	public double getSecondaryAttributeValue(Attribute attr) {
+		// Calculate the value of the given secondary attribute or, if the given
+		// attribute is a primary attribute, throw an IllegalArgumentException
+		switch (attr) {
+			case HEALTH_POINTS:
+				return 1000 + (1000 * healthAttr);
+			
+			case MANA:
+				return 500 + (500 * intelligenceAttr);
+			
+			case MANA_REGEN:
+				return 100 + (50 * intelligenceAttr);
+			
+			case CRIT_CHANCE:
+				return 0.05 + (0.01 * intelligenceAttr) + (0.02 * abilitiesAttr);
+			
+			case DODGE_CHANCE:
+				return 0.05 + (0.02 * intelligenceAttr) + (0.01 * abilitiesAttr);
+			
+			case SPECIAL_DAMAGE:
+				return 800 + (100 * specialAttr);
+				
+			default:
+				throw new IllegalArgumentException(
+					"Only secondary attributes can be used with this method!");
+		}
+	}
+
+	/**
+	 * This method adds the given amount of mana to the player's
+	 * current amount of mana, ensuring that the player does not
+	 * have more than their maximum amount of mana.
+	 * 
+	 * @param amount the amount of mana to add to the player
+	 */
+	public void addMana(int amount) {
+		currentMana = Math.min(currentMana + amount, (int)getSecondaryAttributeValue(Attribute.MANA));
+	}
+
+	/**
+	 * This method removes the given amount of mana from the player's
+	 * current amount of mana.
+	 * 
+	 * @param amount the amount of mana to remove from the player
+	 */
+	public void removeMana(int amount) {
+		currentMana -= amount;
+	}
+
+	/**
+	 * This methods gives the player the specified amount of health,
+	 * ensuring that the player does not have more than their maximum
+	 * amount of health.
+	 * 
+	 * @param amount the amount of health to give the player
+	 * 
+	 * @see ILivingEntity#addHealth(int)
+	 */
+	@Override
+	public void addHealth(int amount) {
+		// Give the player the specified amount of health but cap the player's health at its maximum
+		currentHealth = Math.min(currentHealth + amount, (int)getSecondaryAttributeValue(Attribute.HEALTH_POINTS));
+	}
+
+	/*************************************************************************************/
+	/*                                 BATTLE LISTENERS                                  */
 	/*************************************************************************************/
 	
 	/**
@@ -293,8 +418,12 @@ public class Player implements ILivingEntity {
 	 * state can be modified accordingly.
 	 */
 	public void onBattleStart() {
-		// Stop listening for key presses since we cannot move
-		world.removeKeyListener((KeyPressedListener)this::movementKeyPressedListener);
+		// Reset the player's mana to the amount it should be at the start
+		// of a battle
+		currentMana = INITIAL_MANA;
+
+		// Reset the player's health to its maximum value
+		currentHealth = (int)getSecondaryAttributeValue(Attribute.HEALTH_POINTS);
 	}
 
 	/**
@@ -323,94 +452,9 @@ public class Player implements ILivingEntity {
 		if (hasProtectionEffect()) {
 			numProtectionTurnsRemaining--;
 		}
-	}
 
-	/*************************************************************************************/
-	/*                                    ATTRIBUTES                                     */
-	/*************************************************************************************/
-
-	@Override
-	public void setPrimaryAttributeValue(Attribute attr, int newValue) {
-		// Update the given attribute or, if the given attribute is a
-		// secondary attribute, throw an IllegalArgumentException
-		switch (attr) {
-			case INTELLIGENCE:
-				intelligenceAttr = newValue;
-				break;
-				
-			case HEALTH:
-				healthAttr = newValue;
-				break;
-				
-			case SPECIAL:
-				specialAttr = newValue;
-				break;
-				
-			case ABILITIES:
-				abilitiesAttr = newValue;
-				break;
-				
-			default:
-				throw new IllegalArgumentException(
-					"Only primary attributes can be used with this method!");
-		}
-	}
-	
-	@Override
-	public int getPrimaryAttributeValue(Attribute attr) {
-		// Return the unscaled value of the given attribute or, if the given
-		// attribute is a secondary attribute, throw an IllegalArgumentException
-		switch (attr) {
-			case INTELLIGENCE:
-				return intelligenceAttr;
-				
-			case HEALTH:
-				return healthAttr;
-				
-			case SPECIAL:
-				return specialAttr;
-				
-			case ABILITIES:
-				return abilitiesAttr;
-				
-			default:
-				throw new IllegalArgumentException(
-					"Only primary attributes can be used with this method!");
-		}
-	}
-	
-	@Override
-	public double getSecodaryAttributeValue(Attribute attr) {
-		switch (attr) {
-			case HEALTH_POINTS:
-				return 1000 + (1000 * healthAttr);
-			
-			case MANA:
-				return 500 + (500 * intelligenceAttr);
-				
-			default:
-				return -1;
-		}
-	}
-
-	/**
-	 * This method removes the given amount of mana from the player's
-	 * current amount of mana.
-	 * 
-	 * @param amount the amount of mana to remove from the player
-	 */
-	public void removeMana(int amount) {
-		currentMana -= amount;
-	}
-
-	/**
-	 * This methods gives the player the specified amount of health.
-	 * 
-	 * @param amount the amount of health to give the player
-	 */
-	public void addHealth(int amount) {
-		// Give the player the specified amount of health but cap the player's health at its maximum
-		currentHealth = Math.min(currentHealth + amount, (int)getSecodaryAttributeValue(Attribute.HEALTH_POINTS));
+		// Regenerate part of the player's mana
+		addMana((int)getSecondaryAttributeValue(Attribute.MANA_REGEN));
 	}
 
 	/*************************************************************************************/
@@ -430,7 +474,7 @@ public class Player implements ILivingEntity {
 		addHealth(healthPerTurnIn);
 
 		// If the effect lasts multiple turns then update the appropriate variables
-		if (numTurns >= 2) {
+		if (numTurns > 0) {
 			healingPerTurn = healthPerTurnIn;
 			numHealingTurnsRemaining = numTurns;
 		}
@@ -588,8 +632,9 @@ public class Player implements ILivingEntity {
 		// If the player is not in a world then their position cannot change
 		if (world == null) return;
 		
-		// Do not allow movement if an overlay is currently being displayed
-		if (world.isOverlayDisplayed()) return;
+		// Do not allow movement if an overlay is currently being displayed,
+		// an area screen is not being displayed, or the player is dead
+		if (world.isOverlayDisplayed() || !world.isAreaDisplayed() || isDead()) return;
 		
 		// Update the player's position according the the key pressed
 		switch (e.getKeyChar()) {
@@ -647,6 +692,34 @@ public class Player implements ILivingEntity {
 	 */
 	public String getClassType() {
 		return classType;
+	}
+
+	/**
+	 * This method returns the player's x-position.
+	 * 
+	 * @return the player's x-position
+	 */
+	public int getX() {
+		return xPos;
+	}
+
+	/**
+	 * This method returns the player's y-position.
+	 * 
+	 * @return the player's y-position
+	 */
+	public int getY() {
+		return yPos;
+	}
+
+	/**
+	 * This method adds the given amount of experience to the
+	 * player's amount of experience.
+	 * 
+	 * @param amount the amount of experience to give the player
+	 */
+	public void addExperience(int amount) {
+		experience += amount;
 	}
 
 	/**

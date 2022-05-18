@@ -11,12 +11,14 @@ import javax.swing.JComponent;
 import javax.swing.SpringLayout;
 import javax.swing.SwingUtilities;
 
-import game.entities.ILivingEntity;
+import game.entities.IEnemy;
 import game.entities.Player;
 import game.ui.AreaScreen;
 import game.ui.BattleScreen;
 import game.ui.IScreen;
+import game.ui.Overlay;
 import game.ui.PauseScreenOverlay;
+import game.ui.PlayerDeathScreen;
 import game.util.KeyPressedListener;
 
 /**
@@ -36,10 +38,10 @@ public class World extends JComponent {
 	
 	/**
 	 * This stores the current overlay that is being displayed. Null indicates there
-	 * is not overlay. When there is an overlay it is drawn over everything else in the
+	 * is no overlay. When there is an overlay it is drawn over everything else in the
 	 * world and stops the player from moving.
 	 */
-	private IScreen overlay = null;
+	private Overlay overlay = null;
 	
 	/**
 	 * This is the SpringLayout used by the world.
@@ -75,8 +77,6 @@ public class World extends JComponent {
 	 * @param playerIn the player
 	 */
 	public World(Player playerIn) {
-		super();
-		
 		// Set our layout to be a SpringLayout so that if anything needs to add JComponents to
 		// us they will easily be able to lay them out
 		springLayout = new SpringLayout();
@@ -122,7 +122,7 @@ public class World extends JComponent {
 	}
 
 	/*************************************************************************************/
-	/*                                 GRAPHICS METHODS                                  */
+	/*                                 PAINTING METHODS                                  */
 	/*************************************************************************************/
 	
 	/**
@@ -132,6 +132,21 @@ public class World extends JComponent {
 		repaintRequired = true;
 	}
 	
+	/**
+	 * This method updates the state of the screen's ui so
+	 * that everything is drawn correctly.
+	 */
+	public void updateUIState() {
+		SwingUtilities.updateComponentTreeUI(Main.window);
+		markRepaintRequired();
+		SwingUtilities.invokeLater(Main.window::repaint);
+	}
+	
+	/**
+	 * This method repaints the world.
+	 * 
+	 * @see JComponent#repaint()
+	 */
 	@Override
 	public void repaint() {
 		// If we do not need to repaint the window and are not paused then exit
@@ -161,14 +176,9 @@ public class World extends JComponent {
 				screenStack.peek().paint(g2d);
 			}
 			
-			// If we are not in a battle then paint the player
-			if (!inBattle) {
+			// If an area screen is currently being displayed then paint the player
+			if (isAreaDisplayed()) {
 				player.paint(g2d);
-			}
-			
-			// If the current overlay is not null then draw it
-			if (overlay != null) {
-				overlay.paint(g2d);
 			}
 			
 			// Update 'repaintRequired'
@@ -189,9 +199,27 @@ public class World extends JComponent {
 		
 		// If the current screen is a BattleScreen then we need to
 		// update its state
-		if (screenStack.peek() instanceof BattleScreen) {
+		if (!screenStack.empty() && screenStack.peek() instanceof BattleScreen) {
 			((BattleScreen) screenStack.peek()).update();
 		}
+	}
+
+	/**
+	 * This method shows the given screen. It will also ensure that
+	 * the current screen's java swing components are removed and
+	 * the new screen's java swing components are added.
+	 */
+	public void showScreen(IScreen newScreen) {
+		// Remove the current screen's java swing components
+		screenStack.peek().removeSwingComponents(this);
+
+		// Add the new screen to the screen stack and add its java
+		// swing components to the screen
+		screenStack.push(newScreen);
+		newScreen.addSwingComponents(this, springLayout);
+
+		// Update the ui's state so that everything is drawn correctly
+		updateUIState();
 	}
 
 	/**
@@ -222,6 +250,28 @@ public class World extends JComponent {
 		// Update the player's position
 		player.updatePosition(newX, newY);
 	}
+
+	/**
+	 * This method closes the current screen and returns to the
+	 * previous screen in the screen stack.
+	 */
+	public void closeCurrentScreen() {
+		// Remove the current screen's java swing components
+		screenStack.peek().removeSwingComponents(this);
+
+		// Pop the current screen off of the screen stack
+		screenStack.pop();
+
+		// Readd the new screen's java swing components
+		screenStack.peek().addSwingComponents(this, springLayout);
+
+		// Update the ui's state so that everything is drawn correctly
+		updateUIState();
+	}
+
+	/*************************************************************************************/
+	/*                                  BATTLE METHODS                                   */
+	/*************************************************************************************/
 	
 	/**
 	 * This method initiates a battle between the player and the
@@ -229,15 +279,42 @@ public class World extends JComponent {
 	 * 
 	 * @param enemy the enemy the player is fighting
 	 */
-	public void initiateBattle(ILivingEntity enemy) {
-		// Push a battle screen onto the screen stack
-		screenStack.push(new BattleScreen(this, player, enemy));
-		
+	public void initiateBattle(IEnemy enemy) {
 		// Tell the player they are now in a battle
 		player.onBattleStart();
+
+		// Create a battle screen
+		BattleScreen battleScreen = new BattleScreen(this, player, enemy);
+
+		// Show the battle screen
+		showScreen(battleScreen);
 		
 		// Update the world's state
 		inBattle = true;
+	}
+
+	/**
+	 * This method is called when a battle is over and we need to
+	 * exit out to the regular world.
+	 * 
+	 * @param playerDead     whether or not the player died
+	 * @param experienceGain how much experience the player should gain
+	 * @param enemy          the enemy that the player was fighting
+	 */
+	public void exitBattle(boolean playerDead, int experienceGain, IEnemy enemy) {
+		// Update our state
+		inBattle = false;
+
+		// Close the battle screen
+		closeCurrentScreen();
+
+		// If the player died then show the player death screen. Otherwise
+		// give the player their experience and resume the game.
+		if (playerDead) {
+			showScreen(new PlayerDeathScreen(this, enemy));
+		} else {
+			player.addExperience(experienceGain);
+		}
 	}
 
 	/*************************************************************************************/
@@ -260,19 +337,28 @@ public class World extends JComponent {
 			// If the game is now paused then set the current overlay to a pause screen
 			// overlay, otherwise stop showing the pause screen overlay.
 			if (paused) {
-				// Create the pause overlay then add its swing components to the screen
-				overlay = new PauseScreenOverlay(player);
-				overlay.addSwingComponents(this, springLayout);
+				// Create the pause overlay and then make it the main
+				// window's glass pane so that it is drawn over everything
+				// else and can intercept events
+				overlay = new PauseScreenOverlay(this, player);
+				Main.window.setGlassPane(overlay);
+				
+				// Create the overlay's java swing components and add them
+				// to the screen
+				overlay.createAndAddSwingComponents();
+
+				// Make the overlay visible
+				overlay.setVisible(true);
 			} else {
-				// First remove all the pause overlay's swing components from the screen
-				// and then set 'overlay' to null
-				overlay.removeSwingComponents(this);
+				// Make the pause screen overlay invisible so that it no
+				// longer gets drawn or intercepts events and then set
+				// 'overlay' to null
+				overlay.setVisible(false);
 				overlay = null;
 			}
 			
-			// Update the main window's ui so that everything will be drawn correctly
-			SwingUtilities.updateComponentTreeUI(this);
-			markRepaintRequired();
+			// Update the ui so that everything will be drawn correctly
+			updateUIState();
 		}
 	}
 	
@@ -320,7 +406,33 @@ public class World extends JComponent {
 	public boolean isOverlayDisplayed() {
 		return overlay != null;
 	}
+
+	/**
+	 * This method returns whether or not a battle is currently
+	 * underway.
+	 * 
+	 * @return whether or not a battle is currently underway
+	 */
+	public boolean inBattle() {
+		return inBattle;
+	}
+
+	/**
+	 * This method returns whether or not an AreaScreen is currently
+	 * being displayed.
+	 * 
+	 * @return whether or not an AreaScreen is currently being displayed
+	 */
+	public boolean isAreaDisplayed() {
+		return screenStack.peek() instanceof AreaScreen;
+	}
 	
+	/**
+	 * This method returns whether or not the world is
+	 * focusable (true).
+	 * 
+	 * @return whether or not the world is focusable (true)
+	 */
 	@Override
 	public boolean isFocusable() {
 		return true;
@@ -334,6 +446,6 @@ public class World extends JComponent {
 	 */
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension(Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT); 
+		return Main.SCREEN_SIZE; 
 	}
 }

@@ -309,6 +309,6 @@ public class CharacterCreationScreen extends JComponent {
 	 */
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension(Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT);
+		return Main.SCREEN_SIZE;
 	}
 }

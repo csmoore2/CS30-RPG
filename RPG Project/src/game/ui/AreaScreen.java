@@ -129,7 +129,7 @@ public class AreaScreen implements IScreen {
 		// This is temporary code for testing
 		if (mapImagePathIn == "res/test.jpg") {
 			tileMap[0][TILES_PER_ROW-1] = new Tile.LoadingZone("res/test2.jpg", 0, 0);
-			tileMap[1][0] = new Tile.BattleTrigger(new Enemy(0));
+			tileMap[1][0] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()));
 		} else if (mapImagePathIn == "res/test2.jpg") {
 			tileMap[0][TILES_PER_ROW-1] = new Tile.LoadingZone("res/test.jpg", 0, 0);
 		}

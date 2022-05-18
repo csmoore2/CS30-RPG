@@ -3,21 +3,23 @@ package game.entities;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import game.Action;
 import game.Attribute;
+import game.EnemyAction;
+import game.Main;
 
 /**
  * This class represents an enemy.
  */
-public class Enemy implements ILivingEntity {
+public class Enemy implements IEnemy {
 	/**
-	 * This is the instance of Random that will be used by every instance of Enemy
-	 * when generating random information. It is seeded by the current time in milliseconds.
+	 * This is the multiplier that is multiplied with the enemy's base attack damage
+	 * to determine how much damage the enemy's poison attacks do each turn.
 	 */
-	public static final Random RANDOM = new Random(System.currentTimeMillis());
+	public static final double POISON_DAMAGE_MULTIPLIER = 0.5;
 
 	/**
 	 * This is the enemy's image.
@@ -35,14 +37,32 @@ public class Enemy implements ILivingEntity {
 	private int currentHealth;
 
 	/**
+	 * This stores the original number of healing potions that
+	 * the enemy had.
+	 */
+	private final int originalNumHealingPotions;
+
+	/**
 	 * This is the number of healing potions the enemy has.
 	 */
 	private int numHealingPotions;
 
 	/**
-	 * This is the amount of damage dealt by an attack from this enemy.
+	 * This is the amount of health one healing potion gives
+	 * the enemy.
 	 */
-	private int attackDamage;
+	private final int healingPotionHealth;
+
+	/**
+	 * This is the base amount of damage dealt by an attack from this enemy.
+	 */
+	private final int baseAttackDamage;
+
+	/**
+	 * This is the number of turns that poison inflicted on the player by
+	 * this enemy lasts.
+	 */
+	private final int numPoisonTurns;
 
 	/**
 	 * This is the chance of the enemy making a critical hit.
@@ -81,14 +101,21 @@ public class Enemy implements ILivingEntity {
 		// TODO: Change and Balance Caculations
 
 		// Calculate the enemy's maximum amount of health and start them off with full health
-		maxHealth = (RANDOM.nextInt((playerExp / 25) + 1) + 1) * 2000;
+		maxHealth = (Main.RANDOM.nextInt((playerExp / 25) + 1) + 1) * 2000;
 		currentHealth = maxHealth;
 
 		// Calculate the number of healing potions the enemy should have
-		numHealingPotions = (playerExp / 50) + RANDOM.nextInt(3);
+		originalNumHealingPotions = (playerExp / 50) + Main.RANDOM.nextInt(2);
+		numHealingPotions = originalNumHealingPotions;
 
-		// Calculate the damage dealt by an attack from this enemy
-		attackDamage = (RANDOM.nextInt((playerExp / 50) + 1) * 100) + (playerExp*2) + 100;
+		// One healing potion should give the enemt 25% of their health back
+		healingPotionHealth = (int)(0.25 * maxHealth);
+
+		// Calculate the base damage dealt by an attack from this enemy
+		baseAttackDamage = (Main.RANDOM.nextInt((playerExp / 50) + 1) * 100) + (playerExp*2) + 100 + 1000;
+
+		// Calculate the number of turns this enemy's poison attacks should last
+		numPoisonTurns = playerExp >= 150 ? 3 : 2;
 
 		// Calculate the enemy's chance of making a critical hit
 		criticalChance = 0.015 * playerExp;
@@ -96,6 +123,29 @@ public class Enemy implements ILivingEntity {
 		// Calculate the enemy's chance of dodging an attack
 		dodgeChance = 0.01 * playerExp;
 	}
+
+	/**
+	 * This method resets the enemy's health, number of healing potions, and
+	 * any status effects so that it can be fought again by the player.
+	 * 
+	 * @see IEnemy#reset()
+	 */
+	@Override
+	public void reset() {
+		// Reset the enemy's health
+		currentHealth = maxHealth;
+
+		// Reset the enemy's number of healing potions
+		numHealingPotions = originalNumHealingPotions;
+
+		// Reset the poison status effect
+		poisonDamagePerTurn = 0;
+		numPoisonTurnsRemaining = 0;
+	}
+
+	/*************************************************************************************/
+	/*                                    ATTRIBUTES                                     */
+	/*************************************************************************************/
 
 	@Override
 	public void setPrimaryAttributeValue(Attribute attr, int newValue) {
@@ -108,7 +158,7 @@ public class Enemy implements ILivingEntity {
 	}
 
 	@Override
-	public double getSecodaryAttributeValue(Attribute attr) {
+	public double getSecondaryAttributeValue(Attribute attr) {
 		// Return the scaled attribute value based on the given attribute
 		switch (attr) {
 			// HEALTH_POINTS = maximum amount of health
@@ -126,9 +176,28 @@ public class Enemy implements ILivingEntity {
 			// Everything else is unsupported by enemies
 			default:
 				throw new IllegalArgumentException(
-					String.format("Attribute %s is unsupported by enemies!", attr.name()));
+					String.format("Attribute '%s' is unsupported by enemies!", attr.name()));
 		}
 	}
+
+	/**
+	 * This methods gives the enemy the specified amount of health,
+	 * ensuring that the enemy does not have more than their maximum
+	 * amount of health.
+	 * 
+	 * @param amount the amount of health to give the enemy
+	 * 
+	 * @see ILivingEntity#addHealth(int)
+	 */
+	@Override
+	public void addHealth(int amount) {
+		// Give the enemy the specified amount of health but cap the enemy's health at its maximum
+		currentHealth = Math.min(currentHealth + amount, maxHealth);
+	}
+
+	/*************************************************************************************/
+	/*                                   BATTLE METHODS                                  */
+	/*************************************************************************************/
 
 	/**
 	 * This method is called at the start of the enemy's turn
@@ -146,15 +215,83 @@ public class Enemy implements ILivingEntity {
 	}
 
 	/**
-	 * This method returns the enemy's current amount of health.
+	 * This method generates the enemy's action during a battle. The enemy's
+	 * choice of action is randomly picked based on percentage chances.
 	 * 
-	 * @return the enemy's current amount of health
+	 * @param player the player
+	 * 
+	 * @return the enemy's chosen action for their turn in a battle
+	 * 
+	 * @see IEnemy#generateBattleAction(Player)
 	 */
 	@Override
-	public int getCurrentHealth() {
-		return currentHealth;
+	public EnemyAction generateBattleAction(Player player) {
+		// If the enemy has less than half their health then there
+		// is a 25% chance they will use a healing potion if they
+		// have one
+		if (currentHealth < maxHealth/2 && numHealingPotions > 0) {
+			int choice = Main.RANDOM.nextInt(100) + 1;
+			
+			// 1 to 25 = 25% chance
+			if (choice <= 25) {
+				numHealingPotions--;
+
+				return new EnemyAction(
+					"Healing Potion",
+					Action.Type.HEALING,
+					healingPotionHealth,
+					0
+				);
+			}
+		}
+
+		// Choose a random number between 1 and 100 inclusive so the
+		// percentages are easy
+		int choice = Main.RANDOM.nextInt(100) + 1;
+
+		// There is a 5% chance the enemy will use poison if the
+		// player is not poisoned
+		if (choice > 95 && !player.hasPoisonEffect()) {
+			return new EnemyAction(
+				"Poison Dagger",
+				Action.Type.POISON,
+				baseAttackDamage * POISON_DAMAGE_MULTIPLIER,
+				numPoisonTurns
+			);
+		}
+
+		// There is a 10% or 15% chance the enemy will use an attack
+		// that does 50 damage more than their base attack
+		if (choice > 85) {
+			return new EnemyAction(
+				"Sharp Sword",
+				Action.Type.HIT,
+				baseAttackDamage + 50,
+				0
+			);
+		}
+
+		// There is a 35% change the enemy will use an attack that does
+		// 25 damage more than their base attack
+		if (choice > 50) {
+			return new EnemyAction(
+				"Powerful Punch",
+				Action.Type.HIT,
+				baseAttackDamage + 25,
+				0
+			);
+		}
+
+		// Otherwise the enemy just does their base attack (50% chance)
+		return new EnemyAction("Punch", Action.Type.HIT, baseAttackDamage, 0);
 	}
 
+	/**
+	 * This method inflicts the specified amount of damege on the
+	 * enemy.
+	 * 
+	 * @param damage the amount of damage to inflict on the enemy
+	 */
 	@Override
 	public void inflictDamage(int damage) {
 		// Inflict the given amount of damage but do not let the enemy's health
@@ -177,6 +314,20 @@ public class Enemy implements ILivingEntity {
 	public boolean isDead() {
 		// The enemy is dead if they have no health left
 		return currentHealth == 0;
+	}
+
+	/*************************************************************************************/
+	/*                                      GETTERS                                      */
+	/*************************************************************************************/
+
+	/**
+	 * This method returns the enemy's current amount of health.
+	 * 
+	 * @return the enemy's current amount of health
+	 */
+	@Override
+	public int getCurrentHealth() {
+		return currentHealth;
 	}
 
 	/**

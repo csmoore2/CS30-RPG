@@ -8,9 +8,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SpringLayout;
 import javax.swing.SwingUtilities;
@@ -19,6 +17,7 @@ import javax.swing.border.LineBorder;
 
 import game.Attribute;
 import game.Main;
+import game.World;
 import game.entities.Player;
 import game.util.MutableDouble;
 import game.util.MutableInteger;
@@ -31,7 +30,8 @@ import static javax.swing.SpringLayout.*;
  * game and the option for the player to view their attributes and level
  * up if they have enough experience.
  */
-public class PauseScreenOverlay implements IScreen {
+@SuppressWarnings("serial")
+public class PauseScreenOverlay extends Overlay {
 	/**
 	 * This record stores all the ui data associated with a primary
 	 * attribute for the pause screen overlay.
@@ -89,7 +89,7 @@ public class PauseScreenOverlay implements IScreen {
 	public static final Font BUTTON_FONT = new Font("Button Font", Font.BOLD, 32);
 	
 	/**
-	 * This is the size of each button in this HUD.
+	 * This is the size of each button in this overlay.
 	 */
 	public static final Dimension BUTTON_SIZE = new Dimension(500, 75);
 	
@@ -136,32 +136,14 @@ public class PauseScreenOverlay implements IScreen {
 	public static final String QUIT_BUTTON_TEXT = "Quit Game";
 	
 	/**
-	 * This is the title of the dialog that is shown to the player to ensure
-	 * they want to quit the game.
-	 */
-	public static final String CONFIRM_QUIT_DIALOG_TITLE ="Confirm Exit";
-	
-	/**
-	 * This is the text that is displayed by the dialog that is shown to the player
-	 * to ensure they want to quit the game.
-	 */
-	public static final String CONFIRM_QUIT_DIALOG_TEXT =
-			"Are you sure you want to quit the game? (all progress will be lost)";
-	
-	/**
 	 * This map maps each primary attribute to it corresponding ui data record.
 	 */
-	private final Map<Attribute, PrimaryAttributeUIData> primaryAttributeUIDataMap = new EnumMap<>(Attribute.class);
+	private Map<Attribute, PrimaryAttributeUIData> primaryAttributeUIDataMap = new EnumMap<>(Attribute.class);
 
 	/**
 	 * This map mapseach secondary attribute to it corresponding ui data record.
 	 */
-	private final Map<Attribute, SecondaryAttributeUIData> secondaryAttributeUIDataMap = new EnumMap<>(Attribute.class);
-	
-	/**
-	 * This is the player.
-	 */
-	private Player player;
+	private Map<Attribute, SecondaryAttributeUIData> secondaryAttributeUIDataMap = new EnumMap<>(Attribute.class);
 	
 	/**
 	 * This is the attribute button.
@@ -194,10 +176,11 @@ public class PauseScreenOverlay implements IScreen {
 	/**
 	 * This constructs the pause screen overlay.
 	 * 
+	 * @param worldIn  the world
 	 * @param playerIn the player
 	 */
-	public PauseScreenOverlay(Player playerIn) {
-		player = playerIn;
+	public PauseScreenOverlay(World worldIn, Player playerIn) {
+		super(worldIn, playerIn);
 	}
 
 	/*************************************************************************************/
@@ -215,7 +198,7 @@ public class PauseScreenOverlay implements IScreen {
 	 * @see IScreen#addSwingComponents(JComponent, SpringLayout)
 	 */
 	@Override
-	public void addSwingComponents(JComponent screen, SpringLayout layout) {
+	public void createAndAddSwingComponents() {
 		/******************************************************************
 		 *                        ATTRIBUTE BUTTON                        *
 		 ******************************************************************/
@@ -227,15 +210,15 @@ public class PauseScreenOverlay implements IScreen {
 		attributeButton.setPreferredSize(BUTTON_SIZE);
 		
 		// Make the attribute button show the attribute panel
-		attributeButton.addActionListener((a) -> showAttributePanel(screen));
+		attributeButton.addActionListener((a) -> showAttributePanel());
 		
 		// Align the attribute button to be slightly above the vertical centre of the
 		// screen and horizontally centered
-		layout.putConstraint(VERTICAL_CENTER, attributeButton, -BUTTON_VERTICAL_SPACING/2, VERTICAL_CENTER, screen);
-		layout.putConstraint(HORIZONTAL_CENTER, attributeButton, 0, HORIZONTAL_CENTER, screen);
+		layout.putConstraint(VERTICAL_CENTER, attributeButton, -BUTTON_VERTICAL_SPACING/2, VERTICAL_CENTER, this);
+		layout.putConstraint(HORIZONTAL_CENTER, attributeButton, 0, HORIZONTAL_CENTER, this);
 
 		// Add the attribute button to the screen
-		screen.add(attributeButton);
+		add(attributeButton);
 		
 		/******************************************************************
 		 *                        ATTRIBUTE PANEL                         *
@@ -252,14 +235,14 @@ public class PauseScreenOverlay implements IScreen {
 		attributePanel.setLayout(attributePanelLayout);
 		
 		// Create the ui components inside the attribute panel
-		createAttributePanelUIElements(screen, attributePanelLayout);
+		createAttributePanelUIElements(attributePanelLayout);
 
 		// Centre the attribute panel in the screen
-		layout.putConstraint(VERTICAL_CENTER, attributePanel, 0, VERTICAL_CENTER, screen);
-		layout.putConstraint(HORIZONTAL_CENTER, attributePanel, 0, HORIZONTAL_CENTER, screen);
+		layout.putConstraint(VERTICAL_CENTER, attributePanel, 0, VERTICAL_CENTER, this);
+		layout.putConstraint(HORIZONTAL_CENTER, attributePanel, 0, HORIZONTAL_CENTER, this);
 
 		// Add the attribute panel to the screen
-		screen.add(attributePanel);
+		add(attributePanel);
 		
 		/******************************************************************
 		 *                          QUIT BUTTON                           *
@@ -270,29 +253,20 @@ public class PauseScreenOverlay implements IScreen {
 		quitButton.setFont(BUTTON_FONT);
 		quitButton.setPreferredSize(BUTTON_SIZE);
 		
-		// Give the quit button a click listener that confirms the user wants to
-		// quit the game
-		quitButton.addActionListener((a) -> {
-			// When the user clicks the button show a dialog to confirm that they want to exit
-			int confirmOption = JOptionPane.showConfirmDialog(
-				screen, CONFIRM_QUIT_DIALOG_TEXT,  CONFIRM_QUIT_DIALOG_TITLE, JOptionPane.YES_NO_OPTION);
-			
-			// If the user confirms they want to exit then exit with exit code zero
-			if (confirmOption == JOptionPane.YES_OPTION) {
-				System.exit(0);
-			}
-		});
+		// Have the quit button call Main.quitGame when it is clicked. This will
+		// show the user a dialog to confirm they want to exit.
+		quitButton.addActionListener((a) -> Main.quitGame());
 		
 		// Align the quit button to be slightly below the vertical centre of the screen
 		// and horizontally centered
-		layout.putConstraint(VERTICAL_CENTER, quitButton, BUTTON_VERTICAL_SPACING/2, VERTICAL_CENTER, screen);
-		layout.putConstraint(HORIZONTAL_CENTER, quitButton, 0, HORIZONTAL_CENTER, screen);
+		layout.putConstraint(VERTICAL_CENTER, quitButton, BUTTON_VERTICAL_SPACING/2, VERTICAL_CENTER, this);
+		layout.putConstraint(HORIZONTAL_CENTER, quitButton, 0, HORIZONTAL_CENTER, this);
 
 		// Add the quit button to the screen
-		screen.add(quitButton);
+		add(quitButton);
 		
 		// Show the option menu by default
-		showOptionMenu(screen);
+		showOptionMenu();
 	}
 	
 	/**
@@ -304,7 +278,7 @@ public class PauseScreenOverlay implements IScreen {
 	 * @param screen the screen
 	 * @param layout the attribute panel's spring layout
 	 */
-	private void createAttributePanelUIElements(JComponent screen, SpringLayout panelLayout) {
+	private void createAttributePanelUIElements(SpringLayout panelLayout) {
 		/*****************************************************************************/
 		/*                                   TITLE                                   */
 		/*****************************************************************************/
@@ -395,8 +369,9 @@ public class PauseScreenOverlay implements IScreen {
 			incrementButton.setPreferredSize(ATTRIBUTE_PANEL_DEC_INC_BUTTON_SIZE);
 			incrementButton.addActionListener((a) -> incrementAttribute(attr));
 
-			// Only enable the increment button if the player can level up
-			incrementButton.setEnabled(player.canLevelUp());
+			// Only enable the increment button if the player can level up and
+			// is not in a battle
+			incrementButton.setEnabled(player.canLevelUp() && !world.inBattle());
 
 			// Align the decrement button to be next to the attribute value
 			panelLayout.putConstraint(VERTICAL_CENTER, decrementButton, 0, VERTICAL_CENTER, attrValue);
@@ -445,7 +420,7 @@ public class PauseScreenOverlay implements IScreen {
 			attrLabel.setPreferredSize(ATTRIBUTE_PANEL_ATTR_LABEL_SIZE);
 			
 			// Create a label to display the attribute's scaled value
-			JLabel attrValue = new JLabel(String.valueOf(player.getSecodaryAttributeValue(attr)));
+			JLabel attrValue = new JLabel(String.valueOf(player.getSecondaryAttributeValue(attr)));
 			attrValue.setFont(ATTR_VALUE_FONT);
 
 			// Align the atttribute label to be on the right side of the panel and
@@ -472,8 +447,8 @@ public class PauseScreenOverlay implements IScreen {
 			// Create the primary attribute's ui data record and insert it into the map
 			SecondaryAttributeUIData uiDataRecord = new SecondaryAttributeUIData(
 				attrValue,
-				new MutableDouble(player.getSecodaryAttributeValue(attr)),
-				new MutableDouble(player.getSecodaryAttributeValue(attr))
+				new MutableDouble(player.getSecondaryAttributeValue(attr)),
+				new MutableDouble(player.getSecondaryAttributeValue(attr))
 			);
 			secondaryAttributeUIDataMap.put(attr, uiDataRecord);
 		}
@@ -486,7 +461,7 @@ public class PauseScreenOverlay implements IScreen {
 		// return to the pause menu
 		JButton exitButton = new JButton("Exit");
 		exitButton.setFont(ATTR_PANEL_BUTTON_FONT);
-		exitButton.addActionListener((a) -> showOptionMenu(screen));
+		exitButton.addActionListener((a) -> showOptionMenu());
 
 		// Align the exit button to take up the lower left portion
 		// of the screen
@@ -535,7 +510,7 @@ public class PauseScreenOverlay implements IScreen {
 	 * 
 	 * @param screen the screen
 	 */
-	public void showOptionMenu(JComponent screen) {
+	public void showOptionMenu() {
 		// Hide all java swing components this overlay previously
 		// added to the screen
 		hideAll();
@@ -545,7 +520,7 @@ public class PauseScreenOverlay implements IScreen {
 		quitButton.setVisible(true);
 
 		// Update the screen's ui
-		SwingUtilities.updateComponentTreeUI(screen);
+		SwingUtilities.updateComponentTreeUI(this);
 	}
 
 	/**
@@ -555,7 +530,7 @@ public class PauseScreenOverlay implements IScreen {
 	 * 
 	 * @param screen the screen
 	 */
-	public void showAttributePanel(JComponent screen) {
+	public void showAttributePanel() {
 		// Hide all java swing components this overlay previously
 		// added to the screen
 		hideAll();
@@ -569,25 +544,7 @@ public class PauseScreenOverlay implements IScreen {
 		updateAttributePanelUIState();
 
 		// Update the world's ui
-		SwingUtilities.updateComponentTreeUI(screen);
-	}
-	
-	/**
-	 * This method removes all the ui components previously added by
-	 * this overlay from the screen.
-	 * 
-	 * @param screen the screen
-	 * 
-	 * @see IScreen#removeSwingComponents(JComponent)
-	 */
-	@Override
-	public void removeSwingComponents(JComponent screen) {
-		// Remove all the ui components of the option menu
-		screen.remove(attributeButton);
-		screen.remove(quitButton);
-		
-		// Remove the attribute panel
-		screen.remove(attributePanel);
+		SwingUtilities.updateComponentTreeUI(this);
 	}
 
 	/*************************************************************************************/
@@ -595,7 +552,7 @@ public class PauseScreenOverlay implements IScreen {
 	/*************************************************************************************/
 	
 	@Override
-	public void paint(Graphics2D g2d) {
+	public void paintBackground(Graphics2D g2d) {
 		// Draw the background
 		g2d.setColor(PAUSE_BACKGROUND_COLOUR);
 		g2d.fillRect(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT);
@@ -696,7 +653,7 @@ public class PauseScreenOverlay implements IScreen {
 		// Loop through each secondary attribute, updating their values
 		for (Attribute attr : Attribute.SECONDARY_ATTRIBUTES) {
 			// Get the attribute's new value
-			double newValue = dummyPlayer.getSecodaryAttributeValue(attr);
+			double newValue = dummyPlayer.getSecondaryAttributeValue(attr);
 
 			// Get the attribute's ui data
 			SecondaryAttributeUIData attrUIData = secondaryAttributeUIDataMap.get(attr);
@@ -737,8 +694,8 @@ public class PauseScreenOverlay implements IScreen {
 			PrimaryAttributeUIData attrUIData = primaryAttributeUIDataMap.get(attr);
 
 			// Only enable the increment button if the player has attribute
-			// points to spend
-			attrUIData.incrementButton.setEnabled(availableAttrPoints > 0);
+			// points to spend and the player is not in a battle
+			attrUIData.incrementButton.setEnabled(availableAttrPoints > 0 && !world.inBattle());
 		}
 	}
 

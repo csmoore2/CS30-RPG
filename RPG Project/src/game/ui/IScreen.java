@@ -1,8 +1,8 @@
 package game.ui;
 
+import java.awt.Container;
 import java.awt.Graphics2D;
 
-import javax.swing.JComponent;
 import javax.swing.SpringLayout;
 
 /**
@@ -18,7 +18,7 @@ public interface IScreen {
 	 * @param screen the screen
 	 * @param layout the screen's layout
 	 */
-	default void addSwingComponents(JComponent screen, SpringLayout layout) {}
+	default void addSwingComponents(Container screen, SpringLayout layout) {}
 
 	/**
 	 * This method paints the screen using the given
@@ -35,5 +35,5 @@ public interface IScreen {
 	 * 
 	 * @param screen the screen
 	 */
-	default void removeSwingComponents(JComponent screen) {}
+	default void removeSwingComponents(Container screen) {}
 }
