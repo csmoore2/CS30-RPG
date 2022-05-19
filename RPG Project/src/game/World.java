@@ -89,7 +89,7 @@ public class World extends JComponent {
 	 * or if repainting can be skipped next time the repaint method is called.
 	 */
 	private boolean repaintRequired = false;
-	
+
 	/**
 	 * This variable keeps track of whether the game is paused.
 	 */
@@ -102,6 +102,9 @@ public class World extends JComponent {
 	 * @param playerIn the player
 	 */
 	public World(Player playerIn) {
+		// Set the current level to 1 since the player starts in the green zone
+		Main.currentLevel = 1;
+
 		// Set our layout to be a SpringLayout so that if anything needs to add JComponents to
 		// us they will easily be able to lay them out
 		springLayout = new SpringLayout();
@@ -112,7 +115,7 @@ public class World extends JComponent {
 		player.setWorld(this);
 		
 		// Push the starting screen onto the screen stack
-		screenStack.push(AreaScreen.createNewAreaScreen("res/test.jpg"));
+		screenStack.push(AreaScreen.createNewAreaScreen("res/greenzonebackground.png"));
 		
 		// Register the 'pauseKeyListener' method as a key pressed listener
 		registerKeyListener((KeyPressedListener)this::pauseKeyListener);
@@ -258,8 +261,9 @@ public class World extends JComponent {
 		screenStack.pop();
 		screenStack.push(newArea);
 		
-		// Update the player's position
-		player.updatePosition(newX, newY);
+		// Update the player's position, ensuring that the player does not activate the effect
+		// of the tile they are moving to
+		player.updatePosition(newX, newY, false);
 	}
 
 	/**

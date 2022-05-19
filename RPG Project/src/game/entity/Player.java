@@ -610,13 +610,14 @@ public class Player implements ILivingEntity {
 	 * @param newX the player's new x-position
 	 * @param newY the player's new y-position
 	 */
-	public void updatePosition(int newX, int newY) {
+	public void updatePosition(int newX, int newY, boolean loading) {
 		// Update our position
 		xPos = newX;
 		yPos = newY;
 		
 		// Inform the world of our change in position
-		world.onPlayerPositionChange(newX, newY);
+		if (loading)
+		{world.onPlayerPositionChange(newX, newY);}
 	}
 
 	/**
@@ -641,18 +642,18 @@ public class Player implements ILivingEntity {
 		switch (e.getKeyChar()) {
 			// Vertical Movement (0 = top)
 			case 'w':
-				updatePosition(xPos, Math.max(yPos-1, MIN_Y_POS));
+				updatePosition(xPos, Math.max(yPos-1, MIN_Y_POS), true);
 				break;
 			case 's':
-				updatePosition(xPos, Math.min(yPos+1, MAX_Y_POS));
+				updatePosition(xPos, Math.min(yPos+1, MAX_Y_POS), true);
 				break;
 
 			// Horizontal Movement (0 = Right)
 			case 'a':
-				updatePosition(Math.max(xPos-1, MIN_X_POS), yPos);
+				updatePosition(Math.max(xPos-1, MIN_X_POS), yPos, true);
 				break;
 			case 'd':
-				updatePosition(Math.min(xPos+1, MAX_X_POS), yPos);
+				updatePosition(Math.min(xPos+1, MAX_X_POS), yPos, true);
 				break;
 				
 			// If the key was not one that updates the player's position

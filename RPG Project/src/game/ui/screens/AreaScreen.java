@@ -1,6 +1,8 @@
 package game.ui.screens;
 
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +13,6 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import game.Main;
-import game.entity.Enemy;
 import game.ui.Tile;
 
 /**
@@ -40,6 +41,9 @@ public class AreaScreen implements IScreen {
 	 * This keeps track of whether or not the AreaScreen's tile map has been populated.
 	 */
 	private boolean tileMapPopulated = false;
+	
+	private static double scaleFactorX;
+	private static double scaleFactorY;
 	
 	/**
 	 * The is the area's background image.
@@ -80,6 +84,7 @@ public class AreaScreen implements IScreen {
 	 * @param mapImagePathIn the path to the area's background image
 	 */
 	private AreaScreen(String mapImagePathIn) {
+		
 		// Try to load the given map image file
 		try {
 			mapImage = ImageIO.read(new File(mapImagePathIn));
@@ -88,8 +93,11 @@ public class AreaScreen implements IScreen {
 			throw new RuntimeException("Error loading area background image!", e);
 		}
 		
+		scaleFactorX = (double) mapImage.getWidth()/Main.SCREEN_WIDTH;
+		scaleFactorY = (double) mapImage.getHeight()/Main.SCREEN_HEIGHT;
+		
 		// Ensure that the map image has the same width as the screen
-		if (mapImage.getWidth() != Main.SCREEN_WIDTH) {
+		if ((int) (mapImage.getWidth()/scaleFactorX) != Main.SCREEN_WIDTH) {
 			throw new IllegalArgumentException(
 				String.format(
 					"Error: Area background image and screen must have the same width: %dpx!",
@@ -99,7 +107,7 @@ public class AreaScreen implements IScreen {
 		}
 
 		// Ensure that the map image has the same height as the screen
-		if (mapImage.getHeight() != Main.SCREEN_HEIGHT) {
+		if ((int) (mapImage.getHeight()/scaleFactorY) != Main.SCREEN_HEIGHT) {
 			throw new IllegalArgumentException(
 				String.format(
 					"Error: Area background image and screen must have the same height: %dpx!",
@@ -126,13 +134,36 @@ public class AreaScreen implements IScreen {
 		// Update 'tileMapPopulated'
 		tileMapPopulated = true;
 		
-		// This is temporary code for testing
-		if (mapImagePathIn == "res/test.jpg") {
-			tileMap[0][TILES_PER_ROW-1] = new Tile.LoadingZone("res/test2.jpg", 0, 0);
-			tileMap[1][0] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()));
-		} else if (mapImagePathIn == "res/test2.jpg") {
-			tileMap[0][TILES_PER_ROW-1] = new Tile.LoadingZone("res/test.jpg", 0, 0);
+		// Defines loading and battle titles, dependent upon which level the player is currently on
+		if (Main.currentLevel == 1)
+		{
+			tileMap[0][4] = new Tile.LoadingZone("res/firezonebackground.png", 2, 4, 8);
+			tileMap[4][0] = new Tile.LoadingZone("res/rockzonebackground.png", 5, 8, 4);
+			tileMap[8][4] = new Tile.LoadingZone("res/icezonebackground.png", 4, 4, 0);
+			tileMap[4][8] = new Tile.LoadingZone("res/gemzonebackground.png", 3, 0, 4);
 		}
+		else if (Main.currentLevel == 2) // Fire zone
+		{
+			tileMap[8][4] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 4, 0);
+		}
+		else if (Main.currentLevel == 3) // Gem zone
+		{
+			tileMap[4][0] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 8, 4);
+		}
+		else if (Main.currentLevel == 4) // Ice zone
+		{
+			tileMap[0][4] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 4, 8);
+		}
+		else if (Main.currentLevel == 5) // Stone zone
+		{
+			tileMap[4][8] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 0, 4);
+		}
+		else if (Main.currentLevel == 6) // Boss zone
+		{
+			
+		}
+		
+		
 	}
 	
 	/**
@@ -156,8 +187,15 @@ public class AreaScreen implements IScreen {
 	 */
 	@Override
 	public void paint(Graphics2D g2d) {
+		// Create the transformation to do the scale
+		AffineTransform scaleTransform = new AffineTransform();
+		scaleTransform.scale(1/scaleFactorX, 1/scaleFactorY);
+		
+		// Create the transformation operation
+		AffineTransformOp imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
+		
 		// Draw the area's background image
-		g2d.drawImage(mapImage, null, 0, 0);
+		g2d.drawImage(mapImage, imageScaleOp, 0, 0);
 		
 		// Loop through each tile in the tile map
 		for (int row = 0; row < ROWS_OF_TILES; row++) {
