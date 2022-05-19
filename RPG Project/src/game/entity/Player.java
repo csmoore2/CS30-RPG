@@ -251,10 +251,12 @@ public class Player implements ILivingEntity {
 	 * @param worldIn the player's new world
 	 */
 	public void setWorld(World worldIn) {
-		// If we currently have another world then we should stop
-		// listening for key events from it before we switch worlds
-		if (world != null) world.unregisterKeyListener((KeyPressedListener)this::movementKeyPressedListener);
-		
+		// If we already have a world then throw an exception since we
+		// cannot be in two worlds
+		if (world != null) {
+			throw new IllegalStateException("The player is already in a world!");
+		}
+
 		// Set the player's new world
 		world = worldIn;
 		

@@ -19,7 +19,6 @@ import game.Main;
 import game.World;
 import game.entity.Attribute;
 import game.entity.Player;
-import game.ui.screens.IScreen;
 import game.util.MutableDouble;
 import game.util.MutableInteger;
 
@@ -193,10 +192,7 @@ public class PauseScreenOverlay extends Overlay {
 	 * swing components used by the pause screen overlay and to
 	 * show the initial option menu.
 	 * 
-	 * @param screen the screen
-	 * @param layout the screen's layout
-	 * 
-	 * @see IScreen#addSwingComponents(JComponent, SpringLayout)
+	 * @see Overlay#createAndAddSwingComponents()
 	 */
 	@Override
 	public void createAndAddSwingComponents() {

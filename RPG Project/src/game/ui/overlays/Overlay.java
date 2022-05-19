@@ -64,6 +64,13 @@ public abstract class Overlay extends JComponent {
 	 * them to the screen.
 	 */
 	public abstract void createAndAddSwingComponents();
+	
+	/**
+	 * This method is called by World to update the overlay. By default
+	 * this does nothing but an overlay can override this method if it
+	 * need to update itself.
+	 */
+	public void update() {}
 
 	/**
 	 * This method paints the overlay's background using the given

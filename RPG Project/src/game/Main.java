@@ -155,6 +155,9 @@ public class Main {
 		
 		// Start the world repaint timer on the Event Dispatch Thread (EDT)
 		SwingUtilities.invokeLater(worldRepaintTimer::start);
+
+		// Show the introduction to the player
+		showIntroduction(world);
 		
 		// This is the game loop. We start it running on a daemon thread so that it does not block this thread,
 		// which should be the Event Dispatch Thread (EDT) used by Java Swing, and so that it ends when the other
@@ -168,6 +171,17 @@ public class Main {
 		}, "Game Loop Thread");
 		gameLoopThread.setDaemon(true);
 		gameLoopThread.start();
+	}
+
+	/**
+	 * This method shows the introduction to the player as a series of messages
+	 * on the screen. The introduction covers the story line as well as the basic
+	 * controls for the game.
+	 * 
+	 * @param world the world
+	 */
+	private static void showIntroduction(World world) {
+		world.showMessage("<i>This</i> is <b>the introduction</b>!", 5);
 	}
 
 	/**

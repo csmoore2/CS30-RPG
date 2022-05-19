@@ -5,6 +5,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.Stack;
 
 import javax.swing.JComponent;
@@ -14,6 +16,7 @@ import javax.swing.SwingUtilities;
 import game.entity.IEnemy;
 import game.entity.Player;
 import game.ui.Tile;
+import game.ui.overlays.MessageOverlay;
 import game.ui.overlays.Overlay;
 import game.ui.overlays.PauseScreenOverlay;
 import game.ui.screens.AreaScreen;
@@ -36,6 +39,27 @@ public class World extends JComponent {
 	 * forward navigation and popping of the top screen represents backwards navigation.
 	 */
 	private final Stack<IScreen> screenStack = new Stack<>();
+	
+	/**
+	 * This record represents a message that is displayed on the screen to
+	 * the user for a specified amount of time in seconds.
+	 * 
+	 * @param message the message to display
+	 * @param time    the amount of time, in seconds, to display the message for
+	 */
+	public static final record Message(String message, int time) {}
+	
+	/**
+	 * This is the message queue. It contains all of the messages waiting to be displayed
+	 * to the player. Once this queue is empty no more messages are waiting to be displayed
+	 * to the player and the game will resume.
+	 */
+	private final Queue<Message> messageQueue = new ArrayDeque<>();
+	
+	/**
+	 * This is the message that is currently being displayed to the user.
+	 */
+	private Message currentMessage = null;
 	
 	/**
 	 * This stores the current overlay that is being displayed. Null indicates there
@@ -188,22 +212,8 @@ public class World extends JComponent {
 	}
 
 	/*************************************************************************************/
-	/*                              STATE UPDATING METHODS                               */
+	/*                             SCREEN MANAGEMENT METHODS                             */
 	/*************************************************************************************/
-	
-	/**
-	 * This updates the world.
-	 */
-	public void update() {
-		// If the game is paused then do not update the world
-		if (paused) return;
-		
-		// If the current screen is a BattleScreen then we need to
-		// update its state
-		if (!screenStack.empty() && screenStack.peek() instanceof BattleScreen) {
-			((BattleScreen) screenStack.peek()).update();
-		}
-	}
 
 	/**
 	 * This method shows the given screen. It will also ensure that
@@ -271,6 +281,110 @@ public class World extends JComponent {
 	}
 
 	/*************************************************************************************/
+	/*                             OVERLAY MANAGEMENT METHODS                            */
+	/*************************************************************************************/
+	
+	/**
+	 * This method shows the given overlay and pauses the game.
+	 * 
+	 * @param overlay the overlay to show
+	 */
+	public void showOverlayAndPause(Overlay overlayIn) {
+		// Puase the game
+		paused = true;
+		
+		// Make the overlay the main window's glass pane so that it is
+		// drawn over everything else and can intercept events
+		overlay = overlayIn;
+		Main.window.setGlassPane(overlay);
+		
+		// Create the overlay's java swing components and add them
+		// to the screen
+		overlay.createAndAddSwingComponents();
+
+		// Make the overlay visible
+		overlay.setVisible(true);
+		
+		// Update the ui so that everything will be drawn correctly
+		updateUIState();
+	}
+	
+	/**
+	 * This method hides the current overlay assuming that it
+	 * is not null and resumes the game.
+	 */
+	public void hideOverlayAndResume() {
+		// Hide the overlay
+		overlay.setVisible(false);
+		
+		// Resume the game
+		paused = false;
+		
+		// Update the ui so that everything will be drawn correctly
+		updateUIState();
+	}
+
+	/*************************************************************************************/
+	/*                                   UPDATE METHOD                                   */
+	/*************************************************************************************/
+	
+	/**
+	 * This updates the world which involves displaying messages to the user
+	 * if the message queue is not empty and updating the current screen if
+	 * it needs updating.
+	 */
+	public void update() {
+		// If an overlay is being displayed then do not update the world. However,
+		// do update the overlay.
+		if (isOverlayDisplayed()) {
+			overlay.update();
+			return;
+		}
+		
+		// If we are not currently displaying a message and the message stack is
+		// not empty then start displaying the messages in the message stack
+		if (currentMessage == null && messageQueue.peek() != null) {
+			// Get the next message from the message stack
+			currentMessage = messageQueue.poll();
+			
+			// Show a message overlay to display the message
+			showOverlayAndPause(new MessageOverlay(this, player, currentMessage));
+		}
+		
+		// If a screen is being displayed and it is a BattleScreen then we need to
+		// update its state
+		if (!screenStack.empty()) {
+			if (screenStack.peek() instanceof BattleScreen) {
+				((BattleScreen) screenStack.peek()).update();
+			}
+		}
+	}
+
+	/*************************************************************************************/
+	/*                                  MESSAGE METHODS                                  */
+	/*************************************************************************************/
+	
+	/**
+	 * This method adds the given message to the message queue. Once the message reaches
+	 * the end of the queue it will be displayed on the screen to the player for the amount
+	 * of time, in seconds, specified by the message.
+	 * 
+	 * Note: the message will be formatted as HTML so HTML tags such as <b> and <i> will work
+	 * 
+	 * @param message the message to display to the player
+	 * @param time    the amount of time, in seconds, to display the message for
+	 */
+	public void showMessage(String messageIn, int timeIn) {
+		// Wrap the message with an html tag so that the text will be formatted as HTML
+		// which will allow for the text to be formatted and so that the text will wrap
+		// to a new line if it cannot fit in a single line
+		messageIn = "<html>" + messageIn + "</html>";
+		
+		// Create the Message object and add it to the message queue
+		messageQueue.add(new Message(messageIn, timeIn));
+	}
+
+	/*************************************************************************************/
 	/*                                  BATTLE METHODS                                   */
 	/*************************************************************************************/
 	
@@ -324,42 +438,32 @@ public class World extends JComponent {
 	
 	/**
 	 * This method is registered as a key pressed listener. When it receives
-	 * a key pressed event that corresponds to the escape key being pressed
+	 * a key typed event that corresponds to the escape key being typed
 	 * this method will pause the game.
 	 * 
 	 * @param keyEvent the key pressed event
+	 * 
+	 * @see KeyListener#keyPressed(KeyEvent)
 	 */
 	private void pauseKeyListener(KeyEvent keyEvent) {
-		// If the pressed key is the escape key then switch the pause state of the game
-		// and update whether the pause HUD is shown according to the new pause state
+		// If an overlay is currently being displayed other that the pause
+		// screen overlay then we should not allow the player to view the
+		// pause screen overlay.
+		if (isOverlayDisplayed() && !(overlay instanceof PauseScreenOverlay)) return;
+		
+		// If the pressed key is the escape key then either show the pause screen
+		// overlay if the game is not paused or hide the pause screen overlay if
+		// the game is paused
 		if (keyEvent.getKeyCode() == KeyEvent.VK_ESCAPE) {
-			paused = !paused;
-			
-			// If the game is now paused then set the current overlay to a pause screen
-			// overlay, otherwise stop showing the pause screen overlay.
-			if (paused) {
-				// Create the pause overlay and then make it the main
-				// window's glass pane so that it is drawn over everything
-				// else and can intercept events
-				overlay = new PauseScreenOverlay(this, player);
-				Main.window.setGlassPane(overlay);
-				
-				// Create the overlay's java swing components and add them
-				// to the screen
-				overlay.createAndAddSwingComponents();
-
-				// Make the overlay visible
-				overlay.setVisible(true);
+			if (!paused) {
+				// The game is not paused so pause the game and show the pause screen
+				// overlay
+				showOverlayAndPause(new PauseScreenOverlay(this, player));
 			} else {
-				// Make the pause screen overlay invisible so that it no
-				// longer gets drawn or intercepts events and then set
-				// 'overlay' to null
-				overlay.setVisible(false);
-				overlay = null;
+				// The game is paused so resume the game and stop showing the pause
+				// screen overlay
+				hideOverlayAndResume();
 			}
-			
-			// Update the ui so that everything will be drawn correctly
-			updateUIState();
 		}
 	}
 	
@@ -384,6 +488,19 @@ public class World extends JComponent {
 			newTile.performAction(player, this);
 		}
 	}
+	
+	/**
+	 * This is called by MessageOverlay when it has finished displaying its message
+	 * for the amount of time specified by the message. This method will then update
+	 * 'currentMessage' to be null, stop showing the message overlay, and resume the game.
+	 */
+	public void onMessageFinishDisplay() {
+		// Stop showing the message overlay and resume the game
+		hideOverlayAndResume();
+		
+		// Update 'currentMessage' to be null
+		currentMessage = null;
+	}
 
 	/*************************************************************************************/
 	/*                                      GETTERS                                      */
@@ -405,7 +522,7 @@ public class World extends JComponent {
 	 * @return whether or not an overlay is currently being displayed
 	 */
 	public boolean isOverlayDisplayed() {
-		return overlay != null;
+		return overlay != null && overlay.isVisible();
 	}
 
 	/**
