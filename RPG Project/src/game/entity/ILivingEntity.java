@@ -1,8 +1,6 @@
-package game.entities;
+package game.entity;
 
 import java.awt.image.BufferedImage;
-
-import game.Attribute;
 
 /**
  * This interface specifies methods common to the player and
@@ -11,41 +9,33 @@ import game.Attribute;
  */
 public interface ILivingEntity {
 	/**
-	 * This method gets the current value of the given attribute.
+	 * This method sets the value of the given primary attribute
+	 * to the given value.
 	 * 
-	 * Note: This method can only be called for primary attributes
-	 *       as secondary attributes can only have a scaled value
-	 *       since they are calculated.
-	 * 
-	 * @param attr the attribute whose value we are retrieving
-	 * 
-	 * @return the current value of the given attribute
+	 * @param attr     the attribute whose value we are setting
+	 * @param newValue the new value for the given attribute
 	 */
-	int getAttributeValue(Attribute attr);
+	void setPrimaryAttributeValue(Attribute attr, int newValue);
 	
 	/**
-	 * This method gets the current value of the given attribute,
-	 * but scales it so that it is the actual quantity. For example,
-	 * the attribute HP could have a value of 3 but in the game this
-	 * may correspond to 300 total health.
+	 * This method gets the current value of the given primary
+	 * attribute.
+	 * 
+	 * @param attr the primary attribute whose value we are retrieving
+	 * 
+	 * @return the current value of the given primary attribute
+	 */
+	int getPrimaryAttributeValue(Attribute attr);
+	
+	/**
+	 * This method calculates the value of the given secondary
+	 * attribute and returns the result.
 	 * 
 	 * @param attr the attribute whose value we are retrieving and scaling
 	 * 
 	 * @return the current scaled value of the given attribute
 	 */
-	double getScaledAttributeValue(Attribute attr);
-	
-	/**
-	 * This method sets the value of the given attribute to the
-	 * given value.
-	 * 
-	 * Note: This method can only be called for primary attributes
-	 *       as secondary attributes are calculated.
-	 * 
-	 * @param attr     the attribute whose value we are setting
-	 * @param newValue the new value for the given attribute
-	 */
-	void setAttributeValue(Attribute attr, int newValue);
+	double getSecondaryAttributeValue(Attribute attr);
 
 	/**
 	 * This method is called at the start of this entity's turn
@@ -61,6 +51,15 @@ public interface ILivingEntity {
 	 * @return the amount of health this entity currently has
 	 */
 	int getCurrentHealth();
+
+	/**
+	 * This methods gives the entity the specified amount of health,
+	 * ensuring that the entity does not have more than their maximum
+	 * amount of health.
+	 * 
+	 * @param amount the amount of health to give the entity
+	 */
+	void addHealth(int amount);
 
 	/**
 	 * This method inflicts the specified amount of damage on

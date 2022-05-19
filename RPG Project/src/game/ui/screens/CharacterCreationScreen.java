@@ -1,4 +1,4 @@
-package game.ui;
+package game.ui.screens;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -17,7 +17,7 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
 import game.Main;
-import game.entities.Player;
+import game.entity.Player;
 
 import static javax.swing.SpringLayout.*;
 
@@ -309,6 +309,6 @@ public class CharacterCreationScreen extends JComponent {
 	 */
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension(Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT);
+		return Main.SCREEN_SIZE;
 	}
 }
