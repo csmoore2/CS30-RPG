@@ -1,18 +1,28 @@
 package game;
 
+import java.awt.Dimension;
+import java.util.Random;
+
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import game.entities.Player;
-import game.ui.CharacterCreationScreen;
-import game.ui.StartScreen;
+import game.entity.Player;
+import game.ui.screens.CharacterCreationScreen;
+import game.ui.screens.StartScreen;
 
 /**
  * This class contains the entry point into the game; it is where
  * the initial setup takes place and the game starts.
  */
 public class Main {
+	/**
+	 * This is the instance of Random that will be used by everything in the game when
+	 * generating random information. It is seeded by the current time in milliseconds.
+	 */
+	public static final Random RANDOM = new Random(System.currentTimeMillis());
+
 	/**
 	 * This is the name of the game.
 	 */
@@ -29,6 +39,11 @@ public class Main {
 	public static final int SCREEN_HEIGHT = 1000;
 	
 	/**
+	 * This is the size of the screen.
+	 */
+	public static final Dimension SCREEN_SIZE = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
+	
+	/**
 	 * The number of frames rendered in one second.
 	 */
 	public static final int FRAMES_PER_SECOND = 60;
@@ -37,6 +52,19 @@ public class Main {
 	 * The number of milliseconds per frame.
 	 */
 	public static final int MILLISECONDS_PER_FRAME = 1000/FRAMES_PER_SECOND;
+	
+	/**
+	 * This is the title of the dialog that is shown to the player to ensure
+	 * they want to quit the game.
+	 */
+	public static final String CONFIRM_QUIT_DIALOG_TITLE = "Confirm Exit";
+	
+	/**
+	 * This is the text that is displayed by the dialog that is shown to the player
+	 * to ensure they want to quit the game.
+	 */
+	public static final String CONFIRM_QUIT_DIALOG_TEXT =
+			"Are you sure you want to quit the game? (all progress will be lost)";
 
 	/**
 	 * This is the game's window.
@@ -81,6 +109,19 @@ public class Main {
 		// Center the window and show it
 		window.setLocationRelativeTo(null);
 		window.setVisible(true);
+	}
+	
+	/**
+	 * This method reinitializes the window. This method is required due
+	 * to issues when completely switching the content of the window.
+	 */
+	private static void reinitializeWindow() {
+		// Hide the window and then completely reinitialize it
+		window.setVisible(false);
+		window = new JFrame();
+		window.setTitle(GAME_NAME);
+		window.setResizable(false);
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	
 	/**
@@ -132,30 +173,48 @@ public class Main {
 		
 		// Start the world repaint timer on the Event Dispatch Thread (EDT)
 		SwingUtilities.invokeLater(worldRepaintTimer::start);
+
+		// Show the introduction to the player
+		showIntroduction(world);
 		
 		// This is the game loop. We start it running on a daemon thread so that it does not block this thread,
 		// which should be the Event Dispatch Thread (EDT) used by Java Swing, and so that it ends when the other
 		// threads in this program stop
 		Thread gameLoopThread = new Thread(() -> {
+			// Update the world forever
 			while (true) {
 				// Update the world
 				world.update();
 			}
-		});
+		}, "Game Loop Thread");
 		gameLoopThread.setDaemon(true);
 		gameLoopThread.start();
 	}
-	
+
 	/**
-	 * This method reinitializes the window. This method is required due
-	 * to issues when completely switching the content of the window.
+	 * This method shows the introduction to the player as a series of messages
+	 * on the screen. The introduction covers the story line as well as the basic
+	 * controls for the game.
+	 * 
+	 * @param world the world
 	 */
-	private static void reinitializeWindow() {
-		// Hide the window and then completely reinitialize it
-		window.setVisible(false);
-		window = new JFrame();
-		window.setTitle(GAME_NAME);
-		window.setResizable(false);
-		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	private static void showIntroduction(World world) {
+		world.showMessage("<i>This</i> is <b>the introduction</b>!", 5);
+	}
+
+	/**
+	 * This method quits the game but first asks the user to confirm
+	 * that they do want to exit since they will lose all of their
+	 * progress by exiting.
+	 */
+	public static void quitGame() {
+		// When the user clicks the button show a dialog to confirm that they want to exit
+		int confirmOption = JOptionPane.showConfirmDialog(
+			window, CONFIRM_QUIT_DIALOG_TEXT,  CONFIRM_QUIT_DIALOG_TITLE, JOptionPane.YES_NO_OPTION);
+		
+		// If the user confirms they want to exit then exit with exit code zero
+		if (confirmOption == JOptionPane.YES_OPTION) {
+			System.exit(0);
+		}
 	}
 }

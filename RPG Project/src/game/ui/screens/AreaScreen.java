@@ -1,4 +1,4 @@
-package game.ui;
+package game.ui.screens;
 
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -13,8 +13,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import game.Main;
-import game.Tile;
-import game.entities.Enemy;
+import game.ui.Tile;
 
 /**
  * This class implements IScreen and is used to display an area
