@@ -25,12 +25,12 @@ public class AreaScreen implements IScreen {
 	/**
 	 * This is the number tiles in one row of tiles on the screen.
 	 */
-	public static final int TILES_PER_ROW = Main.SCREEN_WIDTH  / Tile.TILE_SIZE;
+	public static final int TILES_PER_ROW = 9;
 	
 	/**
 	 * This is the number of rows of tiles on the screen.
 	 */
-	public static final int ROWS_OF_TILES = Main.SCREEN_HEIGHT / Tile.TILE_SIZE;
+	public static final int ROWS_OF_TILES = 9;
 	
 	/**
 	 * This is a cache of all the previously loaded area screens so they can be reused.
@@ -42,13 +42,16 @@ public class AreaScreen implements IScreen {
 	 */
 	private boolean tileMapPopulated = false;
 	
-	private static double scaleFactorX;
-	private static double scaleFactorY;
-	
 	/**
 	 * The is the area's background image.
 	 */
 	private final BufferedImage mapImage;
+	
+	/**
+	 * This is the scale transformation operation that is applied to the background
+	 * image to make it the same size at the screen.
+	 */
+	private final AffineTransformOp imageScaleOp;
 	
 	/**
 	 * This is the map of special tiles that is populated by the map file.
@@ -67,7 +70,10 @@ public class AreaScreen implements IScreen {
 	 */
 	public static AreaScreen createNewAreaScreen(String mapImagePathIn) {
 		// Either get or create the AreaScreen
-		AreaScreen screen = AREA_SCREEN_CACHE.computeIfAbsent(mapImagePathIn, AreaScreen::new);
+		AreaScreen screen = AREA_SCREEN_CACHE.computeIfAbsent(
+			mapImagePathIn,
+			(imagePath) -> new AreaScreen(imagePath)
+		);
 		
 		// Populate the area's tile map (if it has not already been populated)
 		screen.populateTileMap(mapImagePathIn);
@@ -84,7 +90,6 @@ public class AreaScreen implements IScreen {
 	 * @param mapImagePathIn the path to the area's background image
 	 */
 	private AreaScreen(String mapImagePathIn) {
-		
 		// Try to load the given map image file
 		try {
 			mapImage = ImageIO.read(new File(mapImagePathIn));
@@ -93,28 +98,17 @@ public class AreaScreen implements IScreen {
 			throw new RuntimeException("Error loading area background image!", e);
 		}
 		
-		scaleFactorX = (double) mapImage.getWidth()/Main.SCREEN_WIDTH;
-		scaleFactorY = (double) mapImage.getHeight()/Main.SCREEN_HEIGHT;
+		// Determine the scale factors that will need to be applied to the image
+		// to make it fit the screen
+		double scaleFactorX = (double) Main.SCREEN_WIDTH  / mapImage.getWidth();
+		double scaleFactorY = (double) Main.SCREEN_HEIGHT / mapImage.getHeight();
 		
-		// Ensure that the map image has the same width as the screen
-		if ((int) (mapImage.getWidth()/scaleFactorX) != Main.SCREEN_WIDTH) {
-			throw new IllegalArgumentException(
-				String.format(
-					"Error: Area background image and screen must have the same width: %dpx!",
-					Main.SCREEN_WIDTH
-				)
-			);
-		}
-
-		// Ensure that the map image has the same height as the screen
-		if ((int) (mapImage.getHeight()/scaleFactorY) != Main.SCREEN_HEIGHT) {
-			throw new IllegalArgumentException(
-				String.format(
-					"Error: Area background image and screen must have the same height: %dpx!",
-					Main.SCREEN_HEIGHT
-				)
-			);
-		}
+		// Create the transformation to do the scale
+		AffineTransform scaleTransform = new AffineTransform();
+		scaleTransform.scale(scaleFactorX, scaleFactorY);
+		
+		// Create the transformation operation
+		imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
 		
 		// Initially we can to fill the tile map with the empty
 		// tile so that we never retrieve null from the tile map
@@ -135,7 +129,6 @@ public class AreaScreen implements IScreen {
 		tileMapPopulated = true;
 		
 		// Defines loading and battle titles, dependent upon which level the player is currently on
-		
 		switch (Main.currentLevel) {
 			case 1:
 				tileMap[0][4] = new Tile.LoadingZone("res/firezonebackground.png", 2, 4, 8);
@@ -157,9 +150,7 @@ public class AreaScreen implements IScreen {
 				break;
 			case 6:
 				break;
-			}
-		
-		
+		}
 	}
 	
 	/**
@@ -183,13 +174,6 @@ public class AreaScreen implements IScreen {
 	 */
 	@Override
 	public void paint(Graphics2D g2d) {
-		// Create the transformation to do the scale
-		AffineTransform scaleTransform = new AffineTransform();
-		scaleTransform.scale(1/scaleFactorX, 1/scaleFactorY);
-		
-		// Create the transformation operation
-		AffineTransformOp imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
-		
 		// Draw the area's background image
 		g2d.drawImage(mapImage, imageScaleOp, 0, 0);
 		

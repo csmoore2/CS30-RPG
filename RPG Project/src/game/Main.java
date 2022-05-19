@@ -26,7 +26,13 @@ public class Main {
 	/**
 	 * This is the name of the game.
 	 */
-	public static final String GAME_NAME = "EleMages: Battle Edition";
+	public static final String GAME_NAME = "Elemental Battle of the Mages";
+
+	/**
+	 * This is the name of the game but formatted so that it will look nice
+	 * on the start screen.
+	 */
+	public static final String GAME_NAME_START_SCREEN = "<html><center>Elemental Battle of<br/>the Mages</center></html>";
 
 	/**
 	 * The width of the game's window.
@@ -36,7 +42,7 @@ public class Main {
 	/**
 	 * The height of the game's window.
 	 */
-	public static final int SCREEN_HEIGHT = 1000;
+	public static final int SCREEN_HEIGHT = 700;
 	
 	/**
 	 * This is the size of the screen.
@@ -152,11 +158,11 @@ public class Main {
 	 * @param player the character chosen by the player
 	 */
 	private static void startGame(Player player) {
-		// Reinitialize the window
-		reinitializeWindow();
-		
 		// Create the world
 		World world = new World(player);
+
+		// Reinitialize the window
+		reinitializeWindow();
 
 		// Add the world to the window and make the window the correct size
 		window.add(world);

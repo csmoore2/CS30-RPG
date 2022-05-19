@@ -205,6 +205,7 @@ public class PauseScreenOverlay extends Overlay {
 		attributeButton = new JButton("View Attributes/Level Up");
 		attributeButton.setFont(BUTTON_FONT);
 		attributeButton.setPreferredSize(BUTTON_SIZE);
+		attributeButton.setFocusable(false);
 		
 		// Make the attribute button show the attribute panel
 		attributeButton.addActionListener((a) -> showAttributePanel());
@@ -249,6 +250,7 @@ public class PauseScreenOverlay extends Overlay {
 		quitButton = new JButton(QUIT_BUTTON_TEXT);
 		quitButton.setFont(BUTTON_FONT);
 		quitButton.setPreferredSize(BUTTON_SIZE);
+		quitButton.setFocusable(false);
 		
 		// Have the quit button call Main.quitGame when it is clicked. This will
 		// show the user a dialog to confirm they want to exit.
@@ -330,8 +332,10 @@ public class PauseScreenOverlay extends Overlay {
 			attrLabel.setHorizontalAlignment(JLabel.RIGHT);
 			attrLabel.setPreferredSize(ATTRIBUTE_PANEL_ATTR_LABEL_SIZE);
 			
-			// Create a label to display the attribute's value
-			JLabel attrValue = new JLabel(String.valueOf(player.getPrimaryAttributeValue(attr)));
+			// Create a label to display the attribute's formatted value
+			JLabel attrValue = new JLabel(
+				Attribute.getDisplayString(attr, player.getPrimaryAttributeValue(attr))
+			);
 			attrValue.setFont(ATTR_VALUE_FONT);
 
 			// Align the atttribute label to be on the left side of the panel and
@@ -415,9 +419,11 @@ public class PauseScreenOverlay extends Overlay {
 			attrLabel.setFont(ATTR_LABEL_FONT);
 			attrLabel.setHorizontalAlignment(JLabel.RIGHT);
 			attrLabel.setPreferredSize(ATTRIBUTE_PANEL_ATTR_LABEL_SIZE);
-			
-			// Create a label to display the attribute's scaled value
-			JLabel attrValue = new JLabel(String.valueOf(player.getSecondaryAttributeValue(attr)));
+
+			// Create a label to display the attribute's formatted scaled value
+			JLabel attrValue = new JLabel(
+				Attribute.getDisplayString(attr, player.getSecondaryAttributeValue(attr))
+			);
 			attrValue.setFont(ATTR_VALUE_FONT);
 
 			// Align the atttribute label to be on the right side of the panel and
@@ -572,7 +578,7 @@ public class PauseScreenOverlay extends Overlay {
 		// and update its value label
 		PrimaryAttributeUIData attrUIData = primaryAttributeUIDataMap.get(attr);
 		attrUIData.value.val++;
-		attrUIData.valueLabel.setText(String.valueOf(attrUIData.value.val));
+		attrUIData.valueLabel.setText(Attribute.getDisplayString(attr, attrUIData.value.val));
 
 		// Update the primary attribute's value's label's text colour to show
 		// that it has been changed
@@ -608,7 +614,7 @@ public class PauseScreenOverlay extends Overlay {
 		// and update its value label
 		PrimaryAttributeUIData attrUIData = primaryAttributeUIDataMap.get(attr);
 		attrUIData.value.val--;
-		attrUIData.valueLabel.setText(String.valueOf(attrUIData.value.val));
+		attrUIData.valueLabel.setText(Attribute.getDisplayString(attr, attrUIData.value.val));
 
 		// If the attribute is now back at its current value for the player then disable
 		// the decrement button and return the value label's text colour to black
@@ -661,7 +667,7 @@ public class PauseScreenOverlay extends Overlay {
 				// Update the value and update the attribute's value's label's text
 				// colour to show that it was updated
 				attrUIData.value.val = newValue;
-				attrUIData.valueLabel.setText(String.valueOf(attrUIData.value.val));
+				attrUIData.valueLabel.setText(Attribute.getDisplayString(attr, attrUIData.value.val));
 
 				// If the attribute's value is not equal to its current value for the player
 				// then change its text colour, otherwise ensure its text colour is normal

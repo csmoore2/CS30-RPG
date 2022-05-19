@@ -1,9 +1,12 @@
 package game.ui.screens;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +15,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.Spring;
 import javax.swing.SpringLayout;
 
 import game.Main;
@@ -36,12 +40,12 @@ public class StartScreen extends JComponent {
 	/**
 	 * This is the font that will be used for the game's title.
 	 */
-	public static final Font TITLE_TEXT_FONT = new Font("Title Font", Font.BOLD, 80);
+	public static final Font TITLE_TEXT_FONT = new Font("Title Font", Font.BOLD, 70);
 	
 	/**
 	 * This is the font that will be used for the start button.
 	 */
-	public static final Font START_BUTTON_FONT = new Font("Start Button Font", Font.PLAIN, 30);
+	public static final Font START_BUTTON_FONT = new Font("Start Button Font", Font.PLAIN, 25);
 	
 	/**
 	 * This is the text that will be displayed on the start button.
@@ -53,6 +57,12 @@ public class StartScreen extends JComponent {
 	 * we will assume that it is the correct size and does not need to be scaled.
 	 */
 	public static final String BACKGROUND_IMAGE_PATH = "res/titleScreen.png";
+	
+	/**
+	 * This is the scale transformation operation that is applied to the background
+	 * image to make it the same size at the screen.
+	 */
+	private final AffineTransformOp imageScaleOp;
 	
 	/**
 	 * This stores the background image of this screen.
@@ -77,17 +87,33 @@ public class StartScreen extends JComponent {
 			throw new RuntimeException("Unable to load start screen background image!", e);
 		}
 		
+		// Determine the scale factors that will need to be applied to the image
+		// to make it fit the screen
+		double scaleFactorX = (double) Main.SCREEN_WIDTH  / backgroundImage.getWidth();
+		double scaleFactorY = (double) Main.SCREEN_HEIGHT / backgroundImage.getHeight();
+		
+		// Create the transformation to do the scale
+		AffineTransform scaleTransform = new AffineTransform();
+		scaleTransform.scale(scaleFactorX, scaleFactorY);
+		
+		// Create the transformation operation
+		imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
+		
 		// Use a SpringLayout to layout this screen
 		SpringLayout layout = new SpringLayout();
 		setLayout(layout);
 		
-		// Create a JLabel to display the game's title
-		JLabel titleText = new JLabel(Main.GAME_NAME);
+		// Create a JLabel to display the game's title.
+		JLabel titleText = new JLabel(Main.GAME_NAME_START_SCREEN);
 		titleText.setFont(TITLE_TEXT_FONT);
+		titleText.setForeground(Color.WHITE);
+		titleText.setHorizontalAlignment(JLabel.CENTER);
 		
-		// Align the title text to be centred horizontally and above the vertical centre of the screen
+		// Set the label's width to be fixed so that its height is what changes
+		layout.getConstraints(titleText).setWidth(Spring.constant(Main.SCREEN_WIDTH));
+		
+		// Align the title text to be above the vertical centre of the screen
 		layout.putConstraint(VERTICAL_CENTER, titleText, -VERTICAL_CENTRE_MARGIN_SPACING, VERTICAL_CENTER, this);
-		layout.putConstraint(HORIZONTAL_CENTER, titleText, 0, HORIZONTAL_CENTER, this);
 		
 		// Create a button that will start the game when clicked. This will
 		// be accomplished by calling the callback provided to the constructor.
@@ -115,7 +141,7 @@ public class StartScreen extends JComponent {
 		
 		// Draw the background image as long as 'g' is an instance of Graphics2D
 		if (g instanceof Graphics2D) {
-			((Graphics2D) g).drawImage(backgroundImage, null, 0, 0);
+			((Graphics2D) g).drawImage(backgroundImage, imageScaleOp, 0, 0);
 		}
 	}
 	

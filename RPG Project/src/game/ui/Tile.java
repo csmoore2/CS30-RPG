@@ -17,7 +17,7 @@ public class Tile {
 	/**
 	 * This is the width and height of a single tile in pixels.
 	 */
-	public static final int TILE_SIZE = Main.SCREEN_WIDTH/9;
+	public static final int TILE_SIZE = Main.SCREEN_WIDTH / AreaScreen.TILES_PER_ROW;
 	
 	
 	/**

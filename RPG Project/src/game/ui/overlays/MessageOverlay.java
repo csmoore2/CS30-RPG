@@ -28,7 +28,7 @@ public class MessageOverlay extends Overlay {
 	 * This is the width that the JLabel displaying the message to the
 	 * player will have.
 	 */
-	private static final Spring MESSAGE_LABEL_WIDTH = Spring.constant(800, 800, 800);
+	private static final Spring MESSAGE_LABEL_WIDTH = Spring.constant(800);
 	
 	/**
 	 * This is the border that will be displayed around the message JLabel that

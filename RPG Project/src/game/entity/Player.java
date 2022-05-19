@@ -37,8 +37,8 @@ public class Player implements ILivingEntity {
 		// A try-catch statement is used in case there is a problem loading one of the images
 		try {
 			PREMADE_PLAYERS[0] = new Player("Mage 1", ImageIO.read(new File("res/char1.png")), 2, 1, 1, 0);
-			PREMADE_PLAYERS[1] = new Player("Mage 2", ImageIO.read(new File("res/char2.png")), 2, 1, 1, 0);
-			PREMADE_PLAYERS[2] = new Player("Mage 3", ImageIO.read(new File("res/char3.png")), 2, 1, 1, 0);
+			PREMADE_PLAYERS[1] = new Player("Mage 2", ImageIO.read(new File("res/char2.png")), 1, 1, 2, 0);
+			PREMADE_PLAYERS[2] = new Player("Mage 3", ImageIO.read(new File("res/char3.png")), 1, 2, 1, 0);
 		} catch (IOException e) {
 			// If there was an error loading one of the images then we need to quit the game
 			throw new RuntimeException("Unable to load image for character!", e);
