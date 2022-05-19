@@ -8,8 +8,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+
 import javax.imageio.ImageIO;
 
+import game.Main;
+import game.Walls;
 import game.World;
 import game.ui.Tile;
 import game.ui.screens.AreaScreen;
@@ -33,9 +36,9 @@ public class Player implements ILivingEntity {
 	static {
 		// A try-catch statement is used in case there is a problem loading one of the images
 		try {
-			PREMADE_PLAYERS[0] = new Player("Ice Mage", ImageIO.read(new File("res/test.jpg")), 2, 1, 1, 0);
-			PREMADE_PLAYERS[1] = new Player("Fire Mage", ImageIO.read(new File("res/test2.jpg")), 2, 1, 1, 0);
-			PREMADE_PLAYERS[2] = new Player("Nature Mage", ImageIO.read(new File("res/test.jpg")), 2, 1, 1, 0);
+			PREMADE_PLAYERS[0] = new Player("Mage 1", ImageIO.read(new File("res/char1.png")), 2, 1, 1, 0);
+			PREMADE_PLAYERS[1] = new Player("Mage 2", ImageIO.read(new File("res/char2.png")), 2, 1, 1, 0);
+			PREMADE_PLAYERS[2] = new Player("Mage 3", ImageIO.read(new File("res/char3.png")), 2, 1, 1, 0);
 		} catch (IOException e) {
 			// If there was an error loading one of the images then we need to quit the game
 			throw new RuntimeException("Unable to load image for character!", e);
@@ -612,12 +615,18 @@ public class Player implements ILivingEntity {
 	 */
 	public void updatePosition(int newX, int newY, boolean loading) {
 		// Update our position
-		xPos = newX;
-		yPos = newY;
-		
-		// Inform the world of our change in position
-		if (loading)
-		{world.onPlayerPositionChange(newX, newY);}
+	
+		if (Walls.arrays[Main.currentLevel-1][newX][newY] != 1)
+			{
+			//newX, newY
+			xPos = newX;
+			yPos = newY;
+			System.out.println("Current level = "+Main.currentLevel);
+			if (loading)
+			{
+				// Inform the world of our change in position
+				world.onPlayerPositionChange(newX, newY);}
+			};
 	}
 
 	/**

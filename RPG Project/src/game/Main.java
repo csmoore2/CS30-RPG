@@ -190,6 +190,10 @@ public class Main {
 		gameLoopThread.setDaemon(true);
 		gameLoopThread.start();
 	}
+	
+	public static void setCurrLevel(int levelTo) {
+		currentLevel = levelTo;
+		}
 
 	/**
 	 * This method shows the introduction to the player as a series of messages

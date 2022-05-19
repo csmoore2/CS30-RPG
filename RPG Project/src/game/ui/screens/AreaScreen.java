@@ -135,33 +135,29 @@ public class AreaScreen implements IScreen {
 		tileMapPopulated = true;
 		
 		// Defines loading and battle titles, dependent upon which level the player is currently on
-		if (Main.currentLevel == 1)
-		{
-			tileMap[0][4] = new Tile.LoadingZone("res/firezonebackground.png", 2, 4, 8);
-			tileMap[4][0] = new Tile.LoadingZone("res/rockzonebackground.png", 5, 8, 4);
-			tileMap[8][4] = new Tile.LoadingZone("res/icezonebackground.png", 4, 4, 0);
-			tileMap[4][8] = new Tile.LoadingZone("res/gemzonebackground.png", 3, 0, 4);
-		}
-		else if (Main.currentLevel == 2) // Fire zone
-		{
-			tileMap[8][4] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 4, 0);
-		}
-		else if (Main.currentLevel == 3) // Gem zone
-		{
-			tileMap[4][0] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 8, 4);
-		}
-		else if (Main.currentLevel == 4) // Ice zone
-		{
-			tileMap[0][4] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 4, 8);
-		}
-		else if (Main.currentLevel == 5) // Stone zone
-		{
-			tileMap[4][8] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 0, 4);
-		}
-		else if (Main.currentLevel == 6) // Boss zone
-		{
-			
-		}
+		
+		switch (Main.currentLevel) {
+			case 1:
+				tileMap[0][4] = new Tile.LoadingZone("res/firezonebackground.png", 2, 4, 8);
+				tileMap[4][0] = new Tile.LoadingZone("res/rockzonebackground.png", 5, 8, 4);
+				tileMap[8][4] = new Tile.LoadingZone("res/icezonebackground.png", 4, 4, 0);
+				tileMap[4][8] = new Tile.LoadingZone("res/gemzonebackground.png", 3, 0, 4);
+				break;
+			case 2:
+				tileMap[8][4] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 4, 0);
+				break;
+			case 3:
+				tileMap[4][0] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 8, 4);
+				break;
+			case 4:
+				tileMap[0][4] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 4, 8);
+				break;
+			case 5:
+				tileMap[4][8] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 0, 4);
+				break;
+			case 6:
+				break;
+			}
 		
 		
 	}
