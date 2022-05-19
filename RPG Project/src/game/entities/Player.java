@@ -18,6 +18,7 @@ import javax.imageio.ImageIO;
 import game.Attribute;
 import game.Main;
 import game.Tile;
+import game.Walls;
 import game.World;
 import game.ui.AreaScreen;
 
@@ -525,19 +526,17 @@ public class Player implements ILivingEntity, KeyListener {
 	public void updatePosition(int newX, int newY, boolean loading) {
 		// Update our position
 	
-		List<List<Integer>> walls1 = new ArrayList();
-		walls1.add(Arrays.asList(1,2));
-		
-		
-		//Main.currentLevel;
-		
-		//newX, newY
-		xPos = newX;
-		yPos = newY;
-		
-		// Inform the world of our change in position
-		if (loading)
-		{world.onPlayerPositionChange(newX, newY);}
+		if (Walls.arrays[Main.currentLevel-1][newX][newY] != 1)
+			{
+			//newX, newY
+			xPos = newX;
+			yPos = newY;
+			System.out.println("Current level = "+Main.currentLevel);
+			if (loading)
+			{
+				// Inform the world of our change in position
+				world.onPlayerPositionChange(newX, newY);}
+			};
 	}
 
 	/**

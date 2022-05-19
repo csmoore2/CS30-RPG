@@ -16,6 +16,7 @@ public class Tile {
 	 */
 	public static final int TILE_SIZE = Main.SCREEN_WIDTH/9;
 	
+	
 	/**
 	 * This is an empty tile; it is not painted nor does it trigger anything.
 	 */
@@ -70,6 +71,12 @@ public class Tile {
 		private final int playerNewY;
 		
 		/**
+		 * The new current level that the loading zone tile should switch to.
+		 */
+		public int tileLevelTo;
+		
+		
+		/**
 		 * This creates a new loading zone tile using the given parameters.
 		 * 
 		 * @param mapImagePathIn this is the path to the background image
@@ -80,7 +87,8 @@ public class Tile {
 		 *                       the area change
 		 */
 		public LoadingZone(String mapImagePathIn, int levelTo, int playerNewXIn, int playerNewYIn) {
-			Main.currentLevel = levelTo;
+			tileLevelTo = levelTo;
+			Main.setCurrLevel(tileLevelTo);
 			newScreen = AreaScreen.createNewAreaScreen(mapImagePathIn);
 			playerNewX = playerNewXIn;
 			playerNewY = playerNewYIn;
@@ -98,6 +106,7 @@ public class Tile {
 		 */
 		@Override
 		public void performAction(Player player, World world) {
+			Main.setCurrLevel(tileLevelTo);
 			world.changeArea(newScreen, playerNewX, playerNewY);
 		}
 	}
@@ -127,7 +136,7 @@ public class Tile {
 
 		/**
 		 * This method is called when the player steps on this tile. In this
-		 * case, that triggers a battle between the player and th enemy stored
+		 * case, that triggers a battle between the player and the enemy stored
 		 * by 'enemy'.
 		 * 
 		 * @param player the player

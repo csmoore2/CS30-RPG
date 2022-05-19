@@ -70,16 +70,6 @@ public class Main {
 	 * @param args command-line arguments
 	 */
 	public static void main(String[] args) {
-		try {
-			(new Walls()).printThis();
-		} catch (FileNotFoundException e) {
-			// Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 		// Create the window and configure it
 		window = new JFrame();
 		window.setTitle(GAME_NAME);
@@ -170,5 +160,9 @@ public class Main {
 		window.setTitle(GAME_NAME);
 		window.setResizable(false);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
+		}
+	
+	public static void setCurrLevel(int levelTo) {
+		currentLevel = levelTo;
+		}
 }

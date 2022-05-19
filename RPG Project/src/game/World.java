@@ -127,7 +127,7 @@ public class World extends JComponent {
 	public void update() {
 		// If the current screen is a BattleScreen then we need to
 		// update its state
-		if (screenStack.peek() instanceof BattleScreen) {
+		if (!screenStack.empty() && screenStack.peek() instanceof BattleScreen) {
 			((BattleScreen) screenStack.peek()).update();
 		}
 	}
