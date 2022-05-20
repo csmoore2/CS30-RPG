@@ -37,7 +37,7 @@ public class Main {
 	/**
 	 * The width of the game's window.
 	 */
-	public static final int SCREEN_WIDTH = 1000;
+	public static final int SCREEN_WIDTH = 1050;
 	
 	/**
 	 * The height of the game's window.
@@ -76,23 +76,6 @@ public class Main {
 	 * This is the game's window.
 	 */
 	public static JFrame window = null;
-	
-	/**
-	 * This is the games current zone/screen.
-	 * 0 = Start screen
-	 * 1 = Green zone
-	 * 2 = Fire zone
-	 * 3 = Gem zone
-	 * 4 = Ice zone
-	 * 5 = Rock zone
-	 * 6 = Final boss zone
-	 */
-	public static int currentLevel = 0;
-	
-	/**
-	 * Array which converts values of currentLevel into Strings for display.
-	 */
-	public static final String[] levels = {"Start screen", "Green Zone / Hub", "Fire Zone", "Gem Zone", "Ice Zone", "Rock Zone"};
 	
 	
 	/**
@@ -196,10 +179,6 @@ public class Main {
 		gameLoopThread.setDaemon(true);
 		gameLoopThread.start();
 	}
-	
-	public static void setCurrLevel(int levelTo) {
-		currentLevel = levelTo;
-		}
 
 	/**
 	 * This method shows the introduction to the player as a series of messages

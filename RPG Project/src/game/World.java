@@ -77,6 +77,11 @@ public class World extends JComponent {
 	 * This is the player.
 	 */
 	private final Player player;
+
+	/**
+	 * This is the zone that the player is currently in.
+	 */
+	private Zone currentZone = Zone.GREEN_HUB;
 	
 	/**
 	 * This keeps track of whether or not the player is currently
@@ -102,8 +107,8 @@ public class World extends JComponent {
 	 * @param playerIn the player
 	 */
 	public World(Player playerIn) {
-		// Set the current level to 1 since the player starts in the green zone
-		Main.currentLevel = 1;
+		// Initialize the map of walls for every zone
+		Walls.initializeWalls();
 
 		// Set our layout to be a SpringLayout so that if anything needs to add JComponents to
 		// us they will easily be able to lay them out
@@ -114,8 +119,8 @@ public class World extends JComponent {
 		player = playerIn;
 		player.setWorld(this);
 		
-		// Push the starting screen onto the screen stack
-		screenStack.push(AreaScreen.createNewAreaScreen("res/greenzonebackground.png"));
+		// Show the starting screen (the green zone / hub zone)
+		showScreen(AreaScreen.createNewAreaScreen(this, Zone.GREEN_HUB));
 		
 		// Register the 'pauseKeyListener' method as a key pressed listener
 		registerKeyListener((KeyPressedListener)this::pauseKeyListener);
@@ -223,9 +228,11 @@ public class World extends JComponent {
 	 * the current screen's java swing components are removed and
 	 * the new screen's java swing components are added.
 	 */
-	public void showScreen(IScreen newScreen) {
-		// Remove the current screen's java swing components
-		screenStack.peek().removeSwingComponents(this);
+	public synchronized void showScreen(IScreen newScreen) {
+		// Remove the current screen's java swing components if there is a current screen
+		if (!screenStack.empty()) {
+			screenStack.peek().removeSwingComponents(this);
+		}
 
 		// Add the new screen to the screen stack and add its java
 		// swing components to the screen
@@ -244,7 +251,7 @@ public class World extends JComponent {
 	 * @param newX    the player's new x-position
 	 * @param newY    the player's new y-position
 	 */
-	public void changeArea(AreaScreen newArea, int newX, int newY) {
+	public synchronized void changeArea(AreaScreen newArea, int newX, int newY) {
 		// Ensure the player's new x-position will be within the screen's bounds
 		if (newX < 0 || newX > AreaScreen.TILES_PER_ROW) {
 			throw new IllegalArgumentException(
@@ -264,13 +271,22 @@ public class World extends JComponent {
 		// Update the player's position, ensuring that the player does not activate the effect
 		// of the tile they are moving to
 		player.updatePosition(newX, newY, false);
+
+		// Update which zone the player is currently in
+		currentZone = newArea.getZone();
+
+		// Let the area screen know that the player's zone has changed
+		newArea.onPlayerZoneChanged();
+
+		// Update the ui's state so that everything is drawn correctly
+		updateUIState();
 	}
 
 	/**
 	 * This method closes the current screen and returns to the
 	 * previous screen in the screen stack.
 	 */
-	public void closeCurrentScreen() {
+	public synchronized void closeCurrentScreen() {
 		// Remove the current screen's java swing components
 		screenStack.peek().removeSwingComponents(this);
 
@@ -355,12 +371,21 @@ public class World extends JComponent {
 			showOverlayAndPause(new MessageOverlay(this, player, currentMessage));
 		}
 		
-		// If a screen is being displayed and it is a BattleScreen then we need to
-		// update its state
-		if (!screenStack.empty()) {
-			if (screenStack.peek() instanceof BattleScreen) {
-				((BattleScreen) screenStack.peek()).update();
-			}
+		// If a battle is happening then we need to update the battle screen
+		if (inBattle) {
+			updateBattleScreen();
+		}
+	}
+
+	/**
+	 * This method is called to update the battle screen when a battle is
+	 * happening. This method is separate from the update method so that it
+	 * can be synchronized.
+	 */
+	private synchronized void updateBattleScreen() {
+		// Update the battle screen if one is being displayed
+		if (!screenStack.empty() && screenStack.peek() instanceof BattleScreen) {
+			((BattleScreen) screenStack.peek()).update();
 		}
 	}
 
@@ -517,6 +542,24 @@ public class World extends JComponent {
 	 */
 	public SpringLayout getSpringLayout() {
 		return springLayout;
+	}
+
+	/**
+	 * This method returns the player.
+	 * 
+	 * @return the player
+	 */
+	public Player getPlayer() {
+		return player;
+	}
+
+	/**
+	 * This method returns the zone that the player is currently in.
+	 * 
+	 * @return the zone that the player is currently in
+	 */
+	public Zone getCurrentZone() {
+		return currentZone;
 	}
 	
 	/**

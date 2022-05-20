@@ -3,8 +3,8 @@ package game.ui;
 import java.awt.Graphics2D;
 import java.util.function.Function;
 
-import game.Main;
 import game.World;
+import game.Zone;
 import game.entity.IEnemy;
 import game.entity.Player;
 import game.ui.screens.AreaScreen;
@@ -17,7 +17,7 @@ public class Tile {
 	/**
 	 * This is the width and height of a single tile in pixels.
 	 */
-	public static final int TILE_SIZE = Main.SCREEN_WIDTH / AreaScreen.TILES_PER_ROW;
+	public static final int TILE_SIZE = AreaScreen.AREA_SCREEN_SIZE / AreaScreen.TILES_PER_ROW;
 	
 	
 	/**
@@ -74,25 +74,17 @@ public class Tile {
 		private final int playerNewY;
 		
 		/**
-		 * The new current level that the loading zone tile should switch to.
-		 */
-		public int tileLevelTo;
-		
-		
-		/**
 		 * This creates a new loading zone tile using the given parameters.
 		 * 
-		 * @param mapImagePathIn this is the path to the background image
-		 *                       of area the loading zone will load
+		 * @param worldIn        this is the world
+		 * @param newZoneIn      the is the zone that the player will be moved to
 		 * @param playerNewXIn   this is the player's new x-position after
 		 *                       the area change
 		 * @param playerNewYIn   this is the player's new y-position after
 		 *                       the area change
 		 */
-		public LoadingZone(String mapImagePathIn, int levelTo, int playerNewXIn, int playerNewYIn) {
-			tileLevelTo = levelTo;
-			Main.setCurrLevel(tileLevelTo);
-			newScreen = AreaScreen.createNewAreaScreen(mapImagePathIn);
+		public LoadingZone(World worldIn, Zone newZoneIn, int playerNewXIn, int playerNewYIn) {
+			newScreen = AreaScreen.createNewAreaScreen(worldIn, newZoneIn);
 			playerNewX = playerNewXIn;
 			playerNewY = playerNewYIn;
 		}
@@ -109,7 +101,6 @@ public class Tile {
 		 */
 		@Override
 		public void performAction(Player player, World world) {
-			Main.setCurrLevel(tileLevelTo);
 			world.changeArea(newScreen, playerNewX, playerNewY);
 		}
 	}

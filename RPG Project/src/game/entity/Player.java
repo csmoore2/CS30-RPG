@@ -11,7 +11,6 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import game.Main;
 import game.Walls;
 import game.World;
 import game.ui.Tile;
@@ -608,25 +607,27 @@ public class Player implements ILivingEntity {
 	/*************************************************************************************/
 	
 	/**
-	 * This method updates the player's position to the given coordinates.
+	 * This method updates the player's position to the given coordinates assuming
+	 * there is not a wall at the player's new position.
 	 * 
-	 * @param newX the player's new x-position
-	 * @param newY the player's new y-position
+	 * @param newX    the player's new x-position
+	 * @param newY    the player's new y-position
+	 * @param loading whether or not the player is changing zones
 	 */
 	public void updatePosition(int newX, int newY, boolean loading) {
+		// If there is a wall at the position we are movig to then do not continue
+		if (Walls.getWallAtPosition(world.getCurrentZone(), newY, newX)) return;
+
 		// Update our position
-	
-		if (Walls.arrays[Main.currentLevel-1][newX][newY] != 1)
-			{
-			//newX, newY
-			xPos = newX;
-			yPos = newY;
-			System.out.println("Current level = "+Main.currentLevel);
-			if (loading)
-			{
-				// Inform the world of our change in position
-				world.onPlayerPositionChange(newX, newY);}
-			};
+		xPos = newX;
+		yPos = newY;
+
+		// If the player is not changing areas then inform the world we have moved
+		// so that it cn preform any necessary actions
+		if (loading) {
+			// Inform the world of our change in position
+			world.onPlayerPositionChange(newX, newY);
+		}
 	}
 
 	/**
@@ -721,6 +722,26 @@ public class Player implements ILivingEntity {
 	 */
 	public int getY() {
 		return yPos;
+	}
+
+	/**
+	 * This method returns the player's current level.
+	 * 
+	 * @return the player's current level
+	 */
+	public int getLevel() {
+		return experience / EXPERIENCE_PER_LEVEL;
+	}
+
+	/**
+	 * This method returns the amount of experience the player
+	 * needs to gain to reach the next level.
+	 * 
+	 * @return the amount of experience the player needs to gain
+	 *         to reach the next level.
+	 */
+	public int getExperienceToNextLevel() {
+		return experience > 0 ? experience % EXPERIENCE_PER_LEVEL : EXPERIENCE_PER_LEVEL;
 	}
 
 	/**
