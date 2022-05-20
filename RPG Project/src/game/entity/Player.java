@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 
 import game.Walls;
 import game.World;
+import game.Zone;
 import game.ui.Tile;
 import game.ui.screens.AreaScreen;
 import game.util.KeyPressedListener;
@@ -473,7 +474,8 @@ public class Player implements ILivingEntity {
 			// Show a message
 			world.showMessage(
 				String.format(
-					"Player took %d damage from a poison effect.",
+					"%s took %d damage from a poison effect.",
+					name,
 					poisonDamagePerTurn
 				),
 				4
@@ -490,7 +492,8 @@ public class Player implements ILivingEntity {
 			// Show a message
 			world.showMessage(
 				String.format(
-					"Player gained %d health from a healing effect.",
+					"%s gained %d health from a healing effect.",
+					name,
 					healingPerTurn
 				),
 				4
@@ -510,7 +513,8 @@ public class Player implements ILivingEntity {
 		// Show a message about the player regenerating their mana
 		world.showMessage(
 			String.format(
-				"Player regenerated %d mana at the start of their turn.",
+				"%s regenerated %d mana at the start of their turn.",
+                name,
 				(int)getSecondaryAttributeValue(Attribute.MANA_REGEN)
 			),
 			4
@@ -685,7 +689,7 @@ public class Player implements ILivingEntity {
 	 * @param loading whether or not the player is changing zones
 	 */
 	public void updatePosition(int newX, int newY, boolean loading) {
-		// If there is a wall at the position we are movig to then do not continue
+		// If there is a wall at the position we are moving to then do not continue
 		if (Walls.getWallAtPosition(world.getCurrentZone(), newY, newX)) return;
 
 		// Update our position
@@ -693,7 +697,7 @@ public class Player implements ILivingEntity {
 		yPos = newY;
 
 		// If the player is not changing areas then inform the world we have moved
-		// so that it cn preform any necessary actions
+		// so that it can perform any necessary actions
 		if (loading) {
 			// Inform the world of our change in position
 			world.onPlayerPositionChange(newX, newY);
@@ -860,6 +864,17 @@ public class Player implements ILivingEntity {
 	 */
 	public void collectKey() {
 		numKeys++;
+	}
+	
+	/**
+	 * This method returns whether or not the player has collected the key
+	 * from each zone aside from the hub.
+	 * 
+	 * @return whether or not the player has collected the key from each zone
+	 *         aside from the hub
+	 */
+	public boolean hasAllKeys() {
+		return numKeys == (Zone.values().length - 1);
 	}
 
 	/**

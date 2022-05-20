@@ -15,8 +15,13 @@ import javax.swing.JComponent;
 import javax.swing.SpringLayout;
 import javax.swing.SwingUtilities;
 
-import game.entity.IEnemy;
 import game.entity.Player;
+import game.entity.enemy.BossEnemy;
+import game.entity.enemy.FinalBossEnemy;
+import game.entity.enemy.IEnemy;
+import game.entity.enemy.MainEnemy;
+import game.entity.enemy.RandomEncounterEnemy;
+import game.ref.Images;
 import game.ui.Tile;
 import game.ui.overlays.MessageOverlay;
 import game.ui.overlays.Overlay;
@@ -40,7 +45,7 @@ public class World extends JComponent {
 	 * that is currently visible to the user. Pushing a new screen on represents
 	 * forward navigation and popping of the top screen represents backwards navigation.
 	 */
-	public final Stack<IScreen> screenStack = new Stack<>();
+	private final Stack<IScreen> screenStack = new Stack<>();
 	
 	/**
 	 * This record represents a message that is displayed on the screen to
@@ -117,6 +122,9 @@ public class World extends JComponent {
 	public World(Player playerIn) {
 		// Initialize the map of walls for every zone
 		Walls.initializeWalls();
+		
+		// Initialize the static images used by the game
+		Images.initializeImages();
 
 		// There are three enemies each in the fire, gem, ice, and rock zones
 		enemiesRemaining.put(Zone.FIRE, 3);
@@ -295,6 +303,21 @@ public class World extends JComponent {
 		// Update the ui's state so that everything is drawn correctly
 		updateUIState();
 	}
+	
+	/**
+	 * This method removes the tile at the given location by setting the tile
+	 * at the given location to an empty tile assuming that the current screen
+	 * is an area screen.
+	 * 
+	 * @param col the column of the tile to remove
+	 * @param row the row of the tile to remove
+	 */
+	public synchronized void removeTileAtLocation(int row, int col) {
+		// Remove the tile if the current screen is an area screen
+		if (!screenStack.empty() && screenStack.peek() instanceof AreaScreen) {
+			((AreaScreen) screenStack.peek()).setTileAtPos(row, col, Tile.EMPTY_TILE);
+		}
+	}
 
 	/**
 	 * This method closes the current screen and returns to the
@@ -392,6 +415,50 @@ public class World extends JComponent {
 				((BattleScreen) screenStack.peek()).update();
 			}
 		}
+		
+		// If the player has all the keys then we should begin the final boss fight
+		if (player.hasAllKeys()) {
+			initiateFinalBossBattle();
+			
+			// TODO
+			////////////////////////////////////
+			// ADD EXPERIENCE TO PLAYER PANEL //
+			////////////////////////////////////
+		}
+	}
+
+	/*************************************************************************************/
+	/*                                   STORY METHODS                                   */
+	/*************************************************************************************/
+	
+	/**
+	 * This method initiates the battle between the player and the final boss. This
+	 * involves showing some story dialog and then initiating the actual battle.
+	 */
+	private void initiateFinalBossBattle() {
+		// Show some story dialog
+		showMessage("As you pick up the final key you hear a distant rumble and a voice thunders "    +
+		            "down from the sky: <i>I AM <b>MARDUK</b>! You think you can defeat me you puny " +
+					"mage?</i>",
+					15);
+		showMessage("<i>Face me then and meet your doom...</i>", 5);
+		showMessage("A shadowy figure appears in the sky and slowly descends towards you. As it "  +
+					"approaches you begin to sense the dark magicaly power that seems to emanate " +
+					"from it.",
+					15);
+		showMessage("When <b>Marduk</b> reaches you he attacks and you begin battling for your life...", 10);
+		
+		// Initiate the battle
+		initiateBattle(new FinalBossEnemy(this, player.getExperience()));
+	}
+
+	/**
+	 * This method concludes the game after the player has defeated the final boss. This
+	 * involves showing some story dialog and then showing the win screen.
+	 */
+	private void concludeGame() {
+		// Show some story dialog
+		showMessage("As you deal the killing blow to <b>Marduk</b>", 5);
 	}
 
 	/*************************************************************************************/
@@ -429,6 +496,15 @@ public class World extends JComponent {
 	 * @param enemy the enemy the player is fighting
 	 */
 	public void initiateBattle(IEnemy enemy) {
+		// Show a different message based on whether or not this is a random
+		// encounter. However, do not show any message if the enemy is the
+		// final boss since that battle is triggered by story dialog
+		if (enemy instanceof RandomEncounterEnemy) {
+			showMessage("A mage leaps out and challenges you to a battle!", 5);
+		} else if (!(enemy instanceof FinalBossEnemy)) {
+			showMessage("You challenge the enemy to a battle!", 5);
+		}
+		
 		// Tell the player they are now in a battle
 		player.onBattleStart();
 
@@ -462,10 +538,17 @@ public class World extends JComponent {
 		if (playerDead) {
 			showScreen(new PlayerDeathScreen(this, enemy));
 		} else {
+			// If the player just defeated the final boss then conclude the story and
+			// finish the game. Otherwise conclude the battle normally.
+			if (enemy instanceof FinalBossEnemy) {
+				concludeGame();
+				return;
+			}
+			
 			// Show a message
 			showMessage(
 				String.format(
-					"You defeated the enemy and gained %d experience!!!",
+					"You defeated the enemy and gained %d experience!",
 					experienceGain
 				),
 				4
@@ -478,33 +561,51 @@ public class World extends JComponent {
 			AreaScreen currentScreen = (AreaScreen) screenStack.peek();
 			currentScreen.tileMap[player.getY()][player.getX()] = null;
 			
-			// Decrement the number of enemies remaining in this zone
-			enemiesRemaining.put(currentZone, enemiesRemaining.get(currentZone) - 1);
-
-			// If there are no more enemies in this zone then open up the boss
-			if (enemiesRemaining.get(currentZone) <= 0) {
-				switch (currentZone) {
-					case FIRE:
-						currentScreen.tileMap[2][4] = null;
-						Walls.setWallAtPosition(currentZone, 4, 1, false);
-						break;
-					case GEM:
-						currentScreen.tileMap[4][6] = null;
-						Walls.setWallAtPosition(currentZone, 7, 4, false);
-						break;
-					case ICE:
-						currentScreen.tileMap[6][4] = null;
-						Walls.setWallAtPosition(currentZone, 4, 7, false);
-						break;
-					case ROCK:
-						currentScreen.tileMap[4][2] = null;
-						Walls.setWallAtPosition(currentZone, 1, 4, false);
-						break;
-					default:
-						break;
-				}
+			// If the enemy was a boss then show a message
+			if (enemy instanceof BossEnemy) {
+				showMessage("As <b>Marduk's</b> lieutenant collapses and turns to ashes you hear a "   +
+			                "distant rumble of thunder as though <b>Marduk</b> himself is expressing " +
+						    "displeasure at your victory.",
+						    10);
 			}
 			
+			// If the enemy was a main enemy then decrement the number of main enemies
+			// remaining in this zone
+			if (enemy instanceof MainEnemy) {
+				// Decrement the number of enemies remaining in this zone
+				enemiesRemaining.put(currentZone, enemiesRemaining.get(currentZone) - 1);
+	
+				// If there are no more enemies in this zone then open up the boss and show a message
+				if (enemiesRemaining.get(currentZone) <= 0) {
+					// Show a message
+					showMessage("As you defeat the final of <b>Marduk's</b> followers in the area " +
+					            "you hear a sound like shattering glass and a barrier breaks, "    +
+								"revealing one of <b>Marduk's</b> lieutenants.",
+								10);
+					
+					// Open up the boss
+					switch (currentZone) {
+						case FIRE:
+							currentScreen.tileMap[2][4] = Tile.EMPTY_TILE;
+							Walls.setWallAtPosition(currentZone, 4, 1, false);
+							break;
+						case GEM:
+							currentScreen.tileMap[4][6] = Tile.EMPTY_TILE;
+							Walls.setWallAtPosition(currentZone, 7, 4, false);
+							break;
+						case ICE:
+							currentScreen.tileMap[6][4] = Tile.EMPTY_TILE;
+							Walls.setWallAtPosition(currentZone, 4, 7, false);
+							break;
+						case ROCK:
+							currentScreen.tileMap[4][2] = Tile.EMPTY_TILE;
+							Walls.setWallAtPosition(currentZone, 1, 4, false);
+							break;
+						default:
+							break;
+					}
+				}
+			}
 		}
 	}
 
@@ -558,7 +659,7 @@ public class World extends JComponent {
 			AreaScreen currentArea = (AreaScreen)screenStack.peek();
 			
 			// Get the tile at the player's new position
-			Tile newTile = currentArea.getTileAtPos(newX, newY);
+			Tile newTile = currentArea.getTileAtPos(newY, newX);
 			
 			// Perform the interaction with the tile at the player's new position
 			newTile.performAction(player, this);

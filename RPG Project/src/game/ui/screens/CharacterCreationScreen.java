@@ -11,6 +11,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
@@ -311,8 +312,20 @@ public class CharacterCreationScreen extends JComponent {
 		// Make the start button set the player's name, change the start button to say loading, and then
 		// call the function given by 'startGameListenerIn' when it is clicked
 		startButton.addActionListener((action) -> {
+			// Ensure that the player has a name
+			if (nameTextField.getText().strip().isEmpty()) {
+				JOptionPane.showMessageDialog(this, "You must have a name!");
+				return;
+			}
+			
+			// Ensure that the player's name is not longer than 25 characters
+			if (nameTextField.getText().strip().length() > 25) {
+				JOptionPane.showMessageDialog(this, "Your name must not exceed 25 characters in length!");
+				return;
+			}
+			
 			// Set the player's name
-			selectedPlayer.setName(nameTextField.getText());
+			selectedPlayer.setName(nameTextField.getText().strip());
 
 			// Change the start button to say loading and disable it
 			startButton.setText("Loading...");

@@ -2,6 +2,7 @@ package game.entity;
 
 import game.Main;
 import game.World;
+import game.entity.enemy.IEnemy;
 
 /**
  * This class represents an action that can be preformed by an enemy. Currently
@@ -64,7 +65,8 @@ public non-sealed class EnemyAction extends Action {
                 if (critical) {
                     world.showMessage(
                         String.format(
-                            "Enemy dealt a critical hit on player for %d damage!",
+                            "Enemy dealt a critical hit to %s for %d damage!",
+                            player.getName(),
                             (int)(effect * damageMultiplier)
                         ),
                         4
@@ -72,7 +74,8 @@ public non-sealed class EnemyAction extends Action {
                 } else {
                     world.showMessage(
                         String.format(
-                            "Enemy hit player for %d damage!",
+                            "Enemy hit %s for %d damage!",
+                            player.getName(),
                             (int)effect
                         ),
                         3
@@ -88,7 +91,8 @@ public non-sealed class EnemyAction extends Action {
                 // Show a message
                 world.showMessage(
                     String.format(
-                        "Enemy inflicted poison on player dealing %d damage for %d turns.",
+                        "Enemy inflicted poison on %s dealing %d damage for %d turns.",
+                        player.getName(),
                         (int)effect,
                         numTurns
                     ),

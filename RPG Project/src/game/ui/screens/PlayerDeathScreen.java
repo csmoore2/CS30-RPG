@@ -11,7 +11,7 @@ import javax.swing.SpringLayout;
 
 import game.Main;
 import game.World;
-import game.entity.IEnemy;
+import game.entity.enemy.IEnemy;
 
 import static javax.swing.SpringLayout.*;
 

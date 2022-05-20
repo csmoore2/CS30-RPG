@@ -6,14 +6,10 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.File;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.Spring;
@@ -22,7 +18,9 @@ import javax.swing.SpringLayout;
 import game.Main;
 import game.World;
 import game.Zone;
-import game.entity.Enemy;
+import game.entity.enemy.BossEnemy;
+import game.entity.enemy.MainEnemy;
+import game.ref.Images;
 import game.ui.Tile;
 
 import static javax.swing.SpringLayout.*;
@@ -45,7 +43,7 @@ public class AreaScreen implements IScreen {
 	public static final int AREA_SCREEN_SIZE = Main.SCREEN_HEIGHT;
 
 	/**
-	 * This is the width of the panel that displays various pieces of impormation about
+	 * This is the width of the panel that displays various pieces of information about
 	 * the player while they are in the world.
 	 */
 	public static final int PLAYER_PANEL_WIDTH = Main.SCREEN_WIDTH - AREA_SCREEN_SIZE;
@@ -227,41 +225,6 @@ public class AreaScreen implements IScreen {
 		// Update 'tileMapPopulated'
 		tileMapPopulated = true;
 		
-		// Defines buffered images for enemies, bosses, locked image screens, and keys
-		BufferedImage enemyFireImage;
-		BufferedImage bossFireImage;
-		BufferedImage enemyGemImage;
-		BufferedImage bossGemImage;
-		BufferedImage enemyIceImage;
-		BufferedImage bossIceImage;
-		BufferedImage enemyRockImage;
-		BufferedImage bossRockImage;
-		BufferedImage lockedFireImage;
-		BufferedImage lockedGemImage;
-		BufferedImage lockedIceImage;
-		BufferedImage lockedRockImage;
-		BufferedImage keyImage;
-		
-		// Attempts to initialize the buffered images for each of the enemies and bosses
-		try {
-			enemyFireImage = ImageIO.read(new File("res/enemyfire.png"));
-			bossFireImage = ImageIO.read(new File("res/bossfire.png"));
-			enemyGemImage = ImageIO.read(new File("res/enemygem.png"));
-			bossGemImage = ImageIO.read(new File("res/bossgem.png"));
-			enemyIceImage = ImageIO.read(new File("res/enemyice.png"));
-			bossIceImage = ImageIO.read(new File("res/bossice.png"));
-			enemyRockImage = ImageIO.read(new File("res/enemyrock.png"));
-			bossRockImage = ImageIO.read(new File("res/bossrock.png"));
-			lockedFireImage = ImageIO.read(new File("res/lockedOutFire.png"));
-			lockedGemImage = ImageIO.read(new File("res/lockedOutGem.png"));
-			lockedIceImage = ImageIO.read(new File("res/lockedOutIce.png"));
-			lockedRockImage = ImageIO.read(new File("res/lockedOutRock.png"));
-			keyImage = ImageIO.read(new File("res/key.png"));
-		} catch (IOException e) {
-			// There was an error loading the image so we cannot continue
-			throw new RuntimeException("Error loading area background image!", e);
-		}
-		
 		// Defines loading and battle titles, dependent upon which level the player is currently on
 		switch (zone) {
 			case GREEN_HUB: // Green zone/hub
@@ -276,65 +239,77 @@ public class AreaScreen implements IScreen {
 				tileMap[8][4] = new Tile.LoadingZone(world, Zone.GREEN_HUB, 4, 0);
 				
 				// Battle trigger tiles
-				tileMap[7][0] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), enemyFireImage);
-				tileMap[3][0] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), enemyFireImage);
-				tileMap[5][8] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), enemyFireImage);
-				tileMap[1][4] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), bossFireImage);
+				tileMap[7][0] = new Tile.BattleTrigger((player) -> new MainEnemy(world, player.getExperience()), Images.enemyFireImage);
+				tileMap[3][0] = new Tile.BattleTrigger((player) -> new MainEnemy(world, player.getExperience()), Images.enemyFireImage);
+				tileMap[5][8] = new Tile.BattleTrigger((player) -> new MainEnemy(world, player.getExperience()), Images.enemyFireImage);
+				tileMap[1][4] = new Tile.BattleTrigger((player) -> new BossEnemy(world, player.getExperience()), Images.bossFireImage);
 				
 				// Locked boss tile
-				tileMap[2][4] = new Tile.LockedOffBoss(lockedFireImage);
+				tileMap[2][4] = new Tile.LockedOffBoss(Images.lockedFireImage);
 				
 				// Key tile
-				tileMap[0][4] = new Tile.KeyTile(keyImage);
+				tileMap[0][4] = new Tile.KeyTile(Images.keyImage);
 				break;
 			case GEM: // Gem zone
 				// Loading zone tile
 				tileMap[4][0] = new Tile.LoadingZone(world, Zone.GREEN_HUB, 8, 4);
 				
 				// Battle trigger tiles
-				tileMap[8][1] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), enemyGemImage);
-				tileMap[8][5] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), enemyGemImage);
-				tileMap[0][3] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), enemyGemImage);
-				tileMap[4][7] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), bossGemImage);
+				tileMap[8][1] = new Tile.BattleTrigger((player) -> new MainEnemy(world, player.getExperience()), Images.enemyGemImage);
+				tileMap[8][5] = new Tile.BattleTrigger((player) -> new MainEnemy(world, player.getExperience()), Images.enemyGemImage);
+				tileMap[0][3] = new Tile.BattleTrigger((player) -> new MainEnemy(world, player.getExperience()), Images.enemyGemImage);
+				tileMap[4][7] = new Tile.BattleTrigger((player) -> new BossEnemy(world, player.getExperience()), Images.bossGemImage);
 				
 				// Locked boss tile
-				tileMap[4][6] = new Tile.LockedOffBoss(lockedGemImage);
+				tileMap[4][6] = new Tile.LockedOffBoss(Images.lockedGemImage);
 				
 				// Key tile
-				tileMap[4][8] = new Tile.KeyTile(keyImage);
+				tileMap[4][8] = new Tile.KeyTile(Images.keyImage);
 				break;
 			case ICE: // Ice zone
 				// Loading zone tile
 				tileMap[0][4] = new Tile.LoadingZone(world, Zone.GREEN_HUB, 4, 8);
 				
 				// Battle trigger tiles
-				tileMap[1][8] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), enemyIceImage);
-				tileMap[5][8] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), enemyIceImage);
-				tileMap[3][0] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), enemyIceImage);
-				tileMap[7][4] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), bossIceImage);
+				tileMap[1][8] = new Tile.BattleTrigger((player) -> new MainEnemy(world, player.getExperience()), Images.enemyIceImage);
+				tileMap[5][8] = new Tile.BattleTrigger((player) -> new MainEnemy(world, player.getExperience()), Images.enemyIceImage);
+				tileMap[3][0] = new Tile.BattleTrigger((player) -> new MainEnemy(world, player.getExperience()), Images.enemyIceImage);
+				tileMap[7][4] = new Tile.BattleTrigger((player) -> new BossEnemy(world, player.getExperience()), Images.bossIceImage);
 				
 				// Locked boss tile
-				tileMap[6][4] = new Tile.LockedOffBoss(lockedIceImage);
+				tileMap[6][4] = new Tile.LockedOffBoss(Images.lockedIceImage);
 				
 				// Key tile
-				tileMap[8][4] = new Tile.KeyTile(keyImage);
+				tileMap[8][4] = new Tile.KeyTile(Images.keyImage);
 				break;
 			case ROCK: // Rock zone
 				// Loading zone tile
 				tileMap[4][8] = new Tile.LoadingZone(world, Zone.GREEN_HUB, 0, 4);
 				
 				// Battle trigger tiles
-				tileMap[0][3] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), enemyRockImage);
-				tileMap[0][7] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), enemyRockImage);
-				tileMap[8][5] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), enemyRockImage);
-				tileMap[4][1] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()), bossRockImage);
+				tileMap[0][3] = new Tile.BattleTrigger((player) -> new MainEnemy(world, player.getExperience()), Images.enemyRockImage);
+				tileMap[0][7] = new Tile.BattleTrigger((player) -> new MainEnemy(world, player.getExperience()), Images.enemyRockImage);
+				tileMap[8][5] = new Tile.BattleTrigger((player) -> new MainEnemy(world, player.getExperience()), Images.enemyRockImage);
+				tileMap[4][1] = new Tile.BattleTrigger((player) -> new BossEnemy(world, player.getExperience()), Images.bossRockImage);
 				
 				// Locked boss tile
-				tileMap[4][2] = new Tile.LockedOffBoss(lockedRockImage);
+				tileMap[4][2] = new Tile.LockedOffBoss(Images.lockedRockImage);
 				
 				// Key tile
-				tileMap[4][0] = new Tile.KeyTile(keyImage);
+				tileMap[4][0] = new Tile.KeyTile(Images.keyImage);
 		}
+	}
+	
+	/**
+	 * This method sets the tile at the given location to the specified
+	 * tile.
+	 * 
+	 * @param row  the row of the tile to set
+	 * @param col  the column of the tile to set
+	 * @param tile the tile to put at the given location
+	 */
+	public void setTileAtPos(int row, int col, Tile tile) {
+		tileMap[row][col] = tile;
 	}
 	
 	/**
@@ -345,8 +320,8 @@ public class AreaScreen implements IScreen {
 	 * 
 	 * @return the tile at the given position
 	 */
-	public Tile getTileAtPos(int x, int y) {
-		return tileMap[y][x];
+	public Tile getTileAtPos(int row, int col) {
+		return tileMap[row][col];
 	}
 
 	/*************************************************************************************/
@@ -375,7 +350,7 @@ public class AreaScreen implements IScreen {
 				// Check if the tile should be painted
 				if (tileMap[row][col].shouldPaint()) {
 					// The tile should be painted, so paint it
-					tileMap[row][col].paint(g2d, row*Tile.TILE_SIZE, col*Tile.TILE_SIZE);
+					tileMap[row][col].paint(g2d, row*Tile.TILE_SIZE, col*Tile.TILE_SIZE + 5);
 				}
 			}
 		}
@@ -430,7 +405,7 @@ public class AreaScreen implements IScreen {
 		)));
 
 		// Align the player's image to be below their name label
-		layout.putConstraint(NORTH, playerImage, 20, SOUTH, playerName);
+		layout.putConstraint(NORTH, playerImage, 10, SOUTH, playerName);
 		layout.putConstraint(EAST, playerImage, 0, EAST, playerName);
 		layout.putConstraint(WEST, playerImage, 0, WEST, playerName);
 
@@ -479,7 +454,7 @@ public class AreaScreen implements IScreen {
 		layout.getConstraints(playerLevel).setWidth(Spring.constant(PLAYER_PANEL_WIDTH));
 
 		// Align the player's level to be below the player's zone
-		layout.putConstraint(NORTH, playerLevel, 40, SOUTH, playerZone);
+		layout.putConstraint(NORTH, playerLevel, 15, SOUTH, playerZone);
 		layout.putConstraint(EAST, playerLevel, 0, EAST, screen);
 
 		// Add the label dsplaying the player's level to the screen but invisible
@@ -504,7 +479,7 @@ public class AreaScreen implements IScreen {
 		layout.getConstraints(playerExpToNextLevel).setWidth(Spring.constant(PLAYER_PANEL_WIDTH));
 
 		// Align the player's experience to next level label to be below the player's level
-		layout.putConstraint(NORTH, playerExpToNextLevel, 40, SOUTH, playerLevel);
+		layout.putConstraint(NORTH, playerExpToNextLevel, 15, SOUTH, playerLevel);
 		layout.putConstraint(EAST, playerExpToNextLevel, 0, EAST, screen);
 
 		// Add the label dsplaying the player's experience to next level to the screen but invisible

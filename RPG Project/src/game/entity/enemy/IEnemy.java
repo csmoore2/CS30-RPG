@@ -1,4 +1,10 @@
-package game.entity;
+package game.entity.enemy;
+
+import java.awt.image.BufferedImage;
+
+import game.entity.EnemyAction;
+import game.entity.ILivingEntity;
+import game.entity.Player;
 
 /**
  * This interface extends ILivingEntity to inherit methods common
@@ -6,6 +12,13 @@ package game.entity;
  * that are unique to enemies.
  */
 public interface IEnemy extends ILivingEntity {
+	/**
+	 * This method sets the enemy's image to the one provided.
+	 * 
+	 * @param imageIn the enemy's image
+	 */
+	void setImage(BufferedImage imageIn);
+
     /**
      * This method is called by the battle screen when it is the enemy's turn
      * and the enemy needs to do an action. This method will then generate the

@@ -2,6 +2,7 @@ package game.entity;
 
 import game.Main;
 import game.World;
+import game.entity.enemy.IEnemy;
 
 /**
  * This class represents an action that can be performed by the player. Currently
@@ -82,14 +83,15 @@ public non-sealed class PlayerAction extends Action {
                 if (numTurns > 0) {
                     world.showMessage(
                         String.format(
-                            "Player will heal %d health for %d turns.",
+                            "%s will heal %d health for %d turns.",
+                            player.getName(),
                             (int)effect, numTurns
                         ),
                         3
                     );
                 } else {
                     world.showMessage(
-                        String.format("Player healed %d health.", (int)effect),
+                        String.format("%s healed %d health.", player.getName(), (int)effect),
                         3
                     );
                 }
@@ -103,7 +105,8 @@ public non-sealed class PlayerAction extends Action {
                 // Show a message
                 world.showMessage(
                     String.format(
-                        "Player will take %.1f%% damage for %d turns",
+                        "%s will take %.1f%% damage for %d turns",
+                        player.getName(),
                         effect * 100,
                         numTurns
                     ),
@@ -138,7 +141,7 @@ public non-sealed class PlayerAction extends Action {
         // If the enemy dodges this action then stop executing this method after showing a message
         if (Main.RANDOM.nextDouble() < enemy.getSecondaryAttributeValue(Attribute.DODGE_CHANCE)) {
             // Show a message and then return
-            world.showMessage("Enemy dodged player's attack.", 3);
+            world.showMessage(String.format("Enemy dodged %s's attack.", player.getName()), 3);
             return;
         }
 
@@ -157,7 +160,8 @@ public non-sealed class PlayerAction extends Action {
                 if (critical) {
                     world.showMessage(
                         String.format(
-                            "Player dealt a critical hit on enemy for %d damage!",
+                            "%s dealt a critical hit on enemy for %d damage!",
+                            player.getName(),
                             (int)(effect * damageMultiplier)
                         ),
                         4
@@ -165,7 +169,8 @@ public non-sealed class PlayerAction extends Action {
                 } else {
                     world.showMessage(
                         String.format(
-                            "Player hit enemy for %d damage!",
+                            "%s hit enemy for %d damage!",
+                            player.getName(),
                             (int)effect
                         ),
                         3
@@ -207,7 +212,8 @@ public non-sealed class PlayerAction extends Action {
                 // Show a message
                 world.showMessage(
                     String.format(
-                        "Player inflicted poison on enemy dealing %d damage for %d turns.",
+                        "%s inflicted poison on enemy dealing %d damage for %d turns.",
+                        player.getName(),
                         (int)effect,
                         numTurns
                     ),

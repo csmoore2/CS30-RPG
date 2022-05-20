@@ -1,6 +1,7 @@
 package game.entity;
 
 import game.World;
+import game.entity.enemy.IEnemy;
 
 /**
  * This enum declares all the actions the player can take during

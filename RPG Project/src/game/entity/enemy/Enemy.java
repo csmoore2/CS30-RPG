@@ -1,4 +1,4 @@
-package game.entity;
+package game.entity.enemy;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -6,13 +6,16 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import game.Main;
 import game.World;
+import game.entity.Attribute;
+import game.entity.EnemyAction;
+import game.entity.ILivingEntity;
+import game.entity.Player;
 
 /**
- * This class represents an enemy.
+ * This class represents a generic enemy.
  */
-public class Enemy implements IEnemy {
+public abstract class Enemy implements IEnemy {
 	/**
 	 * This is the multiplier that is multiplied with the enemy's base attack damage
 	 * to determine how much damage the enemy's poison attacks do each turn.
@@ -22,112 +25,115 @@ public class Enemy implements IEnemy {
 	/**
 	 * This is the world.
 	 */
-	private final World world;
+	protected final World world;
 
 	/**
 	 * This is the enemy's image.
 	 */
-	private final BufferedImage image;
+	protected BufferedImage image;
 
 	/**
 	 * This is the enemy's maximum amount of health.
 	 */
-	private final int maxHealth;
+	protected int maxHealth;
 
 	/**
 	 * This is the enemy's current amount of health.
 	 */
-	private int currentHealth;
+	protected int currentHealth;
 
 	/**
 	 * This stores the original number of healing potions that
 	 * the enemy had.
 	 */
-	private final int originalNumHealingPotions;
+	protected int originalNumHealingPotions;
 
 	/**
 	 * This is the number of healing potions the enemy has.
 	 */
-	private int numHealingPotions;
+	protected int numHealingPotions;
 
 	/**
 	 * This is the amount of health one healing potion gives
 	 * the enemy.
 	 */
-	private final int healingPotionHealth;
+	protected int healingPotionHealth;
 
 	/**
 	 * This is the base amount of damage dealt by an attack from this enemy.
 	 */
-	private final int baseAttackDamage;
+	protected int baseAttackDamage;
 
 	/**
 	 * This is the number of turns that poison inflicted on the player by
 	 * this enemy lasts.
 	 */
-	private final int numPoisonTurns;
+	protected int numPoisonTurns;
 
 	/**
 	 * This is the chance of the enemy making a critical hit.
 	 */
-	private final double criticalChance;
+	protected double criticalChance;
 
 	/**
 	 * This is the chance of the enemy dodging an attack.
 	 */
-	private final double dodgeChance;
+	protected double dodgeChance;
 
 	/**
 	 * This is the amount of damage per turn the enemy is taking from poison.
 	 */
-	private int poisonDamagePerTurn = 0;
+	protected int poisonDamagePerTurn = 0;
 
 	/**
 	 * This is the number of turns remaining for which the enemy will be poisoned.
 	 */
-	private int numPoisonTurnsRemaining = 0;
+	protected int numPoisonTurnsRemaining = 0;
 
 	/**
-	 * This constructs a sem-randomized enemy based on the amount of
-	 * experience the player has.
+	 * This constructs an enemy based on the amount of experience the
+	 * player has.
 	 * 
 	 * @param worldIn   the world
-	 * @param playerExp the amount of experience the playerHas
+	 * @param playerExp the amount of experience the player has
 	 */
-	public Enemy(World worldIn, int playerExp) {
+	protected Enemy(World worldIn, int playerExp) {
 		world = worldIn;
 
-		// Try loading the enemy's image
+		// Try loading a default image for the enemy
 		try {
 			image = ImageIO.read(new File("res/test2.jpg"));
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to load enemy's image!", e);
 		}
 
-		// TODO: Change and Balance Caculations
-
-		// Calculate the enemy's maximum amount of health and start them off with full health
-		maxHealth = (Main.RANDOM.nextInt((playerExp / 25) + 1) + 1) * 2000;
-		currentHealth = maxHealth;
-
-		// Calculate the number of healing potions the enemy should have
-		originalNumHealingPotions = (playerExp / 50) + Main.RANDOM.nextInt(2);
-		numHealingPotions = originalNumHealingPotions;
-
-		// One healing potion should give the enemt 25% of their health back
-		healingPotionHealth = (int)(0.25 * maxHealth);
-
-		// Calculate the base damage dealt by an attack from this enemy
-		baseAttackDamage = (Main.RANDOM.nextInt((playerExp / 50) + 1) * 100) + (playerExp*2) + 100;
-
-		// Calculate the number of turns this enemy's poison attacks should last
-		numPoisonTurns = playerExp >= 150 ? 3 : 2;
-
-		// Calculate the enemy's chance of making a critical hit
-		criticalChance = 0.015 * playerExp;
-
-		// Calculate the enemy's chance of dodging an attack
-		dodgeChance = 0.01 * playerExp;
+		// Initialize all of the enemy's attributes
+		initializeAttributes(playerExp);
+	}
+	
+	/**
+	 * This method is responsible for initialize all of the enemy's attributes:
+	 *     - Max Health and Current Health
+	 *     - Number of Healing Potions and Amount of Health Given by Healing Potions
+	 *     - Base Attack Damage
+	 *     - Number of Turns Poison Attacks Last
+	 *     - Chance of a Critical Hit
+	 *     - Chance of Dodging an Attack
+	 *     
+	 * @param playerExp the player's current amount of experience
+	 */
+	protected abstract void initializeAttributes(int playerExp);
+	
+	/**
+	 * This method sets the enemy's image to the one given.
+	 * 
+	 * @param imageIn the enemy's new image
+	 * 
+	 * @see IEnemy#setImage(BufferedImage)
+	 */
+	@Override
+	public void setImage(BufferedImage imageIn) {
+		image = imageIn;
 	}
 
 	/**
@@ -231,8 +237,9 @@ public class Enemy implements IEnemy {
 	}
 
 	/**
-	 * This method generates the enemy's action during a battle. The enemy's
-	 * choice of action is randomly picked based on percentage chances.
+	 * This method generates the enemy's action during a battle. Exactly
+	 * how this is done will vary between the types of enemies but in general
+	 * the enemy picks a random action based on percentage chances.
 	 * 
 	 * @param player the player
 	 * 
@@ -241,66 +248,7 @@ public class Enemy implements IEnemy {
 	 * @see IEnemy#generateBattleAction(Player)
 	 */
 	@Override
-	public EnemyAction generateBattleAction(Player player) {
-		// If the enemy has less than half their health then there
-		// is a 25% chance they will use a healing potion if they
-		// have one
-		if (currentHealth < maxHealth/2 && numHealingPotions > 0) {
-			int choice = Main.RANDOM.nextInt(100) + 1;
-			
-			// 1 to 25 = 25% chance
-			if (choice <= 25) {
-				numHealingPotions--;
-
-				return new EnemyAction(
-					"Healing Potion",
-					Action.Type.HEALING,
-					healingPotionHealth,
-					0
-				);
-			}
-		}
-
-		// Choose a random number between 1 and 100 inclusive so the
-		// percentages are easy
-		int choice = Main.RANDOM.nextInt(100) + 1;
-
-		// There is a 5% chance the enemy will use poison if the
-		// player is not poisoned
-		if (choice > 95 && !player.hasPoisonEffect()) {
-			return new EnemyAction(
-				"Poison Dagger",
-				Action.Type.POISON,
-				baseAttackDamage * POISON_DAMAGE_MULTIPLIER,
-				numPoisonTurns
-			);
-		}
-
-		// There is a 10% or 15% chance the enemy will use an attack
-		// that does 50 damage more than their base attack
-		if (choice > 85) {
-			return new EnemyAction(
-				"Sharp Sword",
-				Action.Type.HIT,
-				baseAttackDamage + 50,
-				0
-			);
-		}
-
-		// There is a 35% change the enemy will use an attack that does
-		// 25 damage more than their base attack
-		if (choice > 50) {
-			return new EnemyAction(
-				"Powerful Punch",
-				Action.Type.HIT,
-				baseAttackDamage + 25,
-				0
-			);
-		}
-
-		// Otherwise the enemy just does their base attack (50% chance)
-		return new EnemyAction("Punch", Action.Type.HIT, baseAttackDamage, 0);
-	}
+	public abstract EnemyAction generateBattleAction(Player player);
 
 	/**
 	 * This method inflicts the specified amount of damege on the
@@ -355,9 +303,7 @@ public class Enemy implements IEnemy {
 	 *         this enemy
 	 */
 	@Override
-	public int getExperienceGainOnDeath() {
-		return (maxHealth / 1000) * 5;
-	}
+	public abstract int getExperienceGainOnDeath();
 
 	/**
 	 * This method returns the enemy's image.

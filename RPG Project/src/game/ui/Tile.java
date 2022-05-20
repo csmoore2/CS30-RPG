@@ -6,11 +6,10 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.function.Function;
 
-import game.Main;
 import game.World;
 import game.Zone;
-import game.entity.IEnemy;
 import game.entity.Player;
+import game.entity.enemy.IEnemy;
 import game.ui.screens.AreaScreen;
 
 /**
@@ -22,7 +21,6 @@ public class Tile {
 	 * This is the width and height of a single tile in pixels.
 	 */
 	public static final int TILE_SIZE = AreaScreen.AREA_SCREEN_SIZE / AreaScreen.TILES_PER_ROW;
-	
 	
 	/**
 	 * This is an empty tile; it is not painted nor does it trigger anything.
@@ -139,7 +137,6 @@ public class Tile {
 		public BattleTrigger(Function<Player, IEnemy> enemyProducerIn, BufferedImage enemyImageIn) {
 			enemyProducer = enemyProducerIn;
 			enemyImage = enemyImageIn;
-			
 		}
 
 		/**
@@ -156,7 +153,7 @@ public class Tile {
 		public void performAction(Player player, World world) {
 			// Initiate a battle between the player and an enemy produced
 			// by 'enemyProducer'
-			world.initiateBattle(enemyProducer.apply(player));
+			world.initiateBattle(generateEnemy(player));
 		}
 
 		/**
@@ -169,14 +166,19 @@ public class Tile {
 		 *         given player
 		 */
 		public IEnemy generateEnemy(Player player) {
-			return enemyProducer.apply(player);
+			// Generate the enemy and set its image
+			IEnemy enemy =  enemyProducer.apply(player);
+			enemy.setImage(enemyImage);
+			
+			// Return the enemy
+			return enemy;
 		}
 		
 		@Override
 		public void paint(Graphics2D g2d, int y, int x) {
 			// Create the transformation to do the scale
 			AffineTransform scaleTransform = new AffineTransform();
-			scaleTransform.scale((Main.SCREEN_WIDTH/9.0)/enemyImage.getWidth(), (Main.SCREEN_HEIGHT/9.0)/enemyImage.getHeight());
+			scaleTransform.scale((double)TILE_SIZE/enemyImage.getWidth(), (double)TILE_SIZE/enemyImage.getHeight());
 			
 			// Create the transformation operation
 			AffineTransformOp imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
@@ -187,7 +189,6 @@ public class Tile {
 		
 		@Override
 		public boolean shouldPaint() { return true; }
-		
 	}
 	
 	/**
@@ -202,19 +203,17 @@ public class Tile {
 		/**
 		 * This constructs a new locked off boss tile.
 		 * 
-		 * @param lockedImage
-		 *                        
+		 * @param lockedImage 
 		 */
 		public LockedOffBoss(BufferedImage lockedImage) {
 			this.lockedImage = lockedImage;
-			
 		}
 	
 		@Override
 		public void paint(Graphics2D g2d, int y, int x) {
 			// Create the transformation to do the scale
 			AffineTransform scaleTransform = new AffineTransform();
-			scaleTransform.scale((Main.SCREEN_WIDTH/9.0)/lockedImage.getWidth(), (Main.SCREEN_HEIGHT/9.0)/lockedImage.getHeight());
+			scaleTransform.scale((double)TILE_SIZE/lockedImage.getWidth(), (double)TILE_SIZE/lockedImage.getHeight());
 
 			// Create the transformation operation
 			AffineTransformOp imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
@@ -225,7 +224,6 @@ public class Tile {
 		
 		@Override
 		public boolean shouldPaint() { return true; }
-		
 	}
 	
 	/**
@@ -260,21 +258,20 @@ public class Tile {
 		 */
 		@Override
 		public void performAction(Player player, World world) {
-			// Removes the tile from the respective location of the tile map, and increases the counter by 1
-			AreaScreen currentScreen = (AreaScreen) world.screenStack.peek();
+			// Remove the tile from the screen and gives the player a key
 			player.collectKey();
 			switch (world.getCurrentZone()) {
 				case FIRE:
-					currentScreen.tileMap[0][4] = null;
+					world.removeTileAtLocation(0, 4);
 					break;
 				case GEM:
-					currentScreen.tileMap[4][8] = null;
+					world.removeTileAtLocation(4, 8);
 					break;
 				case ICE:
-					currentScreen.tileMap[8][4] = null;
+					world.removeTileAtLocation(8, 4);
 					break;
 				case ROCK:
-					currentScreen.tileMap[4][0] = null;
+					world.removeTileAtLocation(4, 0);
 					break;
 				default:
 					break;
@@ -283,9 +280,10 @@ public class Tile {
 	
 		@Override
 		public void paint(Graphics2D g2d, int y, int x) {
-			// Create the transformation to do the scale
+			// Create the transformation to do the scale and fix the key's position
 			AffineTransform scaleTransform = new AffineTransform();
-			scaleTransform.scale((Main.SCREEN_WIDTH/9.0)/keyImage.getWidth(), (Main.SCREEN_HEIGHT/9.0)/keyImage.getHeight());
+			scaleTransform.scale((double)TILE_SIZE/keyImage.getWidth(), (double)TILE_SIZE/keyImage.getHeight());
+			scaleTransform.translate(-70, 0);
 
 			// Create the transformation operation
 			AffineTransformOp imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
@@ -295,7 +293,6 @@ public class Tile {
 		}
 		
 		@Override
-		public boolean shouldPaint() { return true; }
-		
+		public boolean shouldPaint() { return true; }	
 	}
 }

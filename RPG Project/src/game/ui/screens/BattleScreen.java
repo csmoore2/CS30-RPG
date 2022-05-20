@@ -30,9 +30,9 @@ import game.World;
 import game.entity.Action;
 import game.entity.Attribute;
 import game.entity.EnemyAction;
-import game.entity.IEnemy;
 import game.entity.Player;
 import game.entity.PlayerAction;
+import game.entity.enemy.IEnemy;
 import game.ui.QuantityBar;
 
 import static javax.swing.SpringLayout.*;

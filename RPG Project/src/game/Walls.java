@@ -9,6 +9,10 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;  
 
+/**
+ * This class is responsible for managing the walls for each
+ * zone in the game.
+ */
 public class Walls {
 	/**
 	 * This is the path to the CSV file that contains all of the walls for each map.
@@ -50,6 +54,13 @@ public class Walls {
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to load walls!", e);
 		}
+
+		// Initialize the locations of bosses to be walls (so they cannot be walked into until
+		// the lesser enemies have been defeated.
+		zoneToWallMap.get(Zone.FIRE)[1][4] = true;
+		zoneToWallMap.get(Zone.GEM)[4][7] = true;
+		zoneToWallMap.get(Zone.ICE)[7][4] = true;
+		zoneToWallMap.get(Zone.ROCK)[4][1] = true;
 	}
 
 	/**
