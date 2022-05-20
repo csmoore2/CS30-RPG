@@ -26,17 +26,23 @@ public class Main {
 	/**
 	 * This is the name of the game.
 	 */
-	public static final String GAME_NAME = "EleMages: Battle Edition";
+	public static final String GAME_NAME = "Elemental Battle of the Mages";
+
+	/**
+	 * This is the name of the game but formatted so that it will look nice
+	 * on the start screen.
+	 */
+	public static final String GAME_NAME_START_SCREEN = "<html><center>Elemental Battle of<br/>the Mages</center></html>";
 
 	/**
 	 * The width of the game's window.
 	 */
-	public static final int SCREEN_WIDTH = 1000;
+	public static final int SCREEN_WIDTH = 1050;
 	
 	/**
 	 * The height of the game's window.
 	 */
-	public static final int SCREEN_HEIGHT = 1000;
+	public static final int SCREEN_HEIGHT = 700;
 	
 	/**
 	 * This is the size of the screen.
@@ -70,29 +76,6 @@ public class Main {
 	 * This is the game's window.
 	 */
 	public static JFrame window = null;
-	
-	/**
-	 * This is the games current zone/screen.
-	 * 0 = Start screen
-	 * 1 = Green zone
-	 * 2 = Fire zone
-	 * 3 = Gem zone
-	 * 4 = Ice zone
-	 * 5 = Rock zone
-	 * 6 = Final boss zone
-	 */
-	public static int currentLevel = 0;
-	
-	/**
-	 * Number of keys gotten
-	 */
-	public static int keysGet = 0;
-	
-	/**
-	 * Array which converts values of currentLevel into Strings for display.
-	 */
-	public static final String[] levels = {"Start screen", "Green Zone / Hub", "Fire Zone", "Gem Zone", "Ice Zone", "Rock Zone"};
-	
 	
 	/**
 	 * This is the entry point into the program.
@@ -157,11 +140,11 @@ public class Main {
 	 * @param player the character chosen by the player
 	 */
 	private static void startGame(Player player) {
-		// Reinitialize the window
-		reinitializeWindow();
-		
 		// Create the world
 		World world = new World(player);
+
+		// Reinitialize the window
+		reinitializeWindow();
 
 		// Add the world to the window and make the window the correct size
 		window.add(world);
@@ -195,10 +178,6 @@ public class Main {
 		gameLoopThread.setDaemon(true);
 		gameLoopThread.start();
 	}
-	
-	public static void setCurrLevel(int levelTo) {
-		currentLevel = levelTo;
-		}
 
 	/**
 	 * This method shows the introduction to the player as a series of messages
@@ -208,7 +187,36 @@ public class Main {
 	 * @param world the world
 	 */
 	private static void showIntroduction(World world) {
-		//world.showMessage("<i>This</i> is <b>the introduction</b>!", 5);
+		world.showMessage("Welcome to <b>Elemental Battle of the Mages</b>!", 5);
+		world.showMessage("You are the last descendant of a family of powerful mages who used "  +
+		                  "their magic for good. The rest of your family was eliminated in the " +
+						  "last great <b>Elemental War</b> against Marduk and his followers.",
+						  15);
+		world.showMessage("It is now up to you to to defeat all of Marduk's followers and " +
+		                  "then Marduk himself. By doing so you will free the world from "  +
+						  "the evil that grips it and usher in a golden age of magic.",
+						  15);
+		world.showMessage("Go now! In the areas surrounding this place you will find Marduk's "  +
+		                  "followers and the keys to the realm where Marduk himself dwells. Be " +
+						  "careful though, there are minor mages along your path who will try to "  +
+						  "defeat you to gain favour with Marduk.",
+						  20);
+		world.showMessage("To move you must use the w, a, s, and d keys on your keyboard. If at any "  +
+		                  "time you wish to leave simply pause the game by pressing escape and exit "  +
+						  "the game. Furthermore, for every <b>50 experience points</b> you gain you " +
+						  "level up which will give you <b>2 attribute points</b> to spend. These "    +
+						  "points can be spent by selecting \"View Attributes/Level Up\" in the "      +
+						  "pause screen. Note, though, that you cannot pause the game while a "        +
+						  "message box is being displayed.",
+						  25);
+		world.showMessage(
+			String.format("One final note: if the movement keys are not working try clicking inside "   +
+		                  "the game's window. The time has now come for you to go out into the world. " +
+						  "The whole world is counting on you %s. May luck be on your side!",
+						  world.getPlayer().getName()
+			),
+			15
+		);
 	}
 
 	/**

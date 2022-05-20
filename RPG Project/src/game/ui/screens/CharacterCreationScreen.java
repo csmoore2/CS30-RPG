@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.util.EnumMap;
 import java.util.function.Consumer;
 
 import javax.swing.ImageIcon;
@@ -13,10 +14,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
 import game.Main;
+import game.entity.Attribute;
 import game.entity.Player;
 
 import static javax.swing.SpringLayout.*;
@@ -41,6 +44,12 @@ public class CharacterCreationScreen extends JComponent {
 	public static final String ATTRIBUTE_PANEL_LABEL_TEXT = "Attributes";
 
 	/**
+	 * This is the format string that will be used to display each secondary attribute's
+	 * name and value in the attribute panel.
+	 */
+	public static final String ATTRIBUTE_LABEL_FORMAT = "<html><center><b>%s:</b><br/>%s</center></html>";
+
+	/**
 	 * This is the text that is initially displayed in the player's name field (the default name).
 	 */
 	public static final String NAME_TEXT_FIELD_INITIAL_TEXT = "Untitled Character";
@@ -59,7 +68,7 @@ public class CharacterCreationScreen extends JComponent {
 	 * This is the horizontal padding that will be used for the text field for
 	 * the player's name.
 	 */
-	public static final int NAME_TEXT_FIELD_HORIZONTAL_PADDING = 150;
+	public static final int NAME_TEXT_FIELD_HORIZONTAL_PADDING = 100;
 
 	/**
 	 * This is the default width of a panel.
@@ -79,7 +88,7 @@ public class CharacterCreationScreen extends JComponent {
 	/**
 	 * This is the preferred size of the start button.
 	 */
-	public static final Dimension START_BUTTON_SIZE = new Dimension(150, 50);
+	public static final Dimension START_BUTTON_SIZE = new Dimension(200, 50);
 
 	/**
 	 * This is thedefault border that will be used around panels and other components
@@ -91,6 +100,12 @@ public class CharacterCreationScreen extends JComponent {
 	 * This is the font that will be used for the buttons that represent each premade class.
 	 */
 	public static final Font CLASS_BUTTON_FONT = new Font("Class Button Font", Font.BOLD, 16);
+
+	/**
+	 * This is the font that will be used for the labels that show the name of each player's
+	 * secondary attributes.
+	 */
+	public static final Font ATTRIBUTE_FONT = new Font("Attribute Font", Font.PLAIN, 18);
 
 	/**
 	 * This is the font that will be used for the start button.
@@ -121,6 +136,12 @@ public class CharacterCreationScreen extends JComponent {
 	 * This is the premade player that is currently selected.
 	 */
 	private Player selectedPlayer = Player.PREMADE_PLAYERS[0];
+
+	/**
+	 * This map stores the JLabel associated with each secondary attribute so that
+	 * they can be updated to reflect the currently selected player's attributes.
+	 */
+	private final EnumMap<Attribute, JLabel> secondaryAttributeLabelMap = new EnumMap<>(Attribute.class);
 
 	/**
 	 * This is the "label" that displays the currently selected character's image.
@@ -208,11 +229,37 @@ public class CharacterCreationScreen extends JComponent {
 		// This is the panel that will contain the attribute point layout the player will have if
 		// they pick the currently selected class
 		JPanel attrPanel = new JPanel();
-		attrPanel.setPreferredSize(ATTR_PANEL_DIMENSIONS);
 		attrPanel.setBackground(PANEL_BACKGROUND_COLOUR);
 		attrPanel.setBorder(DEFAULT_BORDER);
 
-		// TODO: Insert code to fill attribute panel here
+		// Give the attribute panel a grid layout with one columns and a variable
+		// number of rows
+		attrPanel.setLayout(new GridLayout(0, 1));
+
+		// Loop through the secondary attributes, adding them to the attribute panel
+		for (Attribute attr : Attribute.SECONDARY_ATTRIBUTES) {
+			// Create a JLabel to hold the attribute's name and value
+			JLabel attributeLabel = new JLabel();
+			attributeLabel.setFont(ATTRIBUTE_FONT);
+			attributeLabel.setHorizontalAlignment(JLabel.CENTER);
+
+			// Give the attribute's label a white background
+			attributeLabel.setOpaque(true);
+			attributeLabel.setBackground(Color.WHITE);
+
+			// Have the JLabel show the attribute's name and value in a nicely formatted way using HTML
+			attributeLabel.setText(String.format(
+				ATTRIBUTE_LABEL_FORMAT,
+				attr.getName(),
+				Attribute.getDisplayString(attr, selectedPlayer.getSecondaryAttributeValue(attr))
+			));
+
+			// Add the attribute's label to the attribute panel
+			attrPanel.add(attributeLabel);
+
+			// Add the attribute's label to th secondary attribute label map
+			secondaryAttributeLabelMap.put(attr, attributeLabel);
+		}
 
 		// Align the label for the attribute panel to be 10px from the top of the screen and the same width
 		// as 'attrPanel' so the text is centered
@@ -220,16 +267,19 @@ public class CharacterCreationScreen extends JComponent {
 		layout.putConstraint(WEST, attrLabel, 0, WEST, attrPanel);
 		layout.putConstraint(EAST, attrLabel, 0, EAST, attrPanel);
 		
-		// Align 'attrPanel' to be 5px from the bottom of its label and 10px from the left side of the screen
-		layout.putConstraint(WEST, attrPanel, DEFAULT_PADDING, WEST, this);
+		// Align 'attrPanel' to be 5px from the bottom of its label, the same width as the class panel,
+		// and 10px from the bottom of the screen
 		layout.putConstraint(NORTH, attrPanel, DEFAULT_PADDING/2, SOUTH, attrLabel);
+		layout.putConstraint(SOUTH, attrPanel, -DEFAULT_PADDING, SOUTH, this);
+		layout.putConstraint(EAST, attrPanel, 0, EAST, classPanel);
+		layout.putConstraint(WEST, attrPanel, 0, WEST, classPanel);
 
 		// Add the attribute panel and its label to the screen
 		add(attrLabel);
 		add(attrPanel);
 
 		/*************************************************************************************/
-		/*                                   MISCELLANEOUS                                   */
+		/*                                    NAME FIELD                                     */
 		/*************************************************************************************/
 		
 		// This is the text field into which the player will enter their chosen name
@@ -239,11 +289,18 @@ public class CharacterCreationScreen extends JComponent {
 		nameTextField.setFont(PLAYER_NAME_FONT);
 		nameTextField.setHorizontalAlignment(JTextField.CENTER);
 		
-		// Align 'nameTextField' to be 10px from the top of the screen, and to be 150px from both
+		// Align 'nameTextField' to be 10px from the top of the screen, and to be 100px from both
 		// the right edge of the screen and from the right edge of 'classPanel'
 		layout.putConstraint(WEST, nameTextField, NAME_TEXT_FIELD_HORIZONTAL_PADDING, EAST, classPanel);
 		layout.putConstraint(EAST, nameTextField, -NAME_TEXT_FIELD_HORIZONTAL_PADDING, EAST, this);
 		layout.putConstraint(NORTH, nameTextField, DEFAULT_PADDING, NORTH, this);
+		
+		// Add the name field to the screen
+		add(nameTextField);
+
+		/*************************************************************************************/
+		/*                                   START BUTTON                                    */
+		/*************************************************************************************/
 		
 		// This is the button the user will press to start the game with their chosen class and name
 		JButton startButton = new JButton();
@@ -251,17 +308,31 @@ public class CharacterCreationScreen extends JComponent {
 		startButton.setFont(START_BUTTON_FONT);
 		startButton.setPreferredSize(START_BUTTON_SIZE);
 
-		// Make the start button set the player's name and then call the function given by
-		// 'startGameListenerIn' when it is clicked
+		// Make the start button set the player's name, change the start button to say loading, and then
+		// call the function given by 'startGameListenerIn' when it is clicked
 		startButton.addActionListener((action) -> {
+			// Set the player's name
 			selectedPlayer.setName(nameTextField.getText());
-			startGameListenerIn.accept(selectedPlayer);
+
+			// Change the start button to say loading and disable it
+			startButton.setText("Loading...");
+			startButton.setEnabled(false);
+
+			// Call the start game listener
+			SwingUtilities.invokeLater(() -> startGameListenerIn.accept(selectedPlayer));
 		});
 		
 		// Align the start button to be 10px from the bottom of the screen and 10px from the
 		// right edge of the screen
 		layout.putConstraint(EAST, startButton, -DEFAULT_PADDING, EAST, this);
 		layout.putConstraint(SOUTH, startButton, -DEFAULT_PADDING, SOUTH, this);
+		
+		// Add the start button to the screen
+		add(startButton);
+
+		/*************************************************************************************/
+		/*                               CHARACTER IMAGE VIEW                                */
+		/*************************************************************************************/
 
 		// This is the "label" that will display the image of character for the player's chosen class
 		characterImageView = new JLabel();
@@ -275,10 +346,7 @@ public class CharacterCreationScreen extends JComponent {
 		layout.putConstraint(WEST, characterImageView, DEFAULT_PADDING, EAST, classPanel);
 		layout.putConstraint(EAST, characterImageView, -DEFAULT_PADDING, EAST, this);
 		
-		// Add the text field for the player's name, the start button, and the "label" displaying the selected
-		// character's image to the screen
-		add(nameTextField);
-		add(startButton);
+		// Add the "label" displaying the selected character's image to the screen
 		add(characterImageView);
 	}
 
@@ -300,6 +368,20 @@ public class CharacterCreationScreen extends JComponent {
 	private void updateUi() {
 		// Update the image of the currently selected character
 		characterImageView.setIcon(new ImageIcon(selectedPlayer.getImage()));
+
+		// Loop through each secondary attribute to update its label to reflect the
+		// currently selected player's attributes
+		for (Attribute attr : Attribute.SECONDARY_ATTRIBUTES) {
+			// Get the attribute's label
+			JLabel attributeLabel = secondaryAttributeLabelMap.get(attr);
+
+			// Update the attribute's label's text
+			attributeLabel.setText(String.format(
+				ATTRIBUTE_LABEL_FORMAT,
+				attr.getName(),
+				Attribute.getDisplayString(attr, selectedPlayer.getSecondaryAttributeValue(attr))
+			));
+		}
 	}
 
 	/**

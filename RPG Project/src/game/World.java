@@ -6,6 +6,8 @@ import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayDeque;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Stack;
 
@@ -77,6 +79,11 @@ public class World extends JComponent {
 	 * This is the player.
 	 */
 	private final Player player;
+
+	/**
+	 * This is the zone that the player is currently in.
+	 */
+	private Zone currentZone = Zone.GREEN_HUB;
 	
 	/**
 	 * This keeps track of whether or not the player is currently
@@ -99,7 +106,7 @@ public class World extends JComponent {
 	 * This variable keeps track of how many enemies remain in each zone
 	 * [enemies remaining in fire, gem, ice, rock]
 	 */
-	public int[] enemiesRemaining = {3,3,3,3};
+	public Map<Zone, Integer> enemiesRemaining = new EnumMap<>(Zone.class);
 	
 	/**
 	 * This constructs the world by pushing the starting screen onto the screen stack
@@ -108,8 +115,14 @@ public class World extends JComponent {
 	 * @param playerIn the player
 	 */
 	public World(Player playerIn) {
-		// Set the current level to 1 since the player starts in the green zone
-		Main.currentLevel = 1;
+		// Initialize the map of walls for every zone
+		Walls.initializeWalls();
+
+		// There are three enemies each in the fire, gem, ice, and rock zones
+		enemiesRemaining.put(Zone.FIRE, 3);
+		enemiesRemaining.put(Zone.GEM, 3);
+		enemiesRemaining.put(Zone.ICE, 3);
+		enemiesRemaining.put(Zone.ROCK, 3);
 
 		// Set our layout to be a SpringLayout so that if anything needs to add JComponents to
 		// us they will easily be able to lay them out
@@ -120,8 +133,8 @@ public class World extends JComponent {
 		player = playerIn;
 		player.setWorld(this);
 		
-		// Push the starting screen onto the screen stack
-		screenStack.push(AreaScreen.createNewAreaScreen("res/greenzonebackground.png"));
+		// Show the starting screen (the green zone / hub zone)
+		showScreen(AreaScreen.createNewAreaScreen(this, Zone.GREEN_HUB));
 		
 		// Register the 'pauseKeyListener' method as a key pressed listener
 		registerKeyListener((KeyPressedListener)this::pauseKeyListener);
@@ -229,9 +242,11 @@ public class World extends JComponent {
 	 * the current screen's java swing components are removed and
 	 * the new screen's java swing components are added.
 	 */
-	public void showScreen(IScreen newScreen) {
-		// Remove the current screen's java swing components
-		screenStack.peek().removeSwingComponents(this);
+	public synchronized void showScreen(IScreen newScreen) {
+		// Remove the current screen's java swing components if there is a current screen
+		if (!screenStack.empty()) {
+			screenStack.peek().removeSwingComponents(this);
+		}
 
 		// Add the new screen to the screen stack and add its java
 		// swing components to the screen
@@ -250,7 +265,7 @@ public class World extends JComponent {
 	 * @param newX    the player's new x-position
 	 * @param newY    the player's new y-position
 	 */
-	public void changeArea(AreaScreen newArea, int newX, int newY) {
+	public synchronized void changeArea(AreaScreen newArea, int newX, int newY) {
 		// Ensure the player's new x-position will be within the screen's bounds
 		if (newX < 0 || newX > AreaScreen.TILES_PER_ROW) {
 			throw new IllegalArgumentException(
@@ -270,13 +285,22 @@ public class World extends JComponent {
 		// Update the player's position, ensuring that the player does not activate the effect
 		// of the tile they are moving to
 		player.updatePosition(newX, newY, false);
+
+		// Update which zone the player is currently in
+		currentZone = newArea.getZone();
+
+		// Let the area screen know that the player's zone has changed
+		newArea.onPlayerZoneChanged();
+
+		// Update the ui's state so that everything is drawn correctly
+		updateUIState();
 	}
 
 	/**
 	 * This method closes the current screen and returns to the
 	 * previous screen in the screen stack.
 	 */
-	public void closeCurrentScreen() {
+	public synchronized void closeCurrentScreen() {
 		// Remove the current screen's java swing components
 		screenStack.peek().removeSwingComponents(this);
 
@@ -343,7 +367,7 @@ public class World extends JComponent {
 	 * if the message queue is not empty and updating the current screen if
 	 * it needs updating.
 	 */
-	public void update() {
+	public synchronized void update() {
 		// If an overlay is being displayed then do not update the world. However,
 		// do update the overlay.
 		if (isOverlayDisplayed()) {
@@ -361,10 +385,10 @@ public class World extends JComponent {
 			showOverlayAndPause(new MessageOverlay(this, player, currentMessage));
 		}
 		
-		// If a screen is being displayed and it is a BattleScreen then we need to
-		// update its state
-		if (!screenStack.empty()) {
-			if (screenStack.peek() instanceof BattleScreen) {
+		// If a battle is happening then we need to update the battle screen
+		if (inBattle) {
+			// Update the battle screen if one is being displayed
+			if (!screenStack.empty() && screenStack.peek() instanceof BattleScreen) {
 				((BattleScreen) screenStack.peek()).update();
 			}
 		}
@@ -384,7 +408,7 @@ public class World extends JComponent {
 	 * @param message the message to display to the player
 	 * @param time    the amount of time, in seconds, to display the message for
 	 */
-	public void showMessage(String messageIn, int timeIn) {
+	public synchronized void showMessage(String messageIn, int timeIn) {
 		// Wrap the message with an html tag so that the text will be formatted as HTML
 		// which will allow for the text to be formatted and so that the text will wrap
 		// to a new line if it cannot fit in a single line
@@ -432,39 +456,52 @@ public class World extends JComponent {
 
 		// Close the battle screen
 		closeCurrentScreen();
-		
 
 		// If the player died then show the player death screen. Otherwise
 		// give the player their experience and resume the game.
 		if (playerDead) {
 			showScreen(new PlayerDeathScreen(this, enemy));
 		} else {
+			// Show a message
+			showMessage(
+				String.format(
+					"You defeated the enemy and gained %d experience!!!",
+					experienceGain
+				),
+				4
+			);
+
+			// Give the player their experience
 			player.addExperience(experienceGain);
 			
 			// Remove the battle tile which triggered this fight
 			AreaScreen currentScreen = (AreaScreen) screenStack.peek();
-			currentScreen.tileMap[player.yPos][player.xPos] = null;
+			currentScreen.tileMap[player.getY()][player.getX()] = null;
 			
-			enemiesRemaining[Main.currentLevel-2]-=1;
-			if (enemiesRemaining[Main.currentLevel-2] <= 0)
-			{
-				switch (Main.currentLevel) {
-				case 2:
-					currentScreen.tileMap[2][4] = null;
-					Walls.arrays[1][4][1] = 0;
-					break;
-				case 3:
-					currentScreen.tileMap[4][6] = null;
-					Walls.arrays[2][7][4] = 0;
-					break;
-				case 4:
-					currentScreen.tileMap[6][4] = null;
-					Walls.arrays[3][4][7] = 0;
-					break;
-				case 5:
-					currentScreen.tileMap[4][2] = null;
-					Walls.arrays[4][1][4] = 0;
-					break;
+			// Decrement the number of enemies remaining in this zone
+			enemiesRemaining.put(currentZone, enemiesRemaining.get(currentZone) - 1);
+
+			// If there are no more enemies in this zone then open up the boss
+			if (enemiesRemaining.get(currentZone) <= 0) {
+				switch (currentZone) {
+					case FIRE:
+						currentScreen.tileMap[2][4] = null;
+						Walls.setWallAtPosition(currentZone, 4, 1, false);
+						break;
+					case GEM:
+						currentScreen.tileMap[4][6] = null;
+						Walls.setWallAtPosition(currentZone, 7, 4, false);
+						break;
+					case ICE:
+						currentScreen.tileMap[6][4] = null;
+						Walls.setWallAtPosition(currentZone, 4, 7, false);
+						break;
+					case ROCK:
+						currentScreen.tileMap[4][2] = null;
+						Walls.setWallAtPosition(currentZone, 1, 4, false);
+						break;
+					default:
+						break;
 				}
 			}
 			
@@ -552,6 +589,24 @@ public class World extends JComponent {
 	 */
 	public SpringLayout getSpringLayout() {
 		return springLayout;
+	}
+
+	/**
+	 * This method returns the player.
+	 * 
+	 * @return the player
+	 */
+	public Player getPlayer() {
+		return player;
+	}
+
+	/**
+	 * This method returns the zone that the player is currently in.
+	 * 
+	 * @return the zone that the player is currently in
+	 */
+	public Zone getCurrentZone() {
+		return currentZone;
 	}
 	
 	/**

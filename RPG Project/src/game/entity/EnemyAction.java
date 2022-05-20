@@ -1,6 +1,7 @@
 package game.entity;
 
 import game.Main;
+import game.World;
 
 /**
  * This class represents an action that can be preformed by an enemy. Currently
@@ -33,15 +34,18 @@ public non-sealed class EnemyAction extends Action {
      * and poison actions will have any effect on the player since
      * all the other actions have a positive benefit.
      * 
+     * @param world  the world
      * @param player the player
      * @param enemy  the enemy
      * 
-     * @see Action#applyPlayerEffect(Player, IEnemy)
+     * @see Action#applyPlayerEffect(World, Player, IEnemy)
      */
     @Override
-    public void applyPlayerEffect(Player player, IEnemy enemy) {
-        // If the player dodges this action then stop executing this method
+    public void applyPlayerEffect(World world, Player player, IEnemy enemy) {
+        // If the player dodges this action then stop executing this method after showing a message
         if (Main.RANDOM.nextDouble() < player.getSecondaryAttributeValue(Attribute.DODGE_CHANCE)) {
+            // Show a message and then return
+            world.showMessage("Player dodged enemy's attack.", 2);
             return;
         }
 
@@ -56,12 +60,44 @@ public non-sealed class EnemyAction extends Action {
         switch (type) {
             // Hit actions do a predetermined amount of action
             case HIT:
+                // Show a different message based on if the hit was critical
+                if (critical) {
+                    world.showMessage(
+                        String.format(
+                            "Enemy dealt a critical hit on player for %d damage!",
+                            (int)(effect * damageMultiplier)
+                        ),
+                        4
+                    );
+                } else {
+                    world.showMessage(
+                        String.format(
+                            "Enemy hit player for %d damage!",
+                            (int)effect
+                        ),
+                        3
+                    );
+                }
+
+                // Inflict the damage
                 player.inflictDamage((int)(effect * damageMultiplier));
                 return;
             
             // Poison actions do damage over multiple turns
             case POISON:
-            player.inflictPoison((int)effect, numTurns);
+                // Show a message
+                world.showMessage(
+                    String.format(
+                        "Enemy inflicted poison on player dealing %d damage for %d turns.",
+                        (int)effect,
+                        numTurns
+                    ),
+                    4
+                );
+
+                // Inflict the effect
+                player.inflictPoison((int)effect, numTurns);
+                return;
             
             // Actions other than hit and poison have no effect on the player
             default:
@@ -76,17 +112,28 @@ public non-sealed class EnemyAction extends Action {
      * all other actions either do damage or are unsupported for
      * enemies.
      * 
+     * @param world  the world
      * @param enemy  the enemy
      * @param player the player
      * 
-     * @see Action#applyEnemyEffect(IEnemy, Player)
+     * @see Action#applyEnemyEffect(World, IEnemy, Player)
      */
     @Override
-    public void applyEnemyEffect(IEnemy enemy, Player player) {
+    public void applyEnemyEffect(World world, IEnemy enemy, Player player) {
         // Apply the action's effect based on its type
         switch (type) {
             // Healing actions give the enemy health back
             case HEALING:
+                // Show a message
+                world.showMessage(
+                    String.format(
+                        "Enemy healed %d health.",
+                        (int)effect
+                    ),
+                    3
+                );
+
+                // Give the enemy the health
                 enemy.addHealth((int)effect);
                 return;
             

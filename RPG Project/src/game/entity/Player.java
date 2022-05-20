@@ -11,7 +11,6 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import game.Main;
 import game.Walls;
 import game.World;
 import game.ui.Tile;
@@ -37,8 +36,8 @@ public class Player implements ILivingEntity {
 		// A try-catch statement is used in case there is a problem loading one of the images
 		try {
 			PREMADE_PLAYERS[0] = new Player("Mage 1", ImageIO.read(new File("res/char1.png")), 2, 1, 1, 0);
-			PREMADE_PLAYERS[1] = new Player("Mage 2", ImageIO.read(new File("res/char2.png")), 2, 1, 1, 0);
-			PREMADE_PLAYERS[2] = new Player("Mage 3", ImageIO.read(new File("res/char3.png")), 2, 1, 1, 0);
+			PREMADE_PLAYERS[1] = new Player("Mage 2", ImageIO.read(new File("res/char2.png")), 1, 1, 2, 0);
+			PREMADE_PLAYERS[2] = new Player("Mage 3", ImageIO.read(new File("res/char3.png")), 1, 2, 1, 0);
 		} catch (IOException e) {
 			// If there was an error loading one of the images then we need to quit the game
 			throw new RuntimeException("Unable to load image for character!", e);
@@ -118,12 +117,12 @@ public class Player implements ILivingEntity {
 	/**
 	 * The x-position of the player in the world.
 	 */
-	public int xPos = 0;
+	private int xPos = (AreaScreen.TILES_PER_ROW - 1) / 2;
 	
 	/**
 	 * The y-position of the player in the world.
 	 */
-	public int yPos = 0;
+	private int yPos = (AreaScreen.ROWS_OF_TILES - 1) / 2;
 	
 	/**
 	 * The world the player is in.
@@ -200,6 +199,11 @@ public class Player implements ILivingEntity {
 	 * A boolean to tell whether or not the character is currently facing the right of the screen
 	 */
 	private boolean facingRight = true;
+
+	/**
+	 * This is the number of keys that the character has collected.
+	 */
+	private int numKeys = 0;
 	
 	/**
 	 * This constructs a dummy player with the given values for its attributes.
@@ -466,6 +470,16 @@ public class Player implements ILivingEntity {
 		// If the player is poisoned then deal the poison damage
 		// and decrement the number of turns remaining
 		if (hasPoisonEffect()) {
+			// Show a message
+			world.showMessage(
+				String.format(
+					"Player took %d damage from a poison effect.",
+					poisonDamagePerTurn
+				),
+				4
+			);
+
+			// Inflict the damage
 			inflictDamage(poisonDamagePerTurn);
 			numPoisonTurnsRemaining--;
 		}
@@ -473,6 +487,16 @@ public class Player implements ILivingEntity {
 		// If the player has an active healing effect then give them the health
 		// they should gain and decrement the number of turns remaining
 		if (hasHealingEffect()) {
+			// Show a message
+			world.showMessage(
+				String.format(
+					"Player gained %d health from a healing effect.",
+					healingPerTurn
+				),
+				4
+			);
+
+			// Add the health
 			addHealth(healingPerTurn);
 			numHealingTurnsRemaining--;
 		}
@@ -482,6 +506,15 @@ public class Player implements ILivingEntity {
 		if (hasProtectionEffect()) {
 			numProtectionTurnsRemaining--;
 		}
+
+		// Show a message about the player regenerating their mana
+		world.showMessage(
+			String.format(
+				"Player regenerated %d mana at the start of their turn.",
+				(int)getSecondaryAttributeValue(Attribute.MANA_REGEN)
+			),
+			4
+		);
 
 		// Regenerate part of the player's mana
 		addMana((int)getSecondaryAttributeValue(Attribute.MANA_REGEN));
@@ -555,7 +588,17 @@ public class Player implements ILivingEntity {
 		// If the player has an active protection effect then multiply the amount
 		// of damage by the protection multiplier
 		if (hasProtectionEffect()) {
+			// Reduce the damage
 			damage *= incomingDamageMultiplier;
+
+			// Show a message
+			world.showMessage(
+				String.format(
+					"A protection effect reduced the damage to %d.",
+					damage
+				),
+				2
+			);
 		}
 
 		// Inflict the given amount of damage but do not let the player's health
@@ -634,24 +677,27 @@ public class Player implements ILivingEntity {
 	/*************************************************************************************/
 	
 	/**
-	 * This method updates the player's position to the given coordinates.
+	 * This method updates the player's position to the given coordinates assuming
+	 * there is not a wall at the player's new position.
 	 * 
-	 * @param newX the player's new x-position
-	 * @param newY the player's new y-position
+	 * @param newX    the player's new x-position
+	 * @param newY    the player's new y-position
+	 * @param loading whether or not the player is changing zones
 	 */
 	public void updatePosition(int newX, int newY, boolean loading) {
+		// If there is a wall at the position we are movig to then do not continue
+		if (Walls.getWallAtPosition(world.getCurrentZone(), newY, newX)) return;
+
 		// Update our position
-	
-		if (Walls.arrays[Main.currentLevel-1][newX][newY] != 1)
-			{
-			//newX, newY
-			xPos = newX;
-			yPos = newY;
-			if (loading)
-			{
-				// Inform the world of our change in position
-				world.onPlayerPositionChange(newX, newY);}
-			};
+		xPos = newX;
+		yPos = newY;
+
+		// If the player is not changing areas then inform the world we have moved
+		// so that it cn preform any necessary actions
+		if (loading) {
+			// Inform the world of our change in position
+			world.onPlayerPositionChange(newX, newY);
+		}
 	}
 
 	/**
@@ -751,6 +797,26 @@ public class Player implements ILivingEntity {
 	}
 
 	/**
+	 * This method returns the player's current level.
+	 * 
+	 * @return the player's current level
+	 */
+	public int getLevel() {
+		return experience / EXPERIENCE_PER_LEVEL;
+	}
+
+	/**
+	 * This method returns the amount of experience the player
+	 * needs to gain to reach the next level.
+	 * 
+	 * @return the amount of experience the player needs to gain
+	 *         to reach the next level.
+	 */
+	public int getExperienceToNextLevel() {
+		return experience > 0 ? experience % EXPERIENCE_PER_LEVEL : EXPERIENCE_PER_LEVEL;
+	}
+
+	/**
 	 * This method adds the given amount of experience to the
 	 * player's amount of experience.
 	 * 
@@ -786,5 +852,22 @@ public class Player implements ILivingEntity {
 	@Override
 	public int getCurrentHealth() {
 		return currentHealth;
+	}
+
+	/**
+	 * This method is called when the player collects a key. This method
+	 * will increment the number of keys that the player has collected.
+	 */
+	public void collectKey() {
+		numKeys++;
+	}
+
+	/**
+	 * This method returns the number of keys that the player has collected.
+	 * 
+	 * @return the number of keys that the player has collected
+	 */
+	public int getNumKeys() {
+		return numKeys;
 	}
 }

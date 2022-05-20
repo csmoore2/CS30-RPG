@@ -7,6 +7,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import game.Main;
+import game.World;
 
 /**
  * This class represents an enemy.
@@ -17,6 +18,11 @@ public class Enemy implements IEnemy {
 	 * to determine how much damage the enemy's poison attacks do each turn.
 	 */
 	public static final double POISON_DAMAGE_MULTIPLIER = 0.5;
+
+	/**
+	 * This is the world.
+	 */
+	private final World world;
 
 	/**
 	 * This is the enemy's image.
@@ -85,9 +91,12 @@ public class Enemy implements IEnemy {
 	 * This constructs a sem-randomized enemy based on the amount of
 	 * experience the player has.
 	 * 
+	 * @param worldIn   the world
 	 * @param playerExp the amount of experience the playerHas
 	 */
-	public Enemy(int playerExp) {
+	public Enemy(World worldIn, int playerExp) {
+		world = worldIn;
+
 		// Try loading the enemy's image
 		try {
 			image = ImageIO.read(new File("res/test2.jpg"));
@@ -109,7 +118,7 @@ public class Enemy implements IEnemy {
 		healingPotionHealth = (int)(0.25 * maxHealth);
 
 		// Calculate the base damage dealt by an attack from this enemy
-		baseAttackDamage = (Main.RANDOM.nextInt((playerExp / 50) + 1) * 100) + (playerExp*2) + 100 + 1000;
+		baseAttackDamage = (Main.RANDOM.nextInt((playerExp / 50) + 1) * 100) + (playerExp*2) + 100;
 
 		// Calculate the number of turns this enemy's poison attacks should last
 		numPoisonTurns = playerExp >= 150 ? 3 : 2;
@@ -206,6 +215,16 @@ public class Enemy implements IEnemy {
 		// If the enemy is poisoned then deal the poison damage
 		// and decrement the number of turns remaining
 		if (hasPoisonEffect()) {
+			// Show a message
+			world.showMessage(
+				String.format(
+					"Enemy took %d damage from a poison effect.",
+					poisonDamagePerTurn
+				),
+				4
+			);
+
+			// Inflict the damage
 			inflictDamage(poisonDamagePerTurn);
 			numPoisonTurnsRemaining--;
 		}

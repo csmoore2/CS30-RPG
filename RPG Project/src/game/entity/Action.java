@@ -1,5 +1,7 @@
 package game.entity;
 
+import game.World;
+
 /**
  * This enum declares all the actions the player can take during
  * their turn in a battle.
@@ -66,6 +68,35 @@ public abstract sealed class Action permits PlayerAction, EnemyAction {
 		manaCost = manaCostIn;
 		requiredAbilityPoints = requiredAbilityPointsIn;
 	}
+
+	/**
+	 * This method applys the effect that this method has on
+	 * the player to the player. For a player's action this
+	 * will either be nothing or a positive effect. For an
+	 * enemy's action this will either be nothing or a
+	 * negative effect
+	 * 
+	 * @param world  the world
+	 * @param player the player
+	 * @param enemy  the enemy
+	 */
+	public abstract void applyPlayerEffect(World world, Player player, IEnemy enemy);
+
+	/**
+	 * This method applys the effect that this method has on
+	 * the enemy to the enemy. For a player's action this
+	 * will either be nothing or a negative effect. For an
+	 * enemy's action this will either be nothing or a
+	 * positive effect
+	 * 
+	 * Note: the player is passed to this method in case the effect
+	 *       of the action is based on the player's attributes
+	 * 
+	 * @param world  the world
+	 * @param enemy  the enemy
+	 * @param player the player
+	 */
+	public abstract void applyEnemyEffect(World world, IEnemy enemy, Player player);
 	
 	/**
 	 * This method returns the name of this action.
@@ -88,38 +119,22 @@ public abstract sealed class Action permits PlayerAction, EnemyAction {
 	/**
 	 * This method returns the number representing this action's effect.
 	 * 
+	 * Note: a player is provided since the damage dealt by the player's
+	 *       special attack is a secondary attribute
+	 * 
+	 * @param player the player
+	 * 
 	 * @return the number representing this action's effect
 	 */
-	public double getEffect() {
-		return effect;
+	public double getEffect(Player player) {
+		// If this is a special action and this is a player action then
+		// return the value of the player's SPECIAL_DAMAGE attribute
+		if (type == Type.SPECIAL && this instanceof PlayerAction) {
+			return player.getSecondaryAttributeValue(Attribute.SPECIAL_DAMAGE);
+		} else {
+			return effect;
+		}
 	}
-
-	/**
-	 * This method applys the effect that this method has on
-	 * the player to the player. For a player's action this
-	 * will either be nothing or a positive effect. For an
-	 * enemy's action this will either be nothing or a
-	 * negative effect
-	 * 
-	 * @param player the player
-	 * @param enemy  the enemy
-	 */
-	public abstract void applyPlayerEffect(Player player, IEnemy enemy);
-
-	/**
-	 * This method applys the effect that this method has on
-	 * the enemy to the enemy. For a player's action this
-	 * will either be nothing or a negative effect. For an
-	 * enemy's action this will either be nothing or a
-	 * positive effect
-	 * 
-	 * Note: the player is passed to this method in case the effect
-	 *       of the action is based on the player's attributes
-	 * 
-	 * @param enemy  the enemy
-	 * @param player the player
-	 */
-	public abstract void applyEnemyEffect(IEnemy enemy, Player player);
 	
 	/**
 	 * This method returns the number of turns this actions lasts, or 0 if this

@@ -6,12 +6,19 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -32,6 +39,11 @@ import static javax.swing.SpringLayout.*;
 
 public class BattleScreen implements IScreen {
 	/**
+	 * This is the size that each status effect icon will be scaled to be.
+	 */
+	public static final int STATUS_EFFECT_ICON_SIZE = 50;
+
+	/**
 	 * This is the width we want the player's and enemy's images to have.
 	 */
 	public static final int TARGET_PICTURE_WIDTH = 200;
@@ -44,12 +56,12 @@ public class BattleScreen implements IScreen {
 	/**
 	 * This is the x-position that the player's image is drawn at in the screen.
 	 */
-	public static final int PLAYER_IMAGE_X_POS = 240;
+	public static final int PLAYER_IMAGE_X_POS = 15;
 
 	/**
 	 * This is the x-position that the enemy's image is drawn at in the screen.
 	 */
-	public static final int ENEMY_IMAGE_X_POS = 840;
+	public static final int ENEMY_IMAGE_X_POS = Main.SCREEN_WIDTH - TARGET_PICTURE_WIDTH - 25;
 
 	/**
 	 * This is the y-position that the player's and enemy's images are drawn at
@@ -71,6 +83,24 @@ public class BattleScreen implements IScreen {
 	 * This is the font that will be used to display labels for objects.
 	 */
 	public static final Font LABEL_TEXT_FONT = new Font("Label Text Font", Font.BOLD, 20);
+
+	/**
+	 * This is the icon that will be displayed under the player's image to
+	 * indicate they have an active protection effect.
+	 */
+	private Image protectionEffectIcon;
+
+	/**
+	 * This is the icon that will be displayed under the player's image to
+	 * indicate they have an active healing effect.
+	 */
+	private Image healingEffectIcon;
+
+	/**
+	 * This is the icon that will be displayed under the player's image to
+	 * indicate they have an active poison effect.
+	 */
+	private Image poisonEffectIcon;
 	
 	/**
 	 * This is the transformation that will be applied to the player's image so
@@ -166,6 +196,39 @@ public class BattleScreen implements IScreen {
 		enemy = enemyIn;
 		
 		/******************************************************************
+		 *                      STATUS EFFECT IMAGES                      *
+		 ******************************************************************/
+
+		// Try to load the images for each status effect
+		try {
+			// Try to load the image for the protection effect
+			protectionEffectIcon = ImageIO.read(new File("res/shield.png"));
+			protectionEffectIcon = protectionEffectIcon.getScaledInstance(
+				STATUS_EFFECT_ICON_SIZE,
+				STATUS_EFFECT_ICON_SIZE,
+				Image.SCALE_SMOOTH
+			);
+
+			// Try to load the image for the healing effect
+			healingEffectIcon = ImageIO.read(new File("res/heart.png"));
+			healingEffectIcon = healingEffectIcon.getScaledInstance(
+				STATUS_EFFECT_ICON_SIZE,
+				STATUS_EFFECT_ICON_SIZE,
+				Image.SCALE_SMOOTH
+			);
+
+			// Try to load the image for the poison effect
+			poisonEffectIcon = ImageIO.read(new File("res/poison.png"));
+			poisonEffectIcon = poisonEffectIcon.getScaledInstance(
+				STATUS_EFFECT_ICON_SIZE,
+				STATUS_EFFECT_ICON_SIZE,
+				Image.SCALE_SMOOTH
+			);
+		} catch (IOException e) {
+			throw new RuntimeException("Unable to load status effect icon!", e);
+		}
+		
+		/******************************************************************
 		 *                          PLAYER IMAGE                          *
 		 ******************************************************************/
 
@@ -232,32 +295,8 @@ public class BattleScreen implements IScreen {
 		
 		// Loop through each possible action the player has and add them the their corresponding JPanel
 		for (PlayerAction action : PlayerAction.PLAYER_BATTLE_ACTIONS) {
-			// Build the text the button corresponding to this action will display. This starts with
-			// the action's name and its mana cost
-			String buttonText = action.getName();
-			buttonText += String.format(" (Cost: %d mana", action.getManaCost());
-			
-			// Hit, poison, and special actions are all attacks and deal damage.
-			// Healing actions give the player health.
-			// Protection actions reduce incoming damage by a multiplier
-			if (action.getType() == Action.Type.HIT || action.getType() == Action.Type.POISON || action.getType() == Action.Type.SPECIAL) {
-				buttonText += String.format(", Damage: %d", (int)action.getEffect());
-			} else if (action.getType() == Action.Type.HEALING) {
-				buttonText += String.format(", +%dHP", (int)action.getEffect());
-			} else if (action.getType() == Action.Type.PROTECTION) {
-				buttonText += String.format(", %.2fx incoming damage", action.getEffect());
-			}
-			
-			// If the action lasts for multiple turns it should be indicated on the button's text
-			if (action.getNumTurns() > 1) {
-				buttonText += String.format(" for %d turns", action.getNumTurns());
-			}
-			
-			// Add the closing parenthesis
-			buttonText += ')';
-			
 			// Create the button representing the action
-			JButton actionButton = new JButton(buttonText);
+			JButton actionButton = new JButton(generateEffectStringForAction(action));
 
 			// Tell the button to perform the action as the player when it is clicked
 			actionButton.addActionListener((a) -> performPlayerAction(action));
@@ -454,17 +493,41 @@ public class BattleScreen implements IScreen {
 	private void updateActions() {
 		for (Entry<Action, JButton> actionButtonPair : actionButtonMap.entrySet()) {
 			Action action = actionButtonPair.getKey();
+
+			// This list contains the reasons that the action is disabled
+			List<String> disabledReasons = new ArrayList<>();
 			
 			// Determine whether or not the player can do this action based on the number of ability points required. the mana cost,
 			// and whose turn it is
 			boolean buttonEnabled = player.getPrimaryAttributeValue(Attribute.ABILITIES) >= action.getRequiredAbilityPoints()
 								 && player.getCurrentMana() >= action.getManaCost()
 								 && playerTurn;
+
+			// If the button was disabled because the player does not have enough ability
+			// points then add it to the list of reasons that the button is disabled
+			if (player.getPrimaryAttributeValue(Attribute.ABILITIES) < action.getRequiredAbilityPoints()) {
+				disabledReasons.add(String.format(
+					"%d ability points required",
+					action.getRequiredAbilityPoints()
+				));
+			}
+
+			// If the button was disabled because the player does not have enough mana then add
+			// it to the list of reasons that the button is disabled
+			if (player.getCurrentMana() < action.getManaCost()) {
+				disabledReasons.add("not enough mana");
+			}
 			
 			// If the action is a poison action and the enemy is already poisoned then
 			// stop the player from stacking poison effects
 			if (action.getType() == Action.Type.POISON) {
 				buttonEnabled = buttonEnabled && !enemy.hasPoisonEffect();
+
+				// If the button was disabled because the enemy is already poisoned then add
+				// it to the list of reasons that the button is disabled
+				if (enemy.hasPoisonEffect()) {
+					disabledReasons.add("enemy already poisoned");
+				}
 			}
 
 			// If the action is a sustained healing action or a protection action and the
@@ -472,11 +535,66 @@ public class BattleScreen implements IScreen {
 			// the player from stacking defence effects
 			if ((action.getType() == Action.Type.HEALING && action.getNumTurns() > 1) || action.getType() == Action.Type.PROTECTION) {
 				buttonEnabled = buttonEnabled && !player.hasHealingEffect() && !player.hasProtectionEffect();
+
+				// If the button was disabled because the player already has a multi-turn healing
+				// or protection effect then add it to the list of reasons that the button is disabled
+				if (player.hasHealingEffect() || player.hasProtectionEffect()) {
+					disabledReasons.add("cannot stack effects");
+				}
 			}
 			
 			// Update the button's state 
 			actionButtonPair.getValue().setEnabled(buttonEnabled);
+
+			// If the button is disabled then append the reasons it is disabled to its text
+			// instead of the actions effects. Otherwise display the action and its effects
+			if (!buttonEnabled) {
+				// Combine all the reasons the button is disabled into one string
+				String disabledReasonStr = Arrays.toString(disabledReasons.toArray());
+
+				// Append the reasons to the end of the button's text
+				actionButtonPair.getValue().setText(action.getName() + ' ' + disabledReasonStr);
+			} else {
+				actionButtonPair.getValue().setText(generateEffectStringForAction(action));
+			}
 		}
+	}
+
+	/**
+	 * This method generates a string that contains all of the given
+	 * action's effects.
+	 * 
+	 * @param action the action whose effect string we are building
+	 * 
+	 * @return a string that contains all of the given action's effects
+	 */
+	private String generateEffectStringForAction(Action action) {
+		// Build the string that contains all of the action's effects. This starts with
+		// the action's name and its mana cost
+		String effectString = action.getName();
+		effectString += String.format(" (Cost: %d mana", action.getManaCost());
+		
+		// Hit, poison, and special actions are all attacks and deal damage.
+		// Healing actions give the player health.
+		// Protection actions reduce incoming damage by a multiplier
+		if (action.getType() == Action.Type.HIT || action.getType() == Action.Type.POISON || action.getType() == Action.Type.SPECIAL) {
+			effectString += String.format(", Damage: %d", (int)action.getEffect(player));
+		} else if (action.getType() == Action.Type.HEALING) {
+			effectString += String.format(", +%dHP", (int)action.getEffect(player));
+		} else if (action.getType() == Action.Type.PROTECTION) {
+			effectString += String.format(", %.2fx incoming damage", action.getEffect(player));
+		}
+		
+		// If the action lasts for multiple turns it should be indicated in the effect string
+		if (action.getNumTurns() > 1) {
+			effectString += String.format(" for %d turns", action.getNumTurns());
+		}
+		
+		// Add the closing parenthesis
+		effectString += ')';
+
+		// Return the result
+		return effectString;
 	}
 	
 	/**
@@ -513,6 +631,52 @@ public class BattleScreen implements IScreen {
 
 		// Draw the enemy
 		g2d.drawImage(enemy.getImage(), enemyImageScaleOp, ENEMY_IMAGE_X_POS, IMAGE_Y_POS);
+
+		// If the player has a protection effect draw the protection icon below their image
+		// to the left of the centre icon (healing)
+		if (player.hasProtectionEffect()) {
+			g2d.drawImage(
+				protectionEffectIcon,
+				PLAYER_IMAGE_X_POS  + (TARGET_PICTURE_WIDTH / 2) - (STATUS_EFFECT_ICON_SIZE / 2) - 10 - STATUS_EFFECT_ICON_SIZE,
+				IMAGE_Y_POS + TARGET_PICTURE_HEIGHT + 10,
+				null,
+				null
+			);
+		}
+
+		// If the player has a healing effect draw the healing icon below their image in the centre
+		if (player.hasHealingEffect()) {
+			g2d.drawImage(
+				healingEffectIcon,
+				PLAYER_IMAGE_X_POS + (TARGET_PICTURE_WIDTH / 2) - (STATUS_EFFECT_ICON_SIZE / 2),
+				IMAGE_Y_POS + TARGET_PICTURE_HEIGHT + 10,
+				null,
+				null
+			);
+		}
+
+		// If the player has a poison effect draw the poison icon below their image to the right
+		// of the centre icon (healing)
+		if (player.hasPoisonEffect()) {
+			g2d.drawImage(
+				poisonEffectIcon,
+				PLAYER_IMAGE_X_POS + (TARGET_PICTURE_WIDTH / 2) - (STATUS_EFFECT_ICON_SIZE / 2) + 10 + STATUS_EFFECT_ICON_SIZE,
+				IMAGE_Y_POS + TARGET_PICTURE_HEIGHT + 10,
+				null,
+				null
+			);
+		}
+
+		// If the enemy has a poison effect draw the poison icon below their image in the centre
+		if (enemy.hasPoisonEffect()) {
+			g2d.drawImage(
+				poisonEffectIcon,
+				ENEMY_IMAGE_X_POS + (TARGET_PICTURE_WIDTH / 2) - (STATUS_EFFECT_ICON_SIZE / 2),
+				IMAGE_Y_POS + TARGET_PICTURE_HEIGHT + 10,
+				null,
+				null
+			);
+		}
 	}
 
 	/*************************************************************************************/
@@ -526,12 +690,15 @@ public class BattleScreen implements IScreen {
 	 * @param action the action to perform
 	 */
 	private void performPlayerAction(PlayerAction action) {
+		// Display a message about the action on the screen
+		world.showMessage(String.format("Player used %s.", action.getName()), 2);
+
 		// Remove the action's mana cost from the player's mana
 		player.removeMana(action.getManaCost());
 
 		// Perform the action's player and enemy effects
-		action.applyPlayerEffect(player, enemy);
-		action.applyEnemyEffect(enemy, player);
+		action.applyPlayerEffect(world, player, enemy);
+		action.applyEnemyEffect(world, enemy, player);
 
 		// Switch to the enemy's turn
 		changeTurns();
@@ -544,9 +711,12 @@ public class BattleScreen implements IScreen {
 	 * @param action the action to perform
 	 */
 	private void performEnemyAction(EnemyAction action) {
+		// Display a message about the action on the screen
+		world.showMessage(String.format("Enemy used %s.", action.getName()), 2);
+
 		// Perform the action's enemy and player effects
-		action.applyPlayerEffect(player, enemy);
-		action.applyEnemyEffect(enemy, player);
+		action.applyPlayerEffect(world, player, enemy);
+		action.applyEnemyEffect(world, enemy, player);
 
 		// Switch to the player's turn
 		changeTurns();

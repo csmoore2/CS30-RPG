@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import game.Main;
 import game.World;
+import game.Zone;
 import game.entity.IEnemy;
 import game.entity.Player;
 import game.ui.screens.AreaScreen;
@@ -20,7 +21,7 @@ public class Tile {
 	/**
 	 * This is the width and height of a single tile in pixels.
 	 */
-	public static final int TILE_SIZE = Main.SCREEN_WIDTH/9;
+	public static final int TILE_SIZE = AreaScreen.AREA_SCREEN_SIZE / AreaScreen.TILES_PER_ROW;
 	
 	
 	/**
@@ -77,25 +78,17 @@ public class Tile {
 		private final int playerNewY;
 		
 		/**
-		 * The new current level that the loading zone tile should switch to.
-		 */
-		public int tileLevelTo;
-		
-		
-		/**
 		 * This creates a new loading zone tile using the given parameters.
 		 * 
-		 * @param mapImagePathIn this is the path to the background image
-		 *                       of area the loading zone will load
+		 * @param worldIn        this is the world
+		 * @param newZoneIn      the is the zone that the player will be moved to
 		 * @param playerNewXIn   this is the player's new x-position after
 		 *                       the area change
 		 * @param playerNewYIn   this is the player's new y-position after
 		 *                       the area change
 		 */
-		public LoadingZone(String mapImagePathIn, int levelTo, int playerNewXIn, int playerNewYIn) {
-			tileLevelTo = levelTo;
-			Main.setCurrLevel(tileLevelTo);
-			newScreen = AreaScreen.createNewAreaScreen(mapImagePathIn);
+		public LoadingZone(World worldIn, Zone newZoneIn, int playerNewXIn, int playerNewYIn) {
+			newScreen = AreaScreen.createNewAreaScreen(worldIn, newZoneIn);
 			playerNewX = playerNewXIn;
 			playerNewY = playerNewYIn;
 		}
@@ -112,7 +105,6 @@ public class Tile {
 		 */
 		@Override
 		public void performAction(Player player, World world) {
-			Main.setCurrLevel(tileLevelTo);
 			world.changeArea(newScreen, playerNewX, playerNewY);
 		}
 	}
@@ -270,20 +262,22 @@ public class Tile {
 		public void performAction(Player player, World world) {
 			// Removes the tile from the respective location of the tile map, and increases the counter by 1
 			AreaScreen currentScreen = (AreaScreen) world.screenStack.peek();
-			Main.keysGet += 1;
-			switch (Main.currentLevel) {
-			case 2:
-				currentScreen.tileMap[0][4] = null;
-				break;
-			case 3:
-				currentScreen.tileMap[4][8] = null;
-				break;
-			case 4:
-				currentScreen.tileMap[8][4] = null;
-				break;
-			case 5:
-				currentScreen.tileMap[4][0] = null;
-				break;
+			player.collectKey();
+			switch (world.getCurrentZone()) {
+				case FIRE:
+					currentScreen.tileMap[0][4] = null;
+					break;
+				case GEM:
+					currentScreen.tileMap[4][8] = null;
+					break;
+				case ICE:
+					currentScreen.tileMap[8][4] = null;
+					break;
+				case ROCK:
+					currentScreen.tileMap[4][0] = null;
+					break;
+				default:
+					break;
 			}
 		}
 	

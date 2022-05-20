@@ -1,6 +1,7 @@
 package game.entity;
 
 import game.Main;
+import game.World;
 
 /**
  * This class represents an action that can be performed by the player. Currently
@@ -64,23 +65,52 @@ public non-sealed class PlayerAction extends Action {
      * player to the player. Since this is a player action only
      * healing and protection actions will have any effect on the
      * player since all the other actions do damage.
-     * 
+     *
+     * @param world  the world
      * @param player the player
      * @param enemy  the enemy
      * 
-     * @see Action#applyPlayerEffect(Player, IEnemy)
+     * @see Action#applyPlayerEffect(World, Player, IEnemy)
      */
     @Override
-    public void applyPlayerEffect(Player player, IEnemy enemy) {
-        // Apply the action's effect based on its type
+    public void applyPlayerEffect(World world, Player player, IEnemy enemy) {
+        // Apply the action's effect based on its type and show a message
         switch (type) {
             // Healing actions give the player health back
             case HEALING:
+                // Show a different message if it was a sustaind heal
+                if (numTurns > 0) {
+                    world.showMessage(
+                        String.format(
+                            "Player will heal %d health for %d turns.",
+                            (int)effect, numTurns
+                        ),
+                        3
+                    );
+                } else {
+                    world.showMessage(
+                        String.format("Player healed %d health.", (int)effect),
+                        3
+                    );
+                }
+
+                // Apply the effect
                 player.applyHealingEffect((int)effect, numTurns);
                 return;
             
             // Protection actions reduce incoming damage by a multiplier
             case PROTECTION:
+                // Show a message
+                world.showMessage(
+                    String.format(
+                        "Player will take %.1f%% damage for %d turns",
+                        effect * 100,
+                        numTurns
+                    ),
+                    4
+                );
+
+                // Apply the effect
                 player.applyProtectionEffect(effect, numTurns);
                 return;
             
@@ -97,15 +127,18 @@ public non-sealed class PlayerAction extends Action {
      * poison, and special actions will have any effect on the
      * enemy since the other actions provide a positive benefit.
      * 
+     * @param world  the world
      * @param enemy  the enemy
      * @param player the player
      * 
-     * @see Action#applyEnemyEffect(IEnemy, Player)
+     * @see Action#applyEnemyEffect(World, IEnemy, Player)
      */
     @Override
-    public void applyEnemyEffect(IEnemy enemy, Player player) {
-        // If the enemy dodges this action then stop executing this method
+    public void applyEnemyEffect(World world, IEnemy enemy, Player player) {
+        // If the enemy dodges this action then stop executing this method after showing a message
         if (Main.RANDOM.nextDouble() < enemy.getSecondaryAttributeValue(Attribute.DODGE_CHANCE)) {
+            // Show a message and then return
+            world.showMessage("Enemy dodged player's attack.", 3);
             return;
         }
 
@@ -120,18 +153,70 @@ public non-sealed class PlayerAction extends Action {
         switch (type) {
             // Hit actions do a predetermined amount of action
             case HIT:
+                // Show a different message based on if the hit was critical
+                if (critical) {
+                    world.showMessage(
+                        String.format(
+                            "Player dealt a critical hit on enemy for %d damage!",
+                            (int)(effect * damageMultiplier)
+                        ),
+                        4
+                    );
+                } else {
+                    world.showMessage(
+                        String.format(
+                            "Player hit enemy for %d damage!",
+                            (int)effect
+                        ),
+                        3
+                    );
+                }
+
+                // Inflict the damage
                 enemy.inflictDamage((int)(effect * damageMultiplier));
                 return;
             
             // The player's special attack does an amount of damage
             // based on their attributes
             case SPECIAL:
+                // Show a different message based on if the hit was critical
+                if (critical) {
+                    world.showMessage(
+                        String.format(
+                            "The special attack dealt a critical hit on enemy for %d damage!",
+                            (int)(effect * damageMultiplier)
+                        ),
+                        4
+                    );
+                } else {
+                    world.showMessage(
+                        String.format(
+                            "The special attack dealt %d damage to enemy.",
+                            (int)effect
+                        ),
+                        3
+                    );
+                }
+
+                // Inflict the damage
                 enemy.inflictDamage((int)(player.getSecondaryAttributeValue(Attribute.SPECIAL_DAMAGE) * damageMultiplier));
                 return;
             
             // Poison actions do damage over multiple turns
             case POISON:
+                // Show a message
+                world.showMessage(
+                    String.format(
+                        "Player inflicted poison on enemy dealing %d damage for %d turns.",
+                        (int)effect,
+                        numTurns
+                    ),
+                    4
+                );
+
+                // Inflict the effect
                 enemy.inflictPoison((int)effect, numTurns);
+                return;
             
             // Actions other than hit, special, and poison have no effect
             // on the enemy
