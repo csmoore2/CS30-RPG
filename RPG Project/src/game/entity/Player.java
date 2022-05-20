@@ -111,12 +111,12 @@ public class Player implements ILivingEntity {
 	/**
 	 * The x-position of the player in the world.
 	 */
-	private int xPos = 0;
+	private int xPos = (AreaScreen.TILES_PER_ROW - 1) / 2;
 	
 	/**
 	 * The y-position of the player in the world.
 	 */
-	private int yPos = 0;
+	private int yPos = (AreaScreen.ROWS_OF_TILES - 1) / 2;
 	
 	/**
 	 * The world the player is in.
@@ -439,6 +439,16 @@ public class Player implements ILivingEntity {
 		// If the player is poisoned then deal the poison damage
 		// and decrement the number of turns remaining
 		if (hasPoisonEffect()) {
+			// Show a message
+			world.showMessage(
+				String.format(
+					"Player took %d damage from a poison effect.",
+					poisonDamagePerTurn
+				),
+				4
+			);
+
+			// Inflict the damage
 			inflictDamage(poisonDamagePerTurn);
 			numPoisonTurnsRemaining--;
 		}
@@ -446,6 +456,16 @@ public class Player implements ILivingEntity {
 		// If the player has an active healing effect then give them the health
 		// they should gain and decrement the number of turns remaining
 		if (hasHealingEffect()) {
+			// Show a message
+			world.showMessage(
+				String.format(
+					"Player gained %d health from a healing effect.",
+					healingPerTurn
+				),
+				4
+			);
+
+			// Add the health
 			addHealth(healingPerTurn);
 			numHealingTurnsRemaining--;
 		}
@@ -455,6 +475,15 @@ public class Player implements ILivingEntity {
 		if (hasProtectionEffect()) {
 			numProtectionTurnsRemaining--;
 		}
+
+		// Show a message about the player regenerating their mana
+		world.showMessage(
+			String.format(
+				"Player regenerated %d mana at the start of their turn.",
+				(int)getSecondaryAttributeValue(Attribute.MANA_REGEN)
+			),
+			4
+		);
 
 		// Regenerate part of the player's mana
 		addMana((int)getSecondaryAttributeValue(Attribute.MANA_REGEN));
@@ -528,7 +557,17 @@ public class Player implements ILivingEntity {
 		// If the player has an active protection effect then multiply the amount
 		// of damage by the protection multiplier
 		if (hasProtectionEffect()) {
+			// Reduce the damage
 			damage *= incomingDamageMultiplier;
+
+			// Show a message
+			world.showMessage(
+				String.format(
+					"A protection effect reduced the damage to %d.",
+					damage
+				),
+				2
+			);
 		}
 
 		// Inflict the given amount of damage but do not let the player's health

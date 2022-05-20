@@ -18,6 +18,7 @@ import javax.swing.SpringLayout;
 import game.Main;
 import game.World;
 import game.Zone;
+import game.entity.Enemy;
 import game.ui.Tile;
 
 import static javax.swing.SpringLayout.*;
@@ -225,6 +226,7 @@ public class AreaScreen implements IScreen {
 		// Defines loading and battle titles, dependent upon which zone this area screen represents
 		switch (zone) {
 			case GREEN_HUB:
+				tileMap[0][0] = new Tile.BattleTrigger((player) -> new Enemy(world, player.getExperience()));
 				tileMap[0][4] = new Tile.LoadingZone(world, Zone.FIRE, 4, 8);
 				tileMap[4][0] = new Tile.LoadingZone(world, Zone.ROCK, 8, 4);
 				tileMap[8][4] = new Tile.LoadingZone(world, Zone.ICE,  4, 0);

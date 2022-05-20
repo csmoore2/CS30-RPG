@@ -353,7 +353,7 @@ public class World extends JComponent {
 	 * if the message queue is not empty and updating the current screen if
 	 * it needs updating.
 	 */
-	public void update() {
+	public synchronized void update() {
 		// If an overlay is being displayed then do not update the world. However,
 		// do update the overlay.
 		if (isOverlayDisplayed()) {
@@ -373,19 +373,10 @@ public class World extends JComponent {
 		
 		// If a battle is happening then we need to update the battle screen
 		if (inBattle) {
-			updateBattleScreen();
-		}
-	}
-
-	/**
-	 * This method is called to update the battle screen when a battle is
-	 * happening. This method is separate from the update method so that it
-	 * can be synchronized.
-	 */
-	private synchronized void updateBattleScreen() {
-		// Update the battle screen if one is being displayed
-		if (!screenStack.empty() && screenStack.peek() instanceof BattleScreen) {
-			((BattleScreen) screenStack.peek()).update();
+			// Update the battle screen if one is being displayed
+			if (!screenStack.empty() && screenStack.peek() instanceof BattleScreen) {
+				((BattleScreen) screenStack.peek()).update();
+			}
 		}
 	}
 
@@ -403,7 +394,7 @@ public class World extends JComponent {
 	 * @param message the message to display to the player
 	 * @param time    the amount of time, in seconds, to display the message for
 	 */
-	public void showMessage(String messageIn, int timeIn) {
+	public synchronized void showMessage(String messageIn, int timeIn) {
 		// Wrap the message with an html tag so that the text will be formatted as HTML
 		// which will allow for the text to be formatted and so that the text will wrap
 		// to a new line if it cannot fit in a single line
@@ -457,6 +448,16 @@ public class World extends JComponent {
 		if (playerDead) {
 			showScreen(new PlayerDeathScreen(this, enemy));
 		} else {
+			// Show a message
+			showMessage(
+				String.format(
+					"You defeated the enemy and gained %d experience!!!",
+					experienceGain
+				),
+				4
+			);
+
+			// Give the player their experience
 			player.addExperience(experienceGain);
 		}
 	}

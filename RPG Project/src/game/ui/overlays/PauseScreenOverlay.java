@@ -128,7 +128,7 @@ public class PauseScreenOverlay extends Overlay {
 	 * This is the size of the decrement and increment buttons in the
 	 * attribute panel.
 	 */
-	public static final Dimension ATTRIBUTE_PANEL_DEC_INC_BUTTON_SIZE = new Dimension(25, 25);
+	public static final Dimension ATTRIBUTE_PANEL_DEC_INC_BUTTON_SIZE = new Dimension(50, 25);
 	
 	/**
 	 * This is the text that will be displayed by the quit game button.

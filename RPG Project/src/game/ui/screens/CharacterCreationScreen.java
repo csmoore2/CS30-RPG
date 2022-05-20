@@ -88,7 +88,7 @@ public class CharacterCreationScreen extends JComponent {
 	/**
 	 * This is the preferred size of the start button.
 	 */
-	public static final Dimension START_BUTTON_SIZE = new Dimension(150, 50);
+	public static final Dimension START_BUTTON_SIZE = new Dimension(200, 50);
 
 	/**
 	 * This is thedefault border that will be used around panels and other components
