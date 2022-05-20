@@ -30,6 +30,7 @@ import game.ui.screens.AreaScreen;
 import game.ui.screens.BattleScreen;
 import game.ui.screens.IScreen;
 import game.ui.screens.PlayerDeathScreen;
+import game.ui.screens.WinScreen;
 import game.util.KeyPressedListener;
 
 /**
@@ -374,8 +375,10 @@ public class World extends JComponent {
 		// Hide the overlay
 		overlay.setVisible(false);
 		
-		// Resume the game
-		paused = false;
+		// Resume the game as long as the message queue is empty
+		if (messageQueue.isEmpty()) {
+			paused = false;
+		}
 		
 		// Update the ui so that everything will be drawn correctly
 		updateUIState();
@@ -458,7 +461,16 @@ public class World extends JComponent {
 	 */
 	private void concludeGame() {
 		// Show some story dialog
-		showMessage("As you deal the killing blow to <b>Marduk</b>", 5);
+		showMessage("As you deal the killing blow to <b>Marduk</b> his voice fills your head. " +
+	                "<i>Noooooo this cannot be happening............</i>.",
+	                5);
+		showMessage("At once everything around you seems to become lighter as the last remnant "   +
+	                "of dark magic leaves the world. People being to celebrate and cheer as they " +
+				    "realize <b>Mardok</b> is no more and they can live their lives in peace.",
+				    10);
+		
+		// Show the win screen
+		showScreen(new WinScreen());
 	}
 
 	/*************************************************************************************/
@@ -536,6 +548,10 @@ public class World extends JComponent {
 		// If the player died then show the player death screen. Otherwise
 		// give the player their experience and resume the game.
 		if (playerDead) {
+			// Show a message
+			showMessage("You died!", 5);
+			
+			// Show the player death screen
 			showScreen(new PlayerDeathScreen(this, enemy));
 		} else {
 			// If the player just defeated the final boss then conclude the story and
