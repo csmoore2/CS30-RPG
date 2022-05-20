@@ -79,7 +79,7 @@ public class FinalBossEnemy extends Enemy {
 				numHealingPotions--;
 
 				return new EnemyAction(
-					"",
+					"Heavenly Healing",
 					Action.Type.HEALING,
 					healingPotionHealth,
 					0
@@ -95,7 +95,7 @@ public class FinalBossEnemy extends Enemy {
 		// player is not poisoned
 		if (choice > 95 && !player.hasPoisonEffect()) {
 			return new EnemyAction(
-				"",
+				"Interstellar Poison",
 				Action.Type.POISON,
 				baseAttackDamage * POISON_DAMAGE_MULTIPLIER,
 				numPoisonTurns
@@ -106,7 +106,7 @@ public class FinalBossEnemy extends Enemy {
 		// that does 100 damage more than their base attack
 		if (choice > 85) {
 			return new EnemyAction(
-				"",
+				"Supernova Destruction",
 				Action.Type.HIT,
 				baseAttackDamage + 100,
 				0
@@ -117,7 +117,7 @@ public class FinalBossEnemy extends Enemy {
 		// 50 damage more than their base attack
 		if (choice > 50) {
 			return new EnemyAction(
-				"",
+				"Galactic Hit",
 				Action.Type.HIT,
 				baseAttackDamage + 50,
 				0
@@ -125,7 +125,7 @@ public class FinalBossEnemy extends Enemy {
 		}
 
 		// Otherwise the boss just does their base attack (50% chance)
-		return new EnemyAction("", Action.Type.HIT, baseAttackDamage, 0);
+		return new EnemyAction("Star Punch", Action.Type.HIT, baseAttackDamage, 0);
 	}
 
 	/*************************************************************************************/

@@ -602,19 +602,19 @@ public class World extends JComponent {
 					switch (currentZone) {
 						case FIRE:
 							removeTileAtLocation(2, 4);
-							Walls.setWallAtPosition(currentZone, 4, 1, false);
+							Walls.setWallAtPosition(currentZone, 1, 4, false);
 							break;
 						case GEM:
 							removeTileAtLocation(4, 6);
-							Walls.setWallAtPosition(currentZone, 7, 4, false);
+							Walls.setWallAtPosition(currentZone, 4, 7, false);
 							break;
 						case ICE:
 							removeTileAtLocation(6, 4);
-							Walls.setWallAtPosition(currentZone, 4, 7, false);
+							Walls.setWallAtPosition(currentZone, 7, 4, false);
 							break;
 						case ROCK:
 							removeTileAtLocation(4, 2);
-							Walls.setWallAtPosition(currentZone, 1, 4, false);
+							Walls.setWallAtPosition(currentZone, 4, 1, false);
 							break;
 						default:
 							break;
