@@ -4,7 +4,7 @@ import game.Main;
 import game.World;
 
 /**
- * This class represents an action that can be preformed by the player. Currently
+ * This class represents an action that can be performed by the player. Currently
  * this just means actions that can be performed during a battle. All instances of
  * this class are predetermined, however, this class can be extended to create new
  * player actions.

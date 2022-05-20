@@ -53,12 +53,25 @@ public class Walls {
 	}
 
 	/**
+	 * This method sets whether or not there is a wall at the given position in
+	 * the given zone.
+	 * 
+	 * @param zone the zone of the tile to set
+	 * @param row  the row of the tile to set
+	 * @param col  the column of the tile to set
+	 * @param wall whether there is a wall at the given position in the given zone
+	 */
+	public static void setWallAtPosition(Zone zone, int row, int col, boolean wall) {
+		zoneToWallMap.get(zone)[row][col] = wall;
+	}
+
+	/**
 	 * This method returns whether or not there is a wall at the given position
 	 * in the given zone.
 	 * 
 	 * @param zone the zone to check
 	 * @param row  the row of the tile to check
-	 * @param col  the columns of the tile to check
+	 * @param col  the column of the tile to check
 	 * 
 	 * @return whether or not there is a wall at the given position in the given zone
 	 */

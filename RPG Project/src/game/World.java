@@ -6,6 +6,8 @@ import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayDeque;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Stack;
 
@@ -38,7 +40,7 @@ public class World extends JComponent {
 	 * that is currently visible to the user. Pushing a new screen on represents
 	 * forward navigation and popping of the top screen represents backwards navigation.
 	 */
-	private final Stack<IScreen> screenStack = new Stack<>();
+	public final Stack<IScreen> screenStack = new Stack<>();
 	
 	/**
 	 * This record represents a message that is displayed on the screen to
@@ -101,6 +103,12 @@ public class World extends JComponent {
 	private boolean paused = false;
 	
 	/**
+	 * This variable keeps track of how many enemies remain in each zone
+	 * [enemies remaining in fire, gem, ice, rock]
+	 */
+	public Map<Zone, Integer> enemiesRemaining = new EnumMap<>(Zone.class);
+	
+	/**
 	 * This constructs the world by pushing the starting screen onto the screen stack
 	 * and initializing the game's state.
 	 * 
@@ -109,6 +117,12 @@ public class World extends JComponent {
 	public World(Player playerIn) {
 		// Initialize the map of walls for every zone
 		Walls.initializeWalls();
+
+		// There are three enemies each in the fire, gem, ice, and rock zones
+		enemiesRemaining.put(Zone.FIRE, 3);
+		enemiesRemaining.put(Zone.GEM, 3);
+		enemiesRemaining.put(Zone.ICE, 3);
+		enemiesRemaining.put(Zone.ROCK, 3);
 
 		// Set our layout to be a SpringLayout so that if anything needs to add JComponents to
 		// us they will easily be able to lay them out
@@ -459,6 +473,38 @@ public class World extends JComponent {
 
 			// Give the player their experience
 			player.addExperience(experienceGain);
+			
+			// Remove the battle tile which triggered this fight
+			AreaScreen currentScreen = (AreaScreen) screenStack.peek();
+			currentScreen.tileMap[player.getY()][player.getX()] = null;
+			
+			// Decrement the number of enemies remaining in this zone
+			enemiesRemaining.put(currentZone, enemiesRemaining.get(currentZone) - 1);
+
+			// If there are no more enemies in this zone then open up the boss
+			if (enemiesRemaining.get(currentZone) <= 0) {
+				switch (currentZone) {
+					case FIRE:
+						currentScreen.tileMap[2][4] = null;
+						Walls.setWallAtPosition(currentZone, 4, 1, false);
+						break;
+					case GEM:
+						currentScreen.tileMap[4][6] = null;
+						Walls.setWallAtPosition(currentZone, 7, 4, false);
+						break;
+					case ICE:
+						currentScreen.tileMap[6][4] = null;
+						Walls.setWallAtPosition(currentZone, 4, 7, false);
+						break;
+					case ROCK:
+						currentScreen.tileMap[4][2] = null;
+						Walls.setWallAtPosition(currentZone, 1, 4, false);
+						break;
+					default:
+						break;
+				}
+			}
+			
 		}
 	}
 
