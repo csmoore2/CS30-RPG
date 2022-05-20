@@ -6,8 +6,11 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,6 +39,11 @@ import static javax.swing.SpringLayout.*;
 
 public class BattleScreen implements IScreen {
 	/**
+	 * This is the size that each status effect icon will be scaled to be.
+	 */
+	public static final int STATUS_EFFECT_ICON_SIZE = 50;
+
+	/**
 	 * This is the width we want the player's and enemy's images to have.
 	 */
 	public static final int TARGET_PICTURE_WIDTH = 200;
@@ -47,12 +56,12 @@ public class BattleScreen implements IScreen {
 	/**
 	 * This is the x-position that the player's image is drawn at in the screen.
 	 */
-	public static final int PLAYER_IMAGE_X_POS = 100;
+	public static final int PLAYER_IMAGE_X_POS = 15;
 
 	/**
 	 * This is the x-position that the enemy's image is drawn at in the screen.
 	 */
-	public static final int ENEMY_IMAGE_X_POS = Main.SCREEN_WIDTH - TARGET_PICTURE_WIDTH - 75;
+	public static final int ENEMY_IMAGE_X_POS = Main.SCREEN_WIDTH - TARGET_PICTURE_WIDTH - 25;
 
 	/**
 	 * This is the y-position that the player's and enemy's images are drawn at
@@ -74,6 +83,24 @@ public class BattleScreen implements IScreen {
 	 * This is the font that will be used to display labels for objects.
 	 */
 	public static final Font LABEL_TEXT_FONT = new Font("Label Text Font", Font.BOLD, 20);
+
+	/**
+	 * This is the icon that will be displayed under the player's image to
+	 * indicate they have an active protection effect.
+	 */
+	private Image protectionEffectIcon;
+
+	/**
+	 * This is the icon that will be displayed under the player's image to
+	 * indicate they have an active healing effect.
+	 */
+	private Image healingEffectIcon;
+
+	/**
+	 * This is the icon that will be displayed under the player's image to
+	 * indicate they have an active poison effect.
+	 */
+	private Image poisonEffectIcon;
 	
 	/**
 	 * This is the transformation that will be applied to the player's image so
@@ -167,6 +194,39 @@ public class BattleScreen implements IScreen {
 		world = worldIn;
 		player = playerIn;
 		enemy = enemyIn;
+		
+		/******************************************************************
+		 *                      STATUS EFFECT IMAGES                      *
+		 ******************************************************************/
+
+		// Try to load the images for each status effect
+		try {
+			// Try to load the image for the protection effect
+			protectionEffectIcon = ImageIO.read(new File("res/shield.png"));
+			protectionEffectIcon = protectionEffectIcon.getScaledInstance(
+				STATUS_EFFECT_ICON_SIZE,
+				STATUS_EFFECT_ICON_SIZE,
+				Image.SCALE_SMOOTH
+			);
+
+			// Try to load the image for the healing effect
+			healingEffectIcon = ImageIO.read(new File("res/heart.png"));
+			healingEffectIcon = healingEffectIcon.getScaledInstance(
+				STATUS_EFFECT_ICON_SIZE,
+				STATUS_EFFECT_ICON_SIZE,
+				Image.SCALE_SMOOTH
+			);
+
+			// Try to load the image for the poison effect
+			poisonEffectIcon = ImageIO.read(new File("res/poison.png"));
+			poisonEffectIcon = poisonEffectIcon.getScaledInstance(
+				STATUS_EFFECT_ICON_SIZE,
+				STATUS_EFFECT_ICON_SIZE,
+				Image.SCALE_SMOOTH
+			);
+		} catch (IOException e) {
+			throw new RuntimeException("Unable to load status effect icon!", e);
+		}
 		
 		/******************************************************************
 		 *                          PLAYER IMAGE                          *
@@ -571,6 +631,52 @@ public class BattleScreen implements IScreen {
 
 		// Draw the enemy
 		g2d.drawImage(enemy.getImage(), enemyImageScaleOp, ENEMY_IMAGE_X_POS, IMAGE_Y_POS);
+
+		// If the player has a protection effect draw the protection icon below their image
+		// to the left of the centre icon (healing)
+		if (player.hasProtectionEffect()) {
+			g2d.drawImage(
+				protectionEffectIcon,
+				PLAYER_IMAGE_X_POS  + (TARGET_PICTURE_WIDTH / 2) - (STATUS_EFFECT_ICON_SIZE / 2) - 10 - STATUS_EFFECT_ICON_SIZE,
+				IMAGE_Y_POS + TARGET_PICTURE_HEIGHT + 10,
+				null,
+				null
+			);
+		}
+
+		// If the player has a healing effect draw the healing icon below their image in the centre
+		if (player.hasHealingEffect()) {
+			g2d.drawImage(
+				healingEffectIcon,
+				PLAYER_IMAGE_X_POS + (TARGET_PICTURE_WIDTH / 2) - (STATUS_EFFECT_ICON_SIZE / 2),
+				IMAGE_Y_POS + TARGET_PICTURE_HEIGHT + 10,
+				null,
+				null
+			);
+		}
+
+		// If the player has a poison effect draw the poison icon below their image to the right
+		// of the centre icon (healing)
+		if (player.hasPoisonEffect()) {
+			g2d.drawImage(
+				poisonEffectIcon,
+				PLAYER_IMAGE_X_POS + (TARGET_PICTURE_WIDTH / 2) - (STATUS_EFFECT_ICON_SIZE / 2) + 10 + STATUS_EFFECT_ICON_SIZE,
+				IMAGE_Y_POS + TARGET_PICTURE_HEIGHT + 10,
+				null,
+				null
+			);
+		}
+
+		// If the enemy has a poison effect draw the poison icon below their image in the centre
+		if (enemy.hasPoisonEffect()) {
+			g2d.drawImage(
+				poisonEffectIcon,
+				ENEMY_IMAGE_X_POS + (TARGET_PICTURE_WIDTH / 2) - (STATUS_EFFECT_ICON_SIZE / 2),
+				IMAGE_Y_POS + TARGET_PICTURE_HEIGHT + 10,
+				null,
+				null
+			);
+		}
 	}
 
 	/*************************************************************************************/
