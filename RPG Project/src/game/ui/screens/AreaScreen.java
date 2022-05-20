@@ -165,7 +165,7 @@ public class AreaScreen implements IScreen {
 	/**
 	 * This is the map of special tiles that is populated by the map file.
 	 */
-	public final Tile[][] tileMap = new Tile[ROWS_OF_TILES][TILES_PER_ROW];
+	private final Tile[][] tileMap = new Tile[ROWS_OF_TILES][TILES_PER_ROW];
 	
 	/**
 	 * This method is what is called by other classes to create instances

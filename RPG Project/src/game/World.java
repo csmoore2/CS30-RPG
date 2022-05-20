@@ -558,8 +558,7 @@ public class World extends JComponent {
 			player.addExperience(experienceGain);
 			
 			// Remove the battle tile which triggered this fight
-			AreaScreen currentScreen = (AreaScreen) screenStack.peek();
-			currentScreen.tileMap[player.getY()][player.getX()] = null;
+			removeTileAtLocation(player.getY(), player.getX());
 			
 			// If the enemy was a boss then show a message
 			if (enemy instanceof BossEnemy) {
@@ -586,19 +585,19 @@ public class World extends JComponent {
 					// Open up the boss
 					switch (currentZone) {
 						case FIRE:
-							currentScreen.tileMap[2][4] = Tile.EMPTY_TILE;
+							removeTileAtLocation(2, 4);
 							Walls.setWallAtPosition(currentZone, 4, 1, false);
 							break;
 						case GEM:
-							currentScreen.tileMap[4][6] = Tile.EMPTY_TILE;
+							removeTileAtLocation(4, 6);
 							Walls.setWallAtPosition(currentZone, 7, 4, false);
 							break;
 						case ICE:
-							currentScreen.tileMap[6][4] = Tile.EMPTY_TILE;
+							removeTileAtLocation(6, 4);
 							Walls.setWallAtPosition(currentZone, 4, 7, false);
 							break;
 						case ROCK:
-							currentScreen.tileMap[4][2] = Tile.EMPTY_TILE;
+							removeTileAtLocation(4, 2);
 							Walls.setWallAtPosition(currentZone, 1, 4, false);
 							break;
 						default:
