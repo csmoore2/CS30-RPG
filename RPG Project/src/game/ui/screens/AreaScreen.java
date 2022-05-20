@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 
 import game.Main;
 import game.ui.Tile;
+import game.entity.Enemy;
 
 /**
  * This class implements IScreen and is used to display an area
@@ -53,7 +54,7 @@ public class AreaScreen implements IScreen {
 	/**
 	 * This is the map of special tiles that is populated by the map file.
 	 */
-	private final Tile[][] tileMap = new Tile[ROWS_OF_TILES][TILES_PER_ROW];
+	public final Tile[][] tileMap = new Tile[ROWS_OF_TILES][TILES_PER_ROW];
 	
 	/**
 	 * This method is what is called by other classes to create instances
@@ -134,26 +135,114 @@ public class AreaScreen implements IScreen {
 		// Update 'tileMapPopulated'
 		tileMapPopulated = true;
 		
-		// Defines loading and battle titles, dependent upon which level the player is currently on
+		// Defines buffered images for enemies, bosses, locked image screens, and keys
+		BufferedImage enemyFireImage;
+		BufferedImage bossFireImage;
+		BufferedImage enemyGemImage;
+		BufferedImage bossGemImage;
+		BufferedImage enemyIceImage;
+		BufferedImage bossIceImage;
+		BufferedImage enemyRockImage;
+		BufferedImage bossRockImage;
+		BufferedImage lockedFireImage;
+		BufferedImage lockedGemImage;
+		BufferedImage lockedIceImage;
+		BufferedImage lockedRockImage;
+		BufferedImage keyImage;
 		
+		// Attempts to initialize the buffered images for each of the enemies and bosses
+		try {
+			enemyFireImage = ImageIO.read(new File("res/enemyfire.png"));
+			bossFireImage = ImageIO.read(new File("res/bossfire.png"));
+			enemyGemImage = ImageIO.read(new File("res/enemygem.png"));
+			bossGemImage = ImageIO.read(new File("res/bossgem.png"));
+			enemyIceImage = ImageIO.read(new File("res/enemyice.png"));
+			bossIceImage = ImageIO.read(new File("res/bossice.png"));
+			enemyRockImage = ImageIO.read(new File("res/enemyrock.png"));
+			bossRockImage = ImageIO.read(new File("res/bossrock.png"));
+			lockedFireImage = ImageIO.read(new File("res/lockedOutFire.png"));
+			lockedGemImage = ImageIO.read(new File("res/lockedOutGem.png"));
+			lockedIceImage = ImageIO.read(new File("res/lockedOutIce.png"));
+			lockedRockImage = ImageIO.read(new File("res/lockedOutRock.png"));
+			keyImage = ImageIO.read(new File("res/key.png"));
+			}
+		catch (IOException e) {
+			// There was an error loading the image so we cannot continue
+			throw new RuntimeException("Error loading area background image!", e);
+		}
+		
+		// Defines loading and battle titles, dependent upon which level the player is currently on
 		switch (Main.currentLevel) {
-			case 1:
+			case 1: // Green zone/hub
+				// Loading zone tiles
 				tileMap[0][4] = new Tile.LoadingZone("res/firezonebackground.png", 2, 4, 8);
 				tileMap[4][0] = new Tile.LoadingZone("res/rockzonebackground.png", 5, 8, 4);
 				tileMap[8][4] = new Tile.LoadingZone("res/icezonebackground.png", 4, 4, 0);
-				tileMap[4][8] = new Tile.LoadingZone("res/gemzonebackground.png", 3, 0, 4);
+				tileMap[4][8] = new Tile.LoadingZone("res/gemzonebackground.png", 3, 0, 4);			
 				break;
-			case 2:
+			case 2: // Fire zone
+				// Loading zone tile
 				tileMap[8][4] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 4, 0);
+				
+				// Battle trigger tiles
+				tileMap[7][0] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), enemyFireImage);
+				tileMap[3][0] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), enemyFireImage);
+				tileMap[5][8] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), enemyFireImage);
+				tileMap[1][4] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), bossFireImage);
+				
+				// Locked boss tile
+				tileMap[2][4] = new Tile.LockedOffBoss(lockedFireImage);
+				
+				// Key tile
+				tileMap[0][4] = new Tile.KeyTile(keyImage);
 				break;
-			case 3:
+			case 3: // Gem zone
+				// Loading zone tile
 				tileMap[4][0] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 8, 4);
+				
+				// Battle trigger tiles
+				tileMap[8][1] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), enemyGemImage);
+				tileMap[8][5] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), enemyGemImage);
+				tileMap[0][3] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), enemyGemImage);
+				tileMap[4][7] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), bossGemImage);
+				
+				// Locked boss tile
+				tileMap[4][6] = new Tile.LockedOffBoss(lockedGemImage);
+				
+				// Key tile
+				tileMap[4][8] = new Tile.KeyTile(keyImage);
 				break;
-			case 4:
+			case 4: // Ice zone
+				// Loading zone tile
 				tileMap[0][4] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 4, 8);
+				
+				// Battle trigger tiles
+				tileMap[1][8] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), enemyIceImage);
+				tileMap[5][8] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), enemyIceImage);
+				tileMap[3][0] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), enemyIceImage);
+				tileMap[7][4] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), bossIceImage);
+				
+				// Locked boss tile
+				tileMap[6][4] = new Tile.LockedOffBoss(lockedIceImage);
+				
+				// Key tile
+				tileMap[8][4] = new Tile.KeyTile(keyImage);
 				break;
-			case 5:
+			case 5: // Rock zone
+				// Loading zone tile
 				tileMap[4][8] = new Tile.LoadingZone("res/greenzonebackground.png", 1, 0, 4);
+				
+				// Battle trigger tiles
+				tileMap[0][3] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), enemyRockImage);
+				tileMap[0][7] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), enemyRockImage);
+				tileMap[8][5] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), enemyRockImage);
+				tileMap[4][1] = new Tile.BattleTrigger((player) -> new Enemy(player.getExperience()), bossRockImage);
+				
+				// Locked boss tile
+				tileMap[4][2] = new Tile.LockedOffBoss(lockedRockImage);
+				
+				// Key tile
+				tileMap[4][0] = new Tile.KeyTile(keyImage);
 				break;
 			case 6:
 				break;

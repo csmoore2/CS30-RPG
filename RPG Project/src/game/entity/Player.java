@@ -105,19 +105,25 @@ public class Player implements ILivingEntity {
 
 	/**
 	 * This is the transformation operation that will be applied to the image when it is
-	 * drawn so that it fits within one tile.
+	 * drawn so that it fits within one tile. Player facing the right direction.
 	 */
-	private final AffineTransformOp imageScaleOp;
+	private final AffineTransformOp rightImageScaleOp;
+	
+	/**
+	 * This is the transformation operation that will be applied to the image when it is
+	 * drawn so that it fits within one tile. Player facing the left direction.
+	 */
+	private final AffineTransformOp leftImageScaleOp;
 	
 	/**
 	 * The x-position of the player in the world.
 	 */
-	private int xPos = 0;
+	public int xPos = 0;
 	
 	/**
 	 * The y-position of the player in the world.
 	 */
-	private int yPos = 0;
+	public int yPos = 0;
 	
 	/**
 	 * The world the player is in.
@@ -191,6 +197,11 @@ public class Player implements ILivingEntity {
 	private int numProtectionTurnsRemaining = 0;
 	
 	/**
+	 * A boolean to tell whether or not the character is currently facing the right of the screen
+	 */
+	private boolean facingRight = true;
+	
+	/**
 	 * This constructs a dummy player with the given values for its attributes.
 	 * 
 	 * @param intelligenceIn this is the value of the player's intelligence attribute
@@ -208,7 +219,8 @@ public class Player implements ILivingEntity {
 		// These variabes are unnecessary for a dummy player
 		classType = null;
 		image = null;
-		imageScaleOp = null;
+		leftImageScaleOp = null;
+		rightImageScaleOp = null;
 	}
 	
 	/**
@@ -240,8 +252,16 @@ public class Player implements ILivingEntity {
 		AffineTransform scaleTransform = new AffineTransform();
 		scaleTransform.scale(imageXScale, imageYScale);
 
-		// Create the transformation operation
-		imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
+		// Create the right-sided transformation operation
+		rightImageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
+		
+		// Reset the transformation
+		scaleTransform = new AffineTransform();
+		scaleTransform.translate((double) Tile.TILE_SIZE,0.0);
+		scaleTransform.scale(-imageXScale, imageYScale);
+		
+		// Create the left-sided transformation operation
+		leftImageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
 		
 		// Set the player's current amount of health to its maximum
 		currentHealth = (int)getSecondaryAttributeValue(Attribute.HEALTH_POINTS);
@@ -281,7 +301,13 @@ public class Player implements ILivingEntity {
 	public void paint(Graphics2D g2d) {
 		// Draw the player's character's image at the correct position and scaled so that
 		// it fits in one tile
-		g2d.drawImage(image, imageScaleOp, xPos*Tile.TILE_SIZE, yPos*Tile.TILE_SIZE);
+		if (facingRight)
+		{
+			g2d.drawImage(image, rightImageScaleOp, xPos*Tile.TILE_SIZE, yPos*Tile.TILE_SIZE);
+		} else {
+			g2d.drawImage(image, leftImageScaleOp, xPos*Tile.TILE_SIZE, yPos*Tile.TILE_SIZE);
+		}
+		
 	}
 
 	/**
@@ -621,7 +647,6 @@ public class Player implements ILivingEntity {
 			//newX, newY
 			xPos = newX;
 			yPos = newY;
-			System.out.println("Current level = "+Main.currentLevel);
 			if (loading)
 			{
 				// Inform the world of our change in position
@@ -660,9 +685,11 @@ public class Player implements ILivingEntity {
 			// Horizontal Movement (0 = Right)
 			case 'a':
 				updatePosition(Math.max(xPos-1, MIN_X_POS), yPos, true);
+				facingRight = false;
 				break;
 			case 'd':
 				updatePosition(Math.min(xPos+1, MAX_X_POS), yPos, true);
+				facingRight = true;
 				break;
 				
 			// If the key was not one that updates the player's position

@@ -2,6 +2,7 @@ package game.ui.screens;
 
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -36,7 +37,7 @@ public class StartScreen extends JComponent {
 	/**
 	 * This is the font that will be used for the game's title.
 	 */
-	public static final Font TITLE_TEXT_FONT = new Font("Title Font", Font.BOLD, 80);
+	public static final Font TITLE_TEXT_FONT = new Font("Title Font", Font.BOLD, 70);
 	
 	/**
 	 * This is the font that will be used for the start button.
@@ -84,6 +85,8 @@ public class StartScreen extends JComponent {
 		// Create a JLabel to display the game's title
 		JLabel titleText = new JLabel(Main.GAME_NAME);
 		titleText.setFont(TITLE_TEXT_FONT);
+		titleText.setForeground(Color.white);
+		//titleText.setPreferredSize(new Dimension(700, 100));
 		
 		// Align the title text to be centred horizontally and above the vertical centre of the screen
 		layout.putConstraint(VERTICAL_CENTER, titleText, -VERTICAL_CENTRE_MARGIN_SPACING, VERTICAL_CENTER, this);

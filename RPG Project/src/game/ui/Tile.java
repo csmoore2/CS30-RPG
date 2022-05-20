@@ -1,6 +1,9 @@
 package game.ui;
 
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 import java.util.function.Function;
 
 import game.Main;
@@ -115,8 +118,8 @@ public class Tile {
 	}
 	
 	/**
-	 * This class represents a battle trigger tile. This tile is not painted,
-	 * but when the player steps on it a battle is triggered.
+	 * This class represents a battle trigger tile. This tile is painted and
+	 * when the player steps on it a battle is triggered.
 	 */
 	public static final class BattleTrigger extends Tile {
 		/**
@@ -126,6 +129,11 @@ public class Tile {
 		private final Function<Player, IEnemy> enemyProducer;
 
 		/**
+		 * The is the enemy's displayed image
+		 */
+		private final BufferedImage enemyImage;
+
+		/**
 		 * This constructs a new BattleTrigger tile with the given enemy
 		 * producing method as the method that produces the enemy for the
 		 * player to fight when they step on this tile.
@@ -133,9 +141,13 @@ public class Tile {
 		 * @param enemyProducerIn a function that, given the player, will produce
 		 *                        an enemy that the player must fight when they
 		 *                        step on this tile
+		 *                        
+		 * @param enemyImageIn the image that is inputed, representing the enemy tile
 		 */
-		public BattleTrigger(Function<Player, IEnemy> enemyProducerIn) {
+		public BattleTrigger(Function<Player, IEnemy> enemyProducerIn, BufferedImage enemyImageIn) {
 			enemyProducer = enemyProducerIn;
+			enemyImage = enemyImageIn;
+			
 		}
 
 		/**
@@ -167,5 +179,129 @@ public class Tile {
 		public IEnemy generateEnemy(Player player) {
 			return enemyProducer.apply(player);
 		}
+		
+		@Override
+		public void paint(Graphics2D g2d, int y, int x) {
+			// Create the transformation to do the scale
+			AffineTransform scaleTransform = new AffineTransform();
+			scaleTransform.scale((Main.SCREEN_WIDTH/9.0)/enemyImage.getWidth(), (Main.SCREEN_HEIGHT/9.0)/enemyImage.getHeight());
+			
+			// Create the transformation operation
+			AffineTransformOp imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
+			
+			// Draw the enemy's image
+			g2d.drawImage(enemyImage, imageScaleOp, x, y);
+		}
+		
+		@Override
+		public boolean shouldPaint() { return true; }
+		
+	}
+	
+	/**
+	 * This class represents a locked off boss tile, that displays while a boss remains inacessible to the player.
+	 */
+	public static final class LockedOffBoss extends Tile {
+		/**
+		 * The is the tile's displayed image
+		 */
+		private final BufferedImage lockedImage;
+		
+		/**
+		 * This constructs a new locked off boss tile.
+		 * 
+		 * @param lockedImage
+		 *                        
+		 */
+		public LockedOffBoss(BufferedImage lockedImage) {
+			this.lockedImage = lockedImage;
+			
+		}
+	
+		@Override
+		public void paint(Graphics2D g2d, int y, int x) {
+			// Create the transformation to do the scale
+			AffineTransform scaleTransform = new AffineTransform();
+			scaleTransform.scale((Main.SCREEN_WIDTH/9.0)/lockedImage.getWidth(), (Main.SCREEN_HEIGHT/9.0)/lockedImage.getHeight());
+
+			// Create the transformation operation
+			AffineTransformOp imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
+			
+			// Draw the tile's image
+			g2d.drawImage(lockedImage, imageScaleOp, x, y);
+		}
+		
+		@Override
+		public boolean shouldPaint() { return true; }
+		
+	}
+	
+	/**
+	 * This class represents a key tile. This tile is painted,
+	 * and when the player steps on it, it is collected.
+	 */
+	public static final class KeyTile extends Tile {
+		/**
+		 * The is the tile's displayed image
+		 */
+		private final BufferedImage keyImage;
+		
+		/**
+		 * This constructs a new locked off boss tile.
+		 * 
+		 * @param lockedImage
+		 *                        
+		 */
+		public KeyTile(BufferedImage keyImage) {
+			this.keyImage = keyImage;
+			
+		}
+		
+		/**
+		 * This method is called when the player steps on this tile. In this
+		 * case, is will perform the action of removing the key tile from tile map, and adding it to the inventory.
+		 * 
+		 * @param player the player
+		 * @param world  the player's world
+		 * 
+		 * @see Tile#performAction(Player, World)
+		 */
+		@Override
+		public void performAction(Player player, World world) {
+			// Removes the tile from the respective location of the tile map, and increases the counter by 1
+			AreaScreen currentScreen = (AreaScreen) world.screenStack.peek();
+			Main.keysGet += 1;
+			switch (Main.currentLevel) {
+			case 2:
+				currentScreen.tileMap[0][4] = null;
+				break;
+			case 3:
+				currentScreen.tileMap[4][8] = null;
+				break;
+			case 4:
+				currentScreen.tileMap[8][4] = null;
+				break;
+			case 5:
+				currentScreen.tileMap[4][0] = null;
+				break;
+			}
+		}
+	
+		@Override
+		public void paint(Graphics2D g2d, int y, int x) {
+			// Create the transformation to do the scale
+			AffineTransform scaleTransform = new AffineTransform();
+			scaleTransform.scale((Main.SCREEN_WIDTH/9.0)/keyImage.getWidth(), (Main.SCREEN_HEIGHT/9.0)/keyImage.getHeight());
+
+			// Create the transformation operation
+			AffineTransformOp imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
+			
+			// Draw the tile's image
+			g2d.drawImage(keyImage, imageScaleOp, x, y);
+		}
+		
+		@Override
+		public boolean shouldPaint() { return true; }
+		
 	}
 }

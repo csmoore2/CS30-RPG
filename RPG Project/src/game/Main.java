@@ -84,6 +84,11 @@ public class Main {
 	public static int currentLevel = 0;
 	
 	/**
+	 * Number of keys gotten
+	 */
+	public static int keysGet = 0;
+	
+	/**
 	 * Array which converts values of currentLevel into Strings for display.
 	 */
 	public static final String[] levels = {"Start screen", "Green Zone / Hub", "Fire Zone", "Gem Zone", "Ice Zone", "Rock Zone"};
@@ -203,7 +208,7 @@ public class Main {
 	 * @param world the world
 	 */
 	private static void showIntroduction(World world) {
-		world.showMessage("<i>This</i> is <b>the introduction</b>!", 5);
+		//world.showMessage("<i>This</i> is <b>the introduction</b>!", 5);
 	}
 
 	/**

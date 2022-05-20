@@ -38,7 +38,7 @@ public class World extends JComponent {
 	 * that is currently visible to the user. Pushing a new screen on represents
 	 * forward navigation and popping of the top screen represents backwards navigation.
 	 */
-	private final Stack<IScreen> screenStack = new Stack<>();
+	public final Stack<IScreen> screenStack = new Stack<>();
 	
 	/**
 	 * This record represents a message that is displayed on the screen to
@@ -94,6 +94,12 @@ public class World extends JComponent {
 	 * This variable keeps track of whether the game is paused.
 	 */
 	private boolean paused = false;
+	
+	/**
+	 * This variable keeps track of how many enemies remain in each zone
+	 * [enemies remaining in fire, gem, ice, rock]
+	 */
+	public int[] enemiesRemaining = {3,3,3,3};
 	
 	/**
 	 * This constructs the world by pushing the starting screen onto the screen stack
@@ -426,6 +432,7 @@ public class World extends JComponent {
 
 		// Close the battle screen
 		closeCurrentScreen();
+		
 
 		// If the player died then show the player death screen. Otherwise
 		// give the player their experience and resume the game.
@@ -433,6 +440,34 @@ public class World extends JComponent {
 			showScreen(new PlayerDeathScreen(this, enemy));
 		} else {
 			player.addExperience(experienceGain);
+			
+			// Remove the battle tile which triggered this fight
+			AreaScreen currentScreen = (AreaScreen) screenStack.peek();
+			currentScreen.tileMap[player.yPos][player.xPos] = null;
+			
+			enemiesRemaining[Main.currentLevel-2]-=1;
+			if (enemiesRemaining[Main.currentLevel-2] <= 0)
+			{
+				switch (Main.currentLevel) {
+				case 2:
+					currentScreen.tileMap[2][4] = null;
+					Walls.arrays[1][4][1] = 0;
+					break;
+				case 3:
+					currentScreen.tileMap[4][6] = null;
+					Walls.arrays[2][7][4] = 0;
+					break;
+				case 4:
+					currentScreen.tileMap[6][4] = null;
+					Walls.arrays[3][4][7] = 0;
+					break;
+				case 5:
+					currentScreen.tileMap[4][2] = null;
+					Walls.arrays[4][1][4] = 0;
+					break;
+				}
+			}
+			
 		}
 	}
 
