@@ -817,7 +817,7 @@ public class Player implements ILivingEntity {
 	 *         to reach the next level.
 	 */
 	public int getExperienceToNextLevel() {
-		return experience > 0 ? experience % EXPERIENCE_PER_LEVEL : EXPERIENCE_PER_LEVEL;
+		return experience > 0 ? EXPERIENCE_PER_LEVEL - (experience % EXPERIENCE_PER_LEVEL) : EXPERIENCE_PER_LEVEL;
 	}
 
 	/**

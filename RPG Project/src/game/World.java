@@ -375,10 +375,8 @@ public class World extends JComponent {
 		// Hide the overlay
 		overlay.setVisible(false);
 		
-		// Resume the game as long as the message queue is empty
-		if (messageQueue.isEmpty()) {
-			paused = false;
-		}
+		// Resume the game
+		paused = false;
 		
 		// Update the ui so that everything will be drawn correctly
 		updateUIState();
@@ -538,7 +536,7 @@ public class World extends JComponent {
 	 * @param experienceGain how much experience the player should gain
 	 * @param enemy          the enemy that the player was fighting
 	 */
-	public void exitBattle(boolean playerDead, int experienceGain, IEnemy enemy) {
+	public synchronized void exitBattle(boolean playerDead, int experienceGain, IEnemy enemy) {
 		// Update our state
 		inBattle = false;
 
@@ -602,24 +600,29 @@ public class World extends JComponent {
 					switch (currentZone) {
 						case FIRE:
 							removeTileAtLocation(2, 4);
-							Walls.setWallAtPosition(currentZone, 4, 1, false);
+							Walls.setWallAtPosition(currentZone, 1, 4, false);
 							break;
 						case GEM:
 							removeTileAtLocation(4, 6);
-							Walls.setWallAtPosition(currentZone, 7, 4, false);
+							Walls.setWallAtPosition(currentZone, 4, 7, false);
 							break;
 						case ICE:
 							removeTileAtLocation(6, 4);
-							Walls.setWallAtPosition(currentZone, 4, 7, false);
+							Walls.setWallAtPosition(currentZone, 7, 4, false);
 							break;
 						case ROCK:
 							removeTileAtLocation(4, 2);
-							Walls.setWallAtPosition(currentZone, 1, 4, false);
+							Walls.setWallAtPosition(currentZone, 4, 1, false);
 							break;
 						default:
 							break;
 					}
 				}
+			}
+
+			// Update the player panel's UI
+			if (screenStack.peek() instanceof AreaScreen) {
+				((AreaScreen)screenStack.peek()).onPlayerUpdate();
 			}
 		}
 	}

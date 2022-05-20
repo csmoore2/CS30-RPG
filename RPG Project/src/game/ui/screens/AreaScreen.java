@@ -93,6 +93,12 @@ public class AreaScreen implements IScreen {
 
 	/**
 	 * This is the format string that will be used to nicely format the amount of
+	 * experience the player has for display.
+	 */
+	public static final String PLAYER_EXPERIENCE_FORMAT = "<html><center><b>Experience:</b><br/>%d</center></html>";
+
+	/**
+	 * This is the format string that will be used to nicely format the amount of
 	 * experience the player needs to gain to reach the next level for display.
 	 */
 	public static final String PLAYER_EXP_TO_NEXT_LEVEL_FORMAT = "<html><center><b>Experience to Next Level:</b><br/>%d</center></html>";
@@ -100,7 +106,7 @@ public class AreaScreen implements IScreen {
 	/**
 	 * This is the font that will be used to display various JLabels in the player panel.
 	 */
-	public static final Font PLAYER_PANEL_GENERAL_LABEL_FONT = new Font("Player Panel General Label Font", Font.PLAIN, 32);
+	public static final Font PLAYER_PANEL_GENERAL_LABEL_FONT = new Font("Player Panel General Label Font", Font.PLAIN, 24);
 	
 	/**
 	 * This is a cache of all the previously loaded area screens so they can be reused.
@@ -136,6 +142,11 @@ public class AreaScreen implements IScreen {
 	 * This is the JLabel that displays the player's current level.
 	 */
 	private static JLabel playerLevel;
+
+	/**
+	 * This is the JLabel that displays the player's experience.
+	 */
+	private static JLabel playerExperience;
 
 	/**
 	 * This is the JLabel that displays the amount of experience the player needs
@@ -462,6 +473,30 @@ public class AreaScreen implements IScreen {
 		screen.add(playerLevel);
 
 		/*****************************************************************************/
+		/*                             PLAYER EXPERIENCE                             */
+		/*****************************************************************************/
+
+		// Create a label to display the player's experience
+		playerExperience = new JLabel(String.format(
+			PLAYER_EXPERIENCE_FORMAT,
+			world.getPlayer().getExperience()
+		));
+		playerExperience.setFont(PLAYER_PANEL_GENERAL_LABEL_FONT);
+		playerExperience.setForeground(Color.WHITE);
+		playerExperience.setHorizontalAlignment(JLabel.CENTER);
+		
+		// Set the label's width to be fixed so that its height is what changes
+		layout.getConstraints(playerExperience).setWidth(Spring.constant(PLAYER_PANEL_WIDTH));
+
+		// Align the player's level to be below the player's level
+		layout.putConstraint(NORTH, playerExperience, 15, SOUTH, playerLevel);
+		layout.putConstraint(EAST, playerExperience, 0, EAST, screen);
+
+		// Add the label dsplaying the player's experience to the screen but invisible
+		playerExperience.setVisible(false);
+		screen.add(playerExperience);
+
+		/*****************************************************************************/
 		/*                      PLAYER EXPERIENCE TO NEXT LEVEL                      */
 		/*****************************************************************************/
 
@@ -478,8 +513,8 @@ public class AreaScreen implements IScreen {
 		// Set the label's width to be fixed so that its height is what changes
 		layout.getConstraints(playerExpToNextLevel).setWidth(Spring.constant(PLAYER_PANEL_WIDTH));
 
-		// Align the player's experience to next level label to be below the player's level
-		layout.putConstraint(NORTH, playerExpToNextLevel, 15, SOUTH, playerLevel);
+		// Align the player's experience to next level label to be below the player's experience
+		layout.putConstraint(NORTH, playerExpToNextLevel, 15, SOUTH, playerExperience);
 		layout.putConstraint(EAST, playerExpToNextLevel, 0, EAST, screen);
 
 		// Add the label dsplaying the player's experience to next level to the screen but invisible
@@ -512,6 +547,7 @@ public class AreaScreen implements IScreen {
 		playerImage.setVisible(true);
 		playerZone.setVisible(true);
 		playerLevel.setVisible(true);
+		playerExperience.setVisible(true);
 		playerExpToNextLevel.setVisible(true);
 	}
 
@@ -530,6 +566,7 @@ public class AreaScreen implements IScreen {
 		playerImage.setVisible(false);
 		playerZone.setVisible(false);
 		playerLevel.setVisible(false);
+		playerExperience.setVisible(false);
 		playerExpToNextLevel.setVisible(false);
 	}
 
@@ -546,6 +583,30 @@ public class AreaScreen implements IScreen {
 		playerZone.setText(String.format(
 			PLAYER_ZONE_FORMAT,
 			world.getCurrentZone().getName()
+		));
+	}
+
+	/**
+	 * This method updates the fields which display properties of the
+	 * player in the player panel.
+	 */
+	public void onPlayerUpdate() {
+		// Update the player's level
+		playerLevel.setText(String.format(
+			PLAYER_LEVEL_FORMAT,
+			world.getPlayer().getLevel()
+		));
+
+		// Update the player's experience
+		playerExperience.setText(String.format(
+			PLAYER_EXPERIENCE_FORMAT,
+			world.getPlayer().getExperience()
+		));
+
+		// Update the player's experience to next level
+		playerExpToNextLevel.setText(String.format(
+			PLAYER_EXP_TO_NEXT_LEVEL_FORMAT,
+			world.getPlayer().getExperienceToNextLevel()
 		));
 	}
 
