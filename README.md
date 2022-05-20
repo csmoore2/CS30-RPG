@@ -1,3 +1,10 @@
+# Elemental Battle of Mages
+
+In order to run the game:
+- Extract the zip file
+- Set the directory of eclipse to be the resulting folder
+- Press the green button which says "run"
+
 ## Attributions
 
 - Healing Effect Icon: <a href="https://www.flaticon.com/free-icons/heart" title="heart icons">Heart icons created by Pixel perfect - Flaticon</a>
