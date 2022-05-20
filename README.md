@@ -1,6 +1,7 @@
 # Elemental Battle of Mages
 
 In order to run the game:
+- Download the code
 - Extract the zip file
 - Set the directory of eclipse to be the resulting folder
 - Press the green button which says "run"
