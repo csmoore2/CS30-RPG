@@ -623,7 +623,7 @@ public class BattleScreen implements IScreen {
 	@Override
 	public void paint(Graphics2D g2d) {
 		// Draw background image
-		g2d.setColor(Color.BLACK);
+		g2d.setColor(new Color(160, 160, 160));
 		g2d.fillRect(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT);
 		
 		// Draw the player
