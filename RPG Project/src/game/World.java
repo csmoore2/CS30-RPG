@@ -17,6 +17,7 @@ import javax.swing.SwingUtilities;
 
 import game.entity.Player;
 import game.entity.enemy.BossEnemy;
+import game.entity.enemy.Enemy;
 import game.entity.enemy.FinalBossEnemy;
 import game.entity.enemy.IEnemy;
 import game.entity.enemy.MainEnemy;
@@ -63,11 +64,6 @@ public class World extends JComponent {
 	 * to the player and the game will resume.
 	 */
 	private final Queue<Message> messageQueue = new ArrayDeque<>();
-	
-	/**
-	 * This is the message that is currently being displayed to the user.
-	 */
-	private Message currentMessage = null;
 	
 	/**
 	 * This stores the current overlay that is being displayed. Null indicates there
@@ -399,14 +395,11 @@ public class World extends JComponent {
 			return;
 		}
 		
-		// If we are not currently displaying a message and the message stack is
-		// not empty then start displaying the messages in the message stack
-		if (currentMessage == null && messageQueue.peek() != null) {
-			// Get the next message from the message stack
-			currentMessage = messageQueue.poll();
-			
-			// Show a message overlay to display the message
-			showOverlayAndPause(new MessageOverlay(this, player, currentMessage));
+		// If the message stack is not empty then start displaying the messages
+		// in the message stack
+		if (messageQueue.peek() != null) {
+			// Show a message overlay to display the next message from the message queue
+			showOverlayAndPause(new MessageOverlay(this, player, messageQueue.poll()));
 		}
 		
 		// If a battle is happening then we need to update the battle screen
@@ -420,11 +413,6 @@ public class World extends JComponent {
 		// If the player has all the keys then we should begin the final boss fight
 		if (player.hasAllKeys()) {
 			initiateFinalBossBattle();
-			
-			// TODO
-			////////////////////////////////////
-			// ADD EXPERIENCE TO PLAYER PANEL //
-			////////////////////////////////////
 		}
 	}
 
@@ -679,22 +667,42 @@ public class World extends JComponent {
 			// Get the tile at the player's new position
 			Tile newTile = currentArea.getTileAtPos(newY, newX);
 			
-			// Perform the interaction with the tile at the player's new position
-			newTile.performAction(player, this);
+			// If the tile is empty check for a random encounter, otherwise perform the tile's action
+			if (newTile == Tile.EMPTY_TILE) {
+				// There is a 20% chance of a random encounter
+				if ((Main.RANDOM.nextInt(100) + 1) <= 20) {
+					// Create a new enemy
+					Enemy enemy = new RandomEncounterEnemy(this, player.getExperience());
+
+					// Set the enemy's image based on the current zone
+					enemy.setImage(
+						switch (currentZone) {
+							case GREEN_HUB -> Images.bossFireImage;
+							case FIRE      -> Images.enemyFireImage;
+							case GEM       -> Images.enemyGemImage;
+							case ICE       -> Images.enemyRockImage;
+							case ROCK      -> Images.enemyRockImage;
+						}
+					);
+
+					// Start the battle
+					initiateBattle(enemy);
+				}
+			} else {
+				// Perform the interaction with the tile at the player's new position
+				newTile.performAction(player, this);
+			}
 		}
 	}
 	
 	/**
 	 * This is called by MessageOverlay when it has finished displaying its message
-	 * for the amount of time specified by the message. This method will then update
-	 * 'currentMessage' to be null, stop showing the message overlay, and resume the game.
+	 * for the amount of time specified by the message. This method will then stop
+	 * showing the message overlay, and resume the game.
 	 */
 	public void onMessageFinishDisplay() {
 		// Stop showing the message overlay and resume the game
 		hideOverlayAndResume();
-		
-		// Update 'currentMessage' to be null
-		currentMessage = null;
 	}
 
 	/*************************************************************************************/
@@ -739,6 +747,26 @@ public class World extends JComponent {
 	}
 
 	/**
+	 * This method returns whether or not there is another message in
+	 * the message queue.
+	 * 
+	 * @return whether or not there is another message in the message queue
+	 */
+	public synchronized boolean hasNextMessage() {
+		return messageQueue.peek() != null;
+	}
+
+	/**
+	 * This method returns the next message in the message queue and
+	 * also removes it from the message queue.
+	 * 
+	 * @return the next message in the message queue
+	 */
+	public synchronized Message getNextMessage() {
+		return messageQueue.poll();
+	}
+
+	/**
 	 * This method returns whether or not a battle is currently
 	 * underway.
 	 * 
@@ -754,7 +782,7 @@ public class World extends JComponent {
 	 * 
 	 * @return whether or not an AreaScreen is currently being displayed
 	 */
-	public boolean isAreaDisplayed() {
+	public synchronized boolean isAreaDisplayed() {
 		return screenStack.peek() instanceof AreaScreen;
 	}
 	

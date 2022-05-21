@@ -45,7 +45,12 @@ public class MessageOverlay extends Overlay {
 	/**
 	 * This is the message that will be displayed to the player.
 	 */
-	private final Message message;
+	private Message message;
+
+	/**
+	 * This label displays the messages to the player.
+	 */
+	private JLabel messageLabel;
 	
 	/**
 	 * This is the time that the overlay began showing the message
@@ -56,8 +61,9 @@ public class MessageOverlay extends Overlay {
 	/**
 	 * This constructs the message overlay using the given parameters.
 	 * 
-	 * @param worldIn  the world
-	 * @param playerIn the player
+	 * @param worldIn   the world
+	 * @param playerIn  the player
+	 * @param messageIn the message that will be displayed to the player
 	 */
 	public MessageOverlay(World worldIn, Player playerIn, Message messageIn) {
 		super(worldIn, playerIn);
@@ -73,7 +79,7 @@ public class MessageOverlay extends Overlay {
 	@Override
 	public void createAndAddSwingComponents() {
 		// Create a JLabel to display the message
-		JLabel messageLabel = new JLabel(message.message());
+		messageLabel = new JLabel(message.message());
 		messageLabel.setFont(MESSAGE_LABEL_FONT);
 		messageLabel.setHorizontalAlignment(JLabel.CENTER);
 		
@@ -92,6 +98,23 @@ public class MessageOverlay extends Overlay {
 		// Add the label to the screen and set the time that we started displaying the label
 		// to the current time
 		add(messageLabel);
+		startTime = System.currentTimeMillis();
+	}
+
+	/**
+	 * This method makes the overlay start showing the new given message
+	 * and discard its previous message/
+	 * 
+	 * @param messageIn the new message to display
+	 */
+	private void showMessage(Message messageIn) {
+		// Change the message
+		message = messageIn;
+
+		// Change the message displayed by the messageLabel
+		messageLabel.setText(messageIn.message());
+
+		// Set the start time to now
 		startTime = System.currentTimeMillis();
 	}
 	
@@ -114,10 +137,15 @@ public class MessageOverlay extends Overlay {
 			long elapsedSeconds = elapsedMilliseconds / 1000;
 			
 			// Check if the elapsed time is greater than or equal to the amount of time we
-			// are supposed to show the message for. If it is then notify the world that we
-			// are done showing the message.
+			// are supposed to show the message for. If it is then check for a new message.
 			if (elapsedSeconds >= message.time()) {
-				world.onMessageFinishDisplay();
+				// If there is a new message to display then show it. Otherwise, notify
+				// the world that we are done showing messages
+				if (world.hasNextMessage()) {
+					showMessage(world.getNextMessage());
+				} else {
+					world.onMessageFinishDisplay();
+				}
 			}
 		}
 	}
@@ -133,5 +161,4 @@ public class MessageOverlay extends Overlay {
 	 */
 	@Override
 	protected void paintBackground(Graphics2D g2d) {}
-
 }

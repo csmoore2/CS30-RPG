@@ -189,7 +189,7 @@ public non-sealed class PlayerAction extends Action {
                     world.showMessage(
                         String.format(
                             "The special attack dealt a critical hit on enemy for %d damage!",
-                            (int)(effect * damageMultiplier)
+                            (int)(player.getSecondaryAttributeValue(Attribute.SPECIAL_DAMAGE) * damageMultiplier)
                         ),
                         4
                     );
@@ -197,7 +197,7 @@ public non-sealed class PlayerAction extends Action {
                     world.showMessage(
                         String.format(
                             "The special attack dealt %d damage to enemy.",
-                            (int)effect
+                            (int)player.getSecondaryAttributeValue(Attribute.SPECIAL_DAMAGE)
                         ),
                         3
                     );
