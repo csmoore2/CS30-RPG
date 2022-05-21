@@ -105,7 +105,7 @@ public class BossEnemy extends Enemy {
 		// that does 100 damage more than their base attack
 		if (choice > 85) {
 			return new EnemyAction(
-				"",
+				"Destructive Kick",
 				Action.Type.HIT,
 				baseAttackDamage + 100,
 				0
@@ -116,7 +116,7 @@ public class BossEnemy extends Enemy {
 		// 50 damage more than their base attack
 		if (choice > 50) {
 			return new EnemyAction(
-				"",
+				"Rude Punch",
 				Action.Type.HIT,
 				baseAttackDamage + 50,
 				0
@@ -124,7 +124,7 @@ public class BossEnemy extends Enemy {
 		}
 
 		// Otherwise the boss just does their base attack (50% chance)
-		return new EnemyAction("", Action.Type.HIT, baseAttackDamage, 0);
+		return new EnemyAction("Harmful Hit", Action.Type.HIT, baseAttackDamage, 0);
 	}
 
 	/*************************************************************************************/
