@@ -11,14 +11,18 @@ import javax.swing.SpringLayout;
 
 import game.Main;
 import game.World;
+import game.Zone;
+import game.entity.Player;
+import game.entity.enemy.FinalBossEnemy;
 import game.entity.enemy.IEnemy;
+import game.entity.enemy.RandomEncounterEnemy;
 
 import static javax.swing.SpringLayout.*;
 
 /**
  * This screen is shown when the player dies while fighting an
  * enemy. This screen will offer the player the option to either
- * retry the fight or quit the game.
+ * retry the fight or return to the hub.
  */
 public class PlayerDeathScreen implements IScreen {
     /**
@@ -49,9 +53,9 @@ public class PlayerDeathScreen implements IScreen {
 
     /**
      * This is the button that the player presses if they
-     * want to quit the game.
+     * want to quit the battle and return to the hub.
      */
-    private JButton quitGameButton;
+    private JButton returnToHub;
 
     /**
      * The world.
@@ -95,6 +99,7 @@ public class PlayerDeathScreen implements IScreen {
 		// Create a button that allows the player to retry the battle
         // they just lost
 		retryBattleButton = new JButton("Retry Battle");
+        retryBattleButton.setFocusable(false);
 		retryBattleButton.setFont(BUTTON_FONT);
 		retryBattleButton.setPreferredSize(BUTTON_SIZE);
 		
@@ -118,25 +123,45 @@ public class PlayerDeathScreen implements IScreen {
 		screen.add(retryBattleButton);
 		
 		/******************************************************************
-		 *                          QUIT BUTTON                           *
+		 *                      RETURN TO HUB BUTTON                      *
 		 ******************************************************************/
 		
-		// Create a button that allows the player to quit the game
-		quitGameButton = new JButton("Quit");
-		quitGameButton.setFont(BUTTON_FONT);
-		quitGameButton.setPreferredSize(BUTTON_SIZE);
+		// Create a button that allows the player to quit the battle and
+        // return to the hub
+		returnToHub = new JButton("Return to Hub");
+        returnToHub.setFocusable(false);
+		returnToHub.setFont(BUTTON_FONT);
+		returnToHub.setPreferredSize(BUTTON_SIZE);
 		
-		// Have the quit button call Main.quitGame when it is clicked. This will
-		// show the user a dialog to confirm they want to exit.
-		quitGameButton.addActionListener((a) -> Main.quitGame());
-		
-		// Align the quit button to be slightly below the vertical centre of the screen
-		// and horizontally centered
-		layout.putConstraint(VERTICAL_CENTER, quitGameButton, BUTTON_VERTICAL_SPACING/2, VERTICAL_CENTER, screen);
-		layout.putConstraint(HORIZONTAL_CENTER, quitGameButton, 0, HORIZONTAL_CENTER, screen);
+		// Have the return to hub button return the player to the centre of the hub
+        // screen when they press it
+		returnToHub.addActionListener((a) -> {
+            // Give the player 1 health so they are no longer dead
+            world.getPlayer().addHealth(1);
 
-		// Add the quit button to the screen
-		screen.add(quitGameButton);
+            // Return the player to the hub
+            world.closeCurrentScreen();
+            world.changeArea(
+                AreaScreen.createNewAreaScreen(world, Zone.GREEN_HUB),
+                Player.MAX_X_POS / 2,
+                Player.MAX_Y_POS / 2
+            );
+        });
+
+        // Only enable the return to hub button if the player was not facing a
+        // randomly encountered enemy or the final boss
+        returnToHub.setEnabled(
+            !(enemy instanceof RandomEncounterEnemy) &&
+            !(enemy instanceof FinalBossEnemy)
+        );
+		
+		// Align the return to hub button to be slightly below the vertical centre of
+        // the screen and horizontally centered
+		layout.putConstraint(VERTICAL_CENTER, returnToHub, BUTTON_VERTICAL_SPACING/2, VERTICAL_CENTER, screen);
+		layout.putConstraint(HORIZONTAL_CENTER, returnToHub, 0, HORIZONTAL_CENTER, screen);
+
+		// Add the return to hub button to the screen
+		screen.add(returnToHub);
     }
 
     /**
@@ -164,8 +189,8 @@ public class PlayerDeathScreen implements IScreen {
      */
     @Override
     public void removeSwingComponents(Container screen) {
-        // Remove the retry and quit buttons from the screen
+        // Remove the retry and return to hub buttons from the screen
         screen.remove(retryBattleButton);
-        screen.remove(quitGameButton);
+        screen.remove(returnToHub);
     }
 }

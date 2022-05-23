@@ -1,6 +1,7 @@
 package game;
 
 import java.awt.Dimension;
+import java.security.SecureRandom;
 import java.util.Random;
 
 import javax.swing.JFrame;
@@ -19,9 +20,9 @@ import game.ui.screens.StartScreen;
 public class Main {
 	/**
 	 * This is the instance of Random that will be used by everything in the game when
-	 * generating random information. It is seeded by the current time in milliseconds.
+	 * generating random information.
 	 */
-	public static final Random RANDOM = new Random(System.currentTimeMillis());
+	public static final Random RANDOM = new SecureRandom();
 
 	/**
 	 * This is the name of the game.
@@ -196,13 +197,15 @@ public class Main {
 		                  "then <b>Marduk</b> himself. By doing so you will free the world from "  +
 						  "the evil that grips it and usher in a golden age of magic.",
 						  15);
-		world.showMessage("Go now! In the areas surrounding this place you will find Marduk's "         +
+		world.showMessage("Go now! In the areas surrounding this place you will find <b>Marduk's</b> "  +
 		                  "followers and the keys to the realm where <b>Marduk</b> himself dwells. Be " +
 						  "careful though, there are minor mages along your path who will try to "      +
 						  "defeat you to gain favour with <b>Marduk</b>.",
 						  20);
 		world.showMessage("To move you must use the w, a, s, and d keys on your keyboard. If at any "  +
 		                  "time you wish to leave simply pause the game by pressing escape and exit "  +
+						  "the game. Furthermore, for every <b>100 experience points</b> you gain you " +
+						  "level up which will give you <b>1 attribute point</b> to spend. These "    +
 						  "the game. Furthermore, for every <b>100 experience points</b> you gain you " +
 						  "level up which will give you <b>2 attribute points</b> to spend. These "    +
 						  "points can be spent by selecting \"View Attributes/Level Up\" in the "      +

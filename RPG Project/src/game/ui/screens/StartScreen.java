@@ -4,9 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -59,12 +56,6 @@ public class StartScreen extends JComponent {
 	public static final String BACKGROUND_IMAGE_PATH = "res/titleScreen.png";
 	
 	/**
-	 * This is the scale transformation operation that is applied to the background
-	 * image to make it the same size at the screen.
-	 */
-	private final AffineTransformOp imageScaleOp;
-	
-	/**
 	 * This stores the background image of this screen.
 	 */
 	private final BufferedImage backgroundImage;
@@ -87,19 +78,7 @@ public class StartScreen extends JComponent {
 			throw new RuntimeException("Unable to load start screen background image!", e);
 		}
 		
-		// Determine the scale factors that will need to be applied to the image
-		// to make it fit the screen
-		double scaleFactorX = (double) Main.SCREEN_WIDTH  / backgroundImage.getWidth();
-		double scaleFactorY = (double) Main.SCREEN_HEIGHT / backgroundImage.getHeight();
-		
-		// Create the transformation to do the scale
-		AffineTransform scaleTransform = new AffineTransform();
-		scaleTransform.scale(scaleFactorX, scaleFactorY);
-		
-		// Create the transformation operation
-		imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
-		
-		// Use a SpringLayout to layout this screen
+		// Use a SpringLayout to lay out this screen
 		SpringLayout layout = new SpringLayout();
 		setLayout(layout);
 		
@@ -139,10 +118,8 @@ public class StartScreen extends JComponent {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
-		// Draw the background image as long as 'g' is an instance of Graphics2D
-		if (g instanceof Graphics2D) {
-			((Graphics2D) g).drawImage(backgroundImage, imageScaleOp, 0, 0);
-		}
+		// Draw the background image
+		g.drawImage(backgroundImage, 0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT, null, null);
 	}
 	
 	/**

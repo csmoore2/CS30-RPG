@@ -118,12 +118,12 @@ public class Player implements ILivingEntity {
 	/**
 	 * The x-position of the player in the world.
 	 */
-	private int xPos = (AreaScreen.TILES_PER_ROW - 1) / 2;
+	private int xPos = MAX_X_POS / 2;
 	
 	/**
 	 * The y-position of the player in the world.
 	 */
-	private int yPos = (AreaScreen.ROWS_OF_TILES - 1) / 2;
+	private int yPos = MAX_Y_POS / 2;
 	
 	/**
 	 * The world the player is in.
@@ -260,9 +260,9 @@ public class Player implements ILivingEntity {
 		// Create the right-sided transformation operation
 		rightImageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
 		
-		// Reset the transformation
+		// Reset the transformation and create the left-sided transformation operation
 		scaleTransform = new AffineTransform();
-		scaleTransform.translate((double) Tile.TILE_SIZE,0.0);
+		scaleTransform.translate((double)Tile.TILE_SIZE, 0.0);
 		scaleTransform.scale(-imageXScale, imageYScale);
 		
 		// Create the left-sided transformation operation
@@ -319,6 +319,8 @@ public class Player implements ILivingEntity {
 	 * This method returns the player's image.
 	 * 
 	 * @return the player's image
+	 * 
+	 * @see ILivingEntity#getImage()
 	 */
 	@Override
 	public BufferedImage getImage() {
@@ -459,12 +461,19 @@ public class Player implements ILivingEntity {
 
 		// Reset the player's health to its maximum value
 		currentHealth = (int)getSecondaryAttributeValue(Attribute.HEALTH_POINTS);
+
+		// Remove any status effects the player had
+		numPoisonTurnsRemaining = 0;
+		numHealingTurnsRemaining = 0;
+		numProtectionTurnsRemaining = 0;
 	}
 
 	/**
 	 * This method is called at the start of the player's turn
 	 * during a battle. It is responsible for updating the player's
 	 * status effects.
+	 * 
+	 * @see ILivingEntity#onBattleTurn()
 	 */
 	@Override
 	public void onBattleTurn() {
@@ -586,6 +595,8 @@ public class Player implements ILivingEntity {
 	 * player has.
 	 * 
 	 * @param damage the amount of damage to inflict on the player
+	 * 
+	 * @see ILivingEntity#inflictDamage(int)
 	 */
 	@Override
 	public void inflictDamage(int damage) {
@@ -610,6 +621,17 @@ public class Player implements ILivingEntity {
 		currentHealth = Math.max(currentHealth - damage, 0);
 	}
 
+	/**
+	 * This method inflicts a poison effect on the player which deals
+	 * a given amount of damage each turn for the specified number of
+	 * turns.
+	 * 
+	 * @param damagePerTurn the amount of damage this effect deals
+	 *                      each turn
+	 * @param numTurns      the number of turns this effect lasts for
+	 * 
+	 * @see ILivingEntity#inflictPoison(int, int)
+	 */
 	@Override
 	public void inflictPoison(int damagePerTurn, int numTurns) {
 		poisonDamagePerTurn = damagePerTurn;
@@ -852,6 +874,8 @@ public class Player implements ILivingEntity {
 	 * This method returns the player's current amount of health.
 	 * 
 	 * @return the player's current amount of health
+	 * 
+	 * @see ILivingEntity#getCurrentHealth()
 	 */
 	@Override
 	public int getCurrentHealth() {

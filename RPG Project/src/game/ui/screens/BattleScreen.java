@@ -7,8 +7,6 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -102,18 +100,6 @@ public class BattleScreen implements IScreen {
 	 * indicate they have an active poison effect.
 	 */
 	private Image poisonEffectIcon;
-	
-	/**
-	 * This is the transformation that will be applied to the player's image so
-	 * that it is the size we want it to be.
-	 */
-	private final AffineTransformOp playerImageScaleOp;
-	
-	/**
-	 * This is the transformation that will be applied to the enemy's image so
-	 * that it is the size we want it to be.
-	 */
-	private final AffineTransformOp enemyImageScaleOp;
 
 	/**
 	 * This is the tabbed pane that contains all the buttons representing the
@@ -182,6 +168,12 @@ public class BattleScreen implements IScreen {
 	 * This keeps track of whether or not it is the player's turn.
 	 */
 	private boolean playerTurn = true;
+
+	/**
+	 * This variable keeps track of whether or not we should switch whose turn
+	 * it is the next time the update method is called.
+	 */
+	private boolean shouldChangeTurns = false;
 	
 	/**
 	 * This creates a BattleScreen using the given World, Player,
@@ -228,38 +220,6 @@ public class BattleScreen implements IScreen {
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to load status effect icon!", e);
 		}
-		
-		/******************************************************************
-		 *                          PLAYER IMAGE                          *
-		 ******************************************************************/
-
-		// Determine how the player's image will need to be scaled so that it is the right size
-		double playerImageScaleX = (double)TARGET_PICTURE_WIDTH  / (double)playerIn.getImage().getWidth();
-		double playerImageScaleY = (double)TARGET_PICTURE_WIDTH / (double)playerIn.getImage().getHeight();
-		
-		// Create a transformation that will be applied to the player's image so it is
-		// the right size
-		AffineTransform playerTransform = new AffineTransform();
-		playerTransform.scale(playerImageScaleX, playerImageScaleY);
-		
-		// Create the transformation operation
-		playerImageScaleOp = new AffineTransformOp(playerTransform, AffineTransformOp.TYPE_BILINEAR);
-		
-		/******************************************************************
-		 *                          ENEMY IMAGE                           *
-		 ******************************************************************/
-
-		// Determine how the enemy's image will need to be scaled so that it is the right size
-		double enemyImageScaleX = (double)TARGET_PICTURE_WIDTH  / (double)enemyIn.getImage().getWidth();
-		double enemyImageScaleY = (double)TARGET_PICTURE_WIDTH / (double)enemyIn.getImage().getHeight();
-		
-		// Create a transformation that will be applied to the enemy's image so it is
-		// the right size
-		AffineTransform enemyTransform = new AffineTransform();
-		enemyTransform.scale(enemyImageScaleX, enemyImageScaleY);
-		
-		// Create the transformation operation
-		enemyImageScaleOp = new AffineTransformOp(enemyTransform, AffineTransformOp.TYPE_BILINEAR);
 	}
 
 	/*************************************************************************************/
@@ -285,6 +245,7 @@ public class BattleScreen implements IScreen {
 		// Create a tabbed pane that holds all the actions the player can take on their turn
 		// during the battle. Each tab represents a different category of actions.
 		playerBattleOptions = new JTabbedPane(JTabbedPane.TOP);
+		playerBattleOptions.setFocusable(false);
 		playerBattleOptions.setPreferredSize(new Dimension(150, 150));
 
 		// Create the JPanels that correspond to each tab. They are created with a GridLayout
@@ -299,6 +260,7 @@ public class BattleScreen implements IScreen {
 		for (PlayerAction action : PlayerAction.PLAYER_BATTLE_ACTIONS) {
 			// Create the button representing the action
 			JButton actionButton = new JButton(generateEffectStringForAction(action));
+			actionButton.setFocusable(false);
 
 			// Tell the button to perform the action as the player when it is clicked
 			actionButton.addActionListener((a) -> performPlayerAction(action));
@@ -377,6 +339,7 @@ public class BattleScreen implements IScreen {
 		// Create a QuantityBar displaying the player's mana and a label that will be displayed beside it
 		playerManaBar = new QuantityBar(0, (int)player.getSecondaryAttributeValue(Attribute.MANA));
 		playerManaBar.setStringPainted(true);
+		playerManaBar.setFocusable(false);
 		
 		playerManaLabel = new JLabel();
 		playerManaLabel.setForeground(DEFAULT_TEXT_COLOUR);
@@ -403,6 +366,7 @@ public class BattleScreen implements IScreen {
 		// Create a QuantityBar displaying the player's health and a label that will be displayed beside it
 		playerHealthBar = new QuantityBar(0, (int)player.getSecondaryAttributeValue(Attribute.HEALTH_POINTS));
 		playerHealthBar.setStringPainted(true);
+		playerHealthBar.setFocusable(false);
 		
 		playerHealthLabel = new JLabel();
 		playerHealthLabel.setForeground(DEFAULT_TEXT_COLOUR);
@@ -430,6 +394,7 @@ public class BattleScreen implements IScreen {
 		//UIManager.put("ProgressBar.horizontalSize", new DimensionUIResource(300, 300));
 		enemyHealthBar = new QuantityBar(0, (int)enemy.getSecondaryAttributeValue(Attribute.HEALTH_POINTS));
 		enemyHealthBar.setStringPainted(true);
+		enemyHealthBar.setFocusable(false);
 		
 		enemyHealthLabel = new JLabel();
 		enemyHealthLabel.setForeground(DEFAULT_TEXT_COLOUR);
@@ -658,10 +623,26 @@ public class BattleScreen implements IScreen {
 		g2d.fillRect(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT);
 		
 		// Draw the player
-		g2d.drawImage(player.getImage(), playerImageScaleOp, PLAYER_IMAGE_X_POS, IMAGE_Y_POS);
-
+		g2d.drawImage(
+			player.getImage(),
+			PLAYER_IMAGE_X_POS,
+			IMAGE_Y_POS,
+			TARGET_PICTURE_WIDTH,
+			TARGET_PICTURE_HEIGHT,
+			null,
+			null
+		);
+		
 		// Draw the enemy
-		g2d.drawImage(enemy.getImage(), enemyImageScaleOp, ENEMY_IMAGE_X_POS, IMAGE_Y_POS);
+		g2d.drawImage(
+			enemy.getImage(),
+			ENEMY_IMAGE_X_POS,
+			IMAGE_Y_POS,
+			TARGET_PICTURE_WIDTH,
+			TARGET_PICTURE_HEIGHT,
+			null,
+			null
+		);
 
 		// If the player has a protection effect draw the protection icon below their image
 		// to the left of the centre icon (healing)
@@ -731,8 +712,8 @@ public class BattleScreen implements IScreen {
 		action.applyPlayerEffect(world, player, enemy);
 		action.applyEnemyEffect(world, enemy, player);
 
-		// Switch to the enemy's turn
-		changeTurns();
+		// Switch to the enemy's turn next time the update method is run
+		shouldChangeTurns = true;
 	}
 
 	/**
@@ -749,8 +730,8 @@ public class BattleScreen implements IScreen {
 		action.applyPlayerEffect(world, player, enemy);
 		action.applyEnemyEffect(world, enemy, player);
 
-		// Switch to the player's turn
-		changeTurns();
+		// Switch to the player's turn next time the update method is run
+		shouldChangeTurns = true;
 	}
 
 	/**
@@ -782,22 +763,32 @@ public class BattleScreen implements IScreen {
 	 * a winner and will perform the enemy's action when it is their turn.
 	 */
 	public void update() {
-		// Check if the battle is over and if so then exit the battle
+		// Check if the battle is over and if so then exit the battle. Otherwise update
+		// the screen as normal
 		if (player.isDead() || enemy.isDead()) {
 			world.exitBattle(player.isDead(), enemy.getExperienceGainOnDeath(), enemy);
-		} else {
-			// Otherwise, if it is the enemy's turn then pause for half a second so
-			// that the enemy's turn is not over in a matter of milliseconds
-			// and then perform the action generated by the enemy
-			if (!playerTurn) {
-				try {
-					Thread.sleep(500);
-					performEnemyAction(enemy.generateBattleAction(player));
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+			return;
+		}
+		
+		// If we should change whose turn it is then do so
+		if (shouldChangeTurns) {
+			changeTurns();
+			shouldChangeTurns = false;
+			return;
+		}
+
+		
+		// If it is the enemy's turn then pause for a second so that
+		// the enemy's turn is not over in a matter of milliseconds
+		// and then perform the action generated by the enemy
+		if (!playerTurn) {
+			try {
+				Thread.sleep(1000);
+				performEnemyAction(enemy.generateBattleAction(player));
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			
+			return;
 		}
 	}
 }

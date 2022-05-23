@@ -38,7 +38,8 @@ import game.util.KeyPressedListener;
  * This class represents the world the player is playing in. This class
  * is responsible for a large portion of the logic that runs the game. This
  * class manages the player, updates the game state, and ensures everything
- * is drawn.
+ * is drawn. In essence this class is the backbone of the game and glues
+ * everything together.
  */
 @SuppressWarnings("serial")
 public class World extends JComponent {
@@ -92,6 +93,12 @@ public class World extends JComponent {
 	 * engaged in a battle.
 	 */
 	private boolean inBattle = false;
+
+	/**
+	 * This variable keeps track of how many steps the player has taken since they were
+	 * last in a random encounter.
+	 */
+	private int randomEncounterStepCounter = 0;
 	
 	/**
 	 * This keeps track of whether or not the world needs to be repainted,
@@ -105,7 +112,7 @@ public class World extends JComponent {
 	private boolean paused = false;
 	
 	/**
-	 * This variable keeps track of how many enemies remain in each zone
+	 * This variable keeps track of how many main enemies remain in each zone
 	 * [enemies remaining in fire, gem, ice, rock]
 	 */
 	public Map<Zone, Integer> enemiesRemaining = new EnumMap<>(Zone.class);
@@ -129,7 +136,7 @@ public class World extends JComponent {
 		// Initialize the static images used by the game
 		Images.initializeImages();
 
-		// There are three enemies each in the fire, gem, ice, and rock zones
+		// There are three main enemies each in the fire, gem, ice, and rock zones
 		enemiesRemaining.put(Zone.FIRE, 3);
 		enemiesRemaining.put(Zone.GEM, 3);
 		enemiesRemaining.put(Zone.ICE, 3);
@@ -458,7 +465,7 @@ public class World extends JComponent {
 	                5);
 		showMessage("At once everything around you seems to become lighter as the last remnant "   +
 	                "of dark magic leaves the world. People being to celebrate and cheer as they " +
-				    "realize <b>Mardok</b> is no more and they can live their lives in peace.",
+				    "realize <b>Marduk</b> is no more and they can live their lives in peace.",
 				    10);
 		
 		// Show the win screen
@@ -476,17 +483,22 @@ public class World extends JComponent {
 	 * 
 	 * Note: the message will be formatted as HTML so HTML tags such as <b> and <i> will work
 	 * 
-	 * @param message the message to display to the player
-	 * @param time    the amount of time, in seconds, to display the message for
+	 * @param messageIn the message to display to the player
+	 * @param timeIn    the amount of time, in seconds, to display the message for
 	 */
 	public synchronized void showMessage(String messageIn, int timeIn) {
-		// Wrap the message with an html tag so that the text will be formatted as HTML
-		// which will allow for the text to be formatted and so that the text will wrap
-		// to a new line if it cannot fit in a single line
-		messageIn = "<html>" + messageIn + "</html>";
-		
-		// Create the Message object and add it to the message queue
-		messageQueue.add(new Message(messageIn, timeIn));
+		// Create the message objectand wrap the message with an html tag so that the text
+		// will be formatted as HTML which will allow for the text to be formatted and so
+		// that the text will wrap to a new line if it cannot fit in a single line
+		Message message = new Message("<html>" + messageIn + "</html>", timeIn);
+
+		// If an overlay is not being displayed the immideately show the message.
+		// Otherwise add it to the message queue
+		if (!isOverlayDisplayed()) {
+			showOverlayAndPause(new MessageOverlay(this, player, message));
+		} else {
+			messageQueue.add(message);
+		}
 	}
 
 	/*************************************************************************************/
@@ -683,7 +695,7 @@ public class World extends JComponent {
 					// Create a new enemy
 					Enemy enemy = new RandomEncounterEnemy(this, player.getExperience());
 
-					// Set the enemy's image based on the current zone
+					// Set the enemy's image to the random enemy image
 					enemy.setImage(Images.randomEnemyImage);
 
 					// Start the battle
@@ -692,7 +704,7 @@ public class World extends JComponent {
 			} else {
 				// Increment the random encounter step counter
 				randomEncounterStepCounter++;
-				
+        
 				// Perform the interaction with the tile at the player's new position
 				newTile.performAction(player, this);
 			}

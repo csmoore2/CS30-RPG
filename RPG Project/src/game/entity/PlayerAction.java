@@ -79,11 +79,16 @@ public non-sealed class PlayerAction extends Action {
      */
     @Override
     public void applyPlayerEffect(World world, Player player, IEnemy enemy) {
-    	// Create a randomizer on the effect (+/- 100)
-    	int randomEffect = Main.RANDOM.nextInt(201)-100;
-    	
-    	// Apply the action's effect based on its type and show a message	
-    	switch (type) {
+        // If this action has no effect on the player then do not continue
+        if (type == Action.Type.HIT || type == Action.Type.POISON || type == Action.Type.SPECIAL) {
+            return;
+        }
+
+        // Create a randomizer on the effect (+/- 100)
+    	  int randomEffect = Main.RANDOM.nextInt(201)-100;
+    	  
+    	  // Apply the action's effect based on its type and show a message	
+    	  switch (type) {
             // Healing actions give the player health back
             case HEALING:
                 // Show a different message if it was a sustaind heal
@@ -145,15 +150,20 @@ public non-sealed class PlayerAction extends Action {
      */
     @Override
     public void applyEnemyEffect(World world, IEnemy enemy, Player player) {
-    	// Create a randomizer on the effect (+/- 100)
-    	int randomEffect = Main.RANDOM.nextInt(201)-100;
+        // If this action has no effect on the enemy then do not continue
+        if (type == Action.Type.HEALING || type == Action.Type.PROTECTION) {
+            return;
+        }
     	
-    	// If the enemy dodges this action then stop executing this method after showing a message
+    	  // If the enemy dodges this action then stop executing this method after showing a message
         if (Main.RANDOM.nextDouble() < enemy.getSecondaryAttributeValue(Attribute.DODGE_CHANCE)) {
             // Show a message and then return
             world.showMessage(String.format("Enemy dodged %s's attack.", player.getName()), 3);
             return;
         }
+
+    	  // Create a randomizer on the effect (+/- 100)
+    	  int randomEffect = Main.RANDOM.nextInt(201)-100;
 
         // Determine whether this action should be treated as critical or regular
         boolean critical = Main.RANDOM.nextDouble() < player.getSecondaryAttributeValue(Attribute.CRIT_CHANCE);

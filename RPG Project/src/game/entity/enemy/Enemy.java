@@ -215,6 +215,8 @@ public abstract class Enemy implements IEnemy {
 	 * This method is called at the start of the enemy's turn
 	 * during a battle. It is responsible for updating the enemy's
 	 * status effects.
+	 * 
+	 * @see ILivingEntity#onBattleTurn()
 	 */
 	@Override
 	public void onBattleTurn() {
@@ -255,6 +257,8 @@ public abstract class Enemy implements IEnemy {
 	 * enemy.
 	 * 
 	 * @param damage the amount of damage to inflict on the enemy
+	 * 
+	 * @see ILivingEntity#inflictDamage(int)
 	 */
 	@Override
 	public void inflictDamage(int damage) {
@@ -263,6 +267,17 @@ public abstract class Enemy implements IEnemy {
 		currentHealth = Math.max(currentHealth - damage, 0);
 	}
 
+	/**
+	 * This method inflicts a poison effect on the enemy which deals
+	 * a given amount of damage each turn for the specified number of
+	 * turns.
+	 * 
+	 * @param damagePerTurn the amount of damage this effect deals
+	 *                      each turn
+	 * @param numTurns      the number of turns this effect lasts for
+	 * 
+	 * @see ILivingEntity#inflictPoison(int, int)
+	 */
 	@Override
 	public void inflictPoison(int damagePerTurn, int numTurns) {
 		poisonDamagePerTurn = damagePerTurn;
@@ -288,6 +303,8 @@ public abstract class Enemy implements IEnemy {
 	 * This method returns the enemy's current amount of health.
 	 * 
 	 * @return the enemy's current amount of health
+	 * 
+	 * @see ILivingEntity#getCurrentHealth()
 	 */
 	@Override
 	public int getCurrentHealth() {
@@ -301,6 +318,8 @@ public abstract class Enemy implements IEnemy {
 	 * 
 	 * @return the amount of experience the player should gain by killing
 	 *         this enemy
+	 * 
+	 * @see IEnemy#getExperienceGainOnDeath()
 	 */
 	@Override
 	public abstract int getExperienceGainOnDeath();
@@ -309,6 +328,8 @@ public abstract class Enemy implements IEnemy {
 	 * This method returns the enemy's image.
 	 * 
 	 * @return the enemy's image
+	 * 
+	 * @see ILivingEntity#getImage()
 	 */
 	@Override
 	public BufferedImage getImage() {

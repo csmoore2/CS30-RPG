@@ -1,8 +1,6 @@
 package game.ui;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.function.Function;
 
@@ -13,8 +11,8 @@ import game.entity.enemy.IEnemy;
 import game.ui.screens.AreaScreen;
 
 /**
- * This class will be used as the superclass for all the
- * special tiles that are placed over an area's background image to trigger events.
+ * This class will be used as the superclass for all the special tiles
+ * that are placed over an area's background image to trigger events.
  */
 public class Tile {
 	/**
@@ -131,7 +129,6 @@ public class Tile {
 		 * @param enemyProducerIn a function that, given the player, will produce
 		 *                        an enemy that the player must fight when they
 		 *                        step on this tile
-		 *                        
 		 * @param enemyImageIn the image that is inputed, representing the enemy tile
 		 */
 		public BattleTrigger(Function<Player, IEnemy> enemyProducerIn, BufferedImage enemyImageIn) {
@@ -174,17 +171,22 @@ public class Tile {
 			return enemy;
 		}
 		
+		/**
+		 * This method paints the image of the enemy this tile makes the player
+		 * battle at this tile's location on the screen.
+		 * 
+		 * @param g2d the instance of Graphics2D to use to paint this tile
+		 * @param x   the x coordinate in pixels of the top left corner of
+		 *            this tile on the screen
+		 * @param y   the y coordinate in pixels of the top left corner of
+		 *            this tile on the screen
+		 * 
+		 * @see Tile#paint(Graphics2D, int, int)
+		 */
 		@Override
 		public void paint(Graphics2D g2d, int y, int x) {
-			// Create the transformation to do the scale
-			AffineTransform scaleTransform = new AffineTransform();
-			scaleTransform.scale((double)TILE_SIZE/enemyImage.getWidth(), (double)TILE_SIZE/enemyImage.getHeight());
-			
-			// Create the transformation operation
-			AffineTransformOp imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
-			
 			// Draw the enemy's image
-			g2d.drawImage(enemyImage, imageScaleOp, x, y);
+			g2d.drawImage(enemyImage, x, y, TILE_SIZE, TILE_SIZE, null, null);
 		}
 		
 		@Override
@@ -209,17 +211,22 @@ public class Tile {
 			this.lockedImage = lockedImage;
 		}
 	
+		/**
+		 * This method paints the image of a barrier that blocks access to
+		 * the zone's boss at this tile's location on the screen.
+		 * 
+		 * @param g2d the instance of Graphics2D to use to paint this tile
+		 * @param x   the x coordinate in pixels of the top left corner of
+		 *            this tile on the screen
+		 * @param y   the y coordinate in pixels of the top left corner of
+		 *            this tile on the screen
+		 * 
+		 * @see Tile#paint(Graphics2D, int, int)
+		 */
 		@Override
 		public void paint(Graphics2D g2d, int y, int x) {
-			// Create the transformation to do the scale
-			AffineTransform scaleTransform = new AffineTransform();
-			scaleTransform.scale((double)TILE_SIZE/lockedImage.getWidth(), (double)TILE_SIZE/lockedImage.getHeight());
-
-			// Create the transformation operation
-			AffineTransformOp imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
-			
 			// Draw the tile's image
-			g2d.drawImage(lockedImage, imageScaleOp, x, y);
+			g2d.drawImage(lockedImage, x, y, TILE_SIZE, TILE_SIZE, null, null);
 		}
 		
 		@Override
@@ -277,19 +284,23 @@ public class Tile {
 					break;
 			}
 		}
-	
+		
+		/**
+		 * This method paints the image of a key at this tile's location
+		 * on the screen.
+		 * 
+		 * @param g2d the instance of Graphics2D to use to paint this tile
+		 * @param x   the x coordinate in pixels of the top left corner of
+		 *            this tile on the screen
+		 * @param y   the y coordinate in pixels of the top left corner of
+		 *            this tile on the screen
+		 * 
+		 * @see Tile#paint(Graphics2D, int, int)
+		 */
 		@Override
 		public void paint(Graphics2D g2d, int y, int x) {
-			// Create the transformation to do the scale and fix the key's position
-			AffineTransform scaleTransform = new AffineTransform();
-			scaleTransform.scale((double)TILE_SIZE/keyImage.getWidth(), (double)TILE_SIZE/keyImage.getHeight());
-			scaleTransform.translate(-70, 0);
-
-			// Create the transformation operation
-			AffineTransformOp imageScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
-			
 			// Draw the tile's image
-			g2d.drawImage(keyImage, imageScaleOp, x, y);
+			g2d.drawImage(keyImage, x, y, TILE_SIZE, TILE_SIZE, null, null);
 		}
 		
 		@Override
