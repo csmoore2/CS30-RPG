@@ -30,6 +30,7 @@ import game.entity.Attribute;
 import game.entity.EnemyAction;
 import game.entity.Player;
 import game.entity.PlayerAction;
+import game.entity.enemy.FinalBossEnemy;
 import game.entity.enemy.IEnemy;
 import game.ui.QuantityBar;
 
@@ -251,6 +252,7 @@ public class BattleScreen implements IScreen {
 		// with 0 rows so there can be any number of rows but only 1 column.
 		JPanel hitOptions     = new JPanel(new GridLayout(0, 1));
 		JPanel poisonOptions  = new JPanel(new GridLayout(0, 1));
+		JPanel healingOptions = new JPanel(new GridLayout(0, 1));
 		JPanel defenceOptions = new JPanel(new GridLayout(0, 1));
 		JPanel specialOptions = new JPanel(new GridLayout(0, 1));
 		
@@ -276,8 +278,12 @@ public class BattleScreen implements IScreen {
 					poisonOptions.add(actionButton);
 					break;
 
-				// Healing and protection actions are added to the 'defenceOptions' JPanel
+				// Healing actions are added to the 'healingOptions' JPanel
 				case HEALING:
+					healingOptions.add(actionButton);
+					break;
+				
+				// Protection actions are added to the 'defenceOptions' JPanel
 				case PROTECTION:
 					defenceOptions.add(actionButton);
 					break;
@@ -298,6 +304,7 @@ public class BattleScreen implements IScreen {
 		// Add the panels with the actions to the tabbed pane as tabs
 		playerBattleOptions.addTab("Hit", hitOptions);
 		playerBattleOptions.addTab("Poison", poisonOptions);
+		playerBattleOptions.addTab("Healing", healingOptions);
 		playerBattleOptions.addTab("Defence", defenceOptions);
 		playerBattleOptions.addTab("Special", specialOptions);
 		
@@ -587,8 +594,32 @@ public class BattleScreen implements IScreen {
 	 */
 	@Override
 	public void paint(Graphics2D g2d) {
-		// Draw background image
-		g2d.setColor(new Color(160, 160, 160));
+		// Draw background image based upon current zone
+		switch (world.getCurrentZone())
+		{
+		case GREEN_HUB:
+			g2d.setColor(new Color(178, 213, 162));
+			break;
+		case FIRE:
+			g2d.setColor(new Color(239, 156, 139));
+			break;
+		case GEM:
+			g2d.setColor(new Color(185, 176, 203));
+			break;
+		case ICE:
+			g2d.setColor(new Color(183, 223, 226));
+			break;
+		case ROCK:
+			g2d.setColor(new Color(197, 205, 206));
+			break;
+		}
+		
+		if (enemy instanceof FinalBossEnemy)
+		{
+			g2d.setColor(new Color(48, 30, 98));
+		}
+		
+		
 		g2d.fillRect(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT);
 		
 		// Draw the player

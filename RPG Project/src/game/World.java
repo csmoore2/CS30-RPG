@@ -118,6 +118,12 @@ public class World extends JComponent {
 	public Map<Zone, Integer> enemiesRemaining = new EnumMap<>(Zone.class);
 	
 	/**
+	 * This variable keeps track of how many steps the player has taken since they were
+	 * last in a random encounter.
+	 */
+	private int randomEncounterStepCounter = 0;
+	
+	/**
 	 * This constructs the world by pushing the starting screen onto the screen stack
 	 * and initializing the game's state.
 	 * 
@@ -529,41 +535,6 @@ public class World extends JComponent {
 	}
 
 	/**
-	 * This method initiates a random encounter between an enemy and the player.
-	 * This method will first generate the enemy and then initiate the battle.
-	 */
-	public void initiateRandomEncounter() {
-		// Create a new enemy
-		Enemy enemy = new RandomEncounterEnemy(this, player.getExperience());
-
-		// If the player is not in the hub then use the current zone as the enemy's zone.
-		// However, if the player is in the hub randomly pick one of the other zones as the
-		// enemy's zone.
-		Zone enemyZone = currentZone;
-
-		if (enemyZone == Zone.GREEN_HUB) {
-			int newZoneID = Main.RANDOM.nextInt(1, Zone.values().length);
-			enemyZone = Zone.values()[newZoneID];
-		}
-
-		// Set the enemy's image based on the zone the enemy originates from
-		enemy.setImage(
-			switch (enemyZone) {
-				case FIRE      -> Images.enemyFireImage;
-				case GEM       -> Images.enemyGemImage;
-				case ICE       -> Images.enemyRockImage;
-				case ROCK      -> Images.enemyRockImage;
-				
-				default -> throw new IllegalArgumentException(
-					String.format("The enemy's zone is invalid: %s", enemyZone.name()));
-			}
-		);
-
-		// Start the battle
-		initiateBattle(enemy);
-	}
-
-	/**
 	 * This method is called when a battle is over and we need to
 	 * exit out to the regular world.
 	 * 
@@ -714,21 +685,26 @@ public class World extends JComponent {
 			// Get the tile at the player's new position
 			Tile newTile = currentArea.getTileAtPos(newY, newX);
 			
-			// If the tile is empty check for a random encounter assuming the player has moved at least
-			// four tiles from their previous random encounter, otherwise perform the tile's action
-			if (newTile == Tile.EMPTY_TILE && randomEncounterStepCounter >= 4) {
-				// There is a 15% chance of a random encounter
-				if ((Main.RANDOM.nextInt(100) + 1) <= 15) {
+			// If the tile is empty check for a random encounter, otherwise perform the tile's action
+			if (newTile == Tile.EMPTY_TILE && randomEncounterStepCounter >=4) {
+				// There is an 8% chance of a random encounter
+				if ((Main.RANDOM.nextInt(100) + 1) <= 8) {
 					// Reset the random encounter step counter
 					randomEncounterStepCounter = 0;
+					
+					// Create a new enemy
+					Enemy enemy = new RandomEncounterEnemy(this, player.getExperience());
 
-					// Initiate the random encounter
-					initiateRandomEncounter();
+					// Set the enemy's image to the random enemy image
+					enemy.setImage(Images.randomEnemyImage);
+
+					// Start the battle
+					initiateBattle(enemy);
 				}
 			} else {
 				// Increment the random encounter step counter
 				randomEncounterStepCounter++;
-
+        
 				// Perform the interaction with the tile at the player's new position
 				newTile.performAction(player, this);
 			}

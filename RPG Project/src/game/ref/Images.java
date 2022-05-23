@@ -24,6 +24,7 @@ public final class Images {
 	public static BufferedImage lockedGemImage;
 	public static BufferedImage lockedIceImage;
 	public static BufferedImage lockedRockImage;
+	public static BufferedImage randomEnemyImage;
 	public static BufferedImage keyImage;
 	
 	/**
@@ -45,7 +46,8 @@ public final class Images {
 			lockedGemImage  = ImageIO.read(new File("res/lockedOutGem.png"));
 			lockedIceImage  = ImageIO.read(new File("res/lockedOutIce.png"));
 			lockedRockImage = ImageIO.read(new File("res/lockedOutRock.png"));
-			keyImage        = ImageIO.read(new File("res/key.png"));
+			randomEnemyImage = ImageIO.read(new File("res/randomenemy.png"));
+			keyImage = ImageIO.read(new File("res/key.png"));
 		} catch (IOException e) {
 			// There was an error loading an image so we cannot continue
 			throw new RuntimeException("Error loading image!", e);
