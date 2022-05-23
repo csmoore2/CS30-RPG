@@ -43,6 +43,11 @@ public non-sealed class EnemyAction extends Action {
      */
     @Override
     public void applyPlayerEffect(World world, Player player, IEnemy enemy) {
+        // If this action has no effect on the player then do not continue
+        if (type == Action.Type.HEALING || type == Action.Type.PROTECTION) {
+            return;
+        }
+
         // If the player dodges this action then stop executing this method after showing a message
         if (Main.RANDOM.nextDouble() < player.getSecondaryAttributeValue(Attribute.DODGE_CHANCE)) {
             // Show a message and then return
@@ -124,6 +129,11 @@ public non-sealed class EnemyAction extends Action {
      */
     @Override
     public void applyEnemyEffect(World world, IEnemy enemy, Player player) {
+        // If this action has no effect on the enemy then do not continue
+        if (type == Action.Type.HIT || type == Action.Type.POISON || type == Action.Type.SPECIAL) {
+            return;
+        }
+
         // Apply the action's effect based on its type
         switch (type) {
             // Healing actions give the enemy health back

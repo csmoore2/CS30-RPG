@@ -1,4 +1,4 @@
-# Elemental Battle of Mages
+# Elemental Battle of the Mages
 
 ## Running the Game
 

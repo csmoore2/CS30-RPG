@@ -32,27 +32,27 @@ public class RandomEncounterEnemy extends Enemy {
 	@Override
 	protected void initializeAttributes(int playerExp) {
 		// Calculate the enemy's maximum amount of health and start them off with full health
-		maxHealth = (Main.RANDOM.nextInt((playerExp / 25) + 1) + 1) * 2000;
+		maxHealth = (playerExp / 25)*200 + 1000 + Main.RANDOM.nextInt(3)*100;
 		currentHealth = maxHealth;
 
 		// Calculate the number of healing potions the enemy should have
-		originalNumHealingPotions = (playerExp / 50) + Main.RANDOM.nextInt(2);
+		originalNumHealingPotions = (playerExp / 250) + Main.RANDOM.nextInt(2);
 		numHealingPotions = originalNumHealingPotions;
 
-		// One healing potion should give the enemy 20% of their health back
-		healingPotionHealth = (int)(0.2 * maxHealth);
+		// One healing potion should give the enemy 15% of their health back
+		healingPotionHealth = (int)(0.15 * maxHealth);
 
 		// Calculate the base damage dealt by an attack from this enemy
 		baseAttackDamage = (Main.RANDOM.nextInt((playerExp / 50) + 1) * 100) + (playerExp*2) + 100;
 
 		// Calculate the number of turns this enemy's poison attacks should last
-		numPoisonTurns = playerExp >= 150 ? 3 : 2;
+		numPoisonTurns = playerExp >= 400 ? 3 : 2;
 
 		// Calculate the enemy's chance of making a critical hit
-		criticalChance = 0.01 * playerExp;
+		criticalChance = 0.0003 * playerExp;
 
 		// Calculate the enemy's chance of dodging an attack
-		dodgeChance = 0.005 * playerExp;
+		dodgeChance = 0.0002 * playerExp;
 	}
 
 	/**

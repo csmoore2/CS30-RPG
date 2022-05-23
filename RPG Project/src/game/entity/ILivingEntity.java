@@ -96,15 +96,6 @@ public interface ILivingEntity {
 	boolean isDead();
 
 	/**
-	 * This method returns the amount of experience the player should
-	 * gain by killing this entity. By default this is zero.
-	 * 
-	 * @return the amount of experience the player should gain by killing
-	 *         this entity
-	 */
-	default int getExperienceGainOnDeath() { return 0; }
-
-	/**
 	 * This method returns the image that represents this entity.
 	 * 
 	 * @return the image that represents this entity

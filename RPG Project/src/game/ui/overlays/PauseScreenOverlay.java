@@ -209,6 +209,9 @@ public class PauseScreenOverlay extends Overlay {
 		
 		// Make the attribute button show the attribute panel
 		attributeButton.addActionListener((a) -> showAttributePanel());
+
+		// Enable the attribute button as long as the player is not dead
+		attributeButton.setEnabled(!player.isDead());
 		
 		// Align the attribute button to be slightly above the vertical centre of the
 		// screen and horizontally centered

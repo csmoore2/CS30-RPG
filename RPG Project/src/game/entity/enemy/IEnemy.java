@@ -30,6 +30,15 @@ public interface IEnemy extends ILivingEntity {
      */
     EnemyAction generateBattleAction(Player player);
 
+	/**
+	 * This method returns the amount of experience the player should
+	 * gain by killing this enemy.
+	 * 
+	 * @return the amount of experience the player should gain by killing
+	 *         this enemy
+	 */
+	int getExperienceGainOnDeath();
+
     /**
      * This method resets the state of the enemy so that it can be fought
      * again.
