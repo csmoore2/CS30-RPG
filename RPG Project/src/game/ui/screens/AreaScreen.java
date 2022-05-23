@@ -349,7 +349,7 @@ public class AreaScreen implements IScreen {
 	@Override
 	public void paint(Graphics2D g2d) {
 		// Draw a black background under the background image
-		g2d.setColor(Color.BLACK);
+		g2d.setColor(Color.GRAY);
 		g2d.fillRect(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT);
 
 		// Draw the area's background image (the zone's background image)

@@ -60,13 +60,13 @@ public class Player implements ILivingEntity {
 	 * This is the number of experience points the player has to gain
 	 * to level up.
 	 */
-	public static final int EXPERIENCE_PER_LEVEL = 50;
+	public static final int EXPERIENCE_PER_LEVEL = 100;
 
 	/**
 	 * This is the number of attribute points the player gets to spend
 	 * each time they level up.
 	 */
-	public static final int ATTR_POINTS_PER_LEVEL = 2;
+	public static final int ATTR_POINTS_PER_LEVEL = 1;
 	
 	/**
 	 * The minimum possible x-position of the player.
@@ -385,19 +385,19 @@ public class Player implements ILivingEntity {
 		// attribute is a primary attribute, throw an IllegalArgumentException
 		switch (attr) {
 			case HEALTH_POINTS:
-				return 1000 + (1000 * healthAttr);
+				return 1000 + (300 * healthAttr);
 			
 			case MANA:
-				return 500 + (500 * intelligenceAttr);
+				return 500 + (250 * intelligenceAttr);
 			
 			case MANA_REGEN:
-				return 100 + (50 * intelligenceAttr);
+				return 100 + (10 * intelligenceAttr);
 			
 			case CRIT_CHANCE:
-				return 0.05 + (0.01 * intelligenceAttr) + (0.02 * abilitiesAttr);
+				return 0.05 + (0.01 * intelligenceAttr) + (0.01 * abilitiesAttr);
 			
 			case DODGE_CHANCE:
-				return 0.05 + (0.02 * intelligenceAttr) + (0.01 * abilitiesAttr);
+				return 0.05 + (0.01 * intelligenceAttr) + (0.01 * abilitiesAttr);
 			
 			case SPECIAL_DAMAGE:
 				return 800 + (100 * specialAttr);

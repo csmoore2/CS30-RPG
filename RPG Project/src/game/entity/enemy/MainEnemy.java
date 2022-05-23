@@ -32,27 +32,29 @@ public class MainEnemy extends Enemy {
 	@Override
 	protected void initializeAttributes(int playerExp) {
 		// Calculate the enemy's maximum amount of health and start them off with full health
-		maxHealth = (Main.RANDOM.nextInt((playerExp / 10) + 1) + 1) * 2000;
+		maxHealth = (int) (((double) playerExp / 1100.0 + 9.0/10.0) * 2000.0) + Main.RANDOM.nextInt(500)-250;
+		maxHealth = Main.RANDOM.nextInt((int) (maxHealth - maxHealth*2.0/4.0))+ (int)(maxHealth*2.7/4.0);
 		currentHealth = maxHealth;
 
 		// Calculate the number of healing potions the enemy should have
-		originalNumHealingPotions = (playerExp / 25) + Main.RANDOM.nextInt(2);
+		originalNumHealingPotions = (playerExp / 600) + Main.RANDOM.nextInt(3);
 		numHealingPotions = originalNumHealingPotions;
 
 		// One healing potion should give the enemy 30% of their health back
 		healingPotionHealth = (int)(0.30 * maxHealth);
 
 		// Calculate the base damage dealt by an attack from this enemy
-		baseAttackDamage = (Main.RANDOM.nextInt((playerExp / 20) + 1) * 100) + (playerExp*2) + 100;
+		baseAttackDamage = (int) 15*Main.RANDOM.nextInt((int) java.lang.Math.sqrt(playerExp)+1)+200+ Main.RANDOM.nextInt(200)-100;
 
 		// Calculate the number of turns this enemy's poison attacks should last
-		numPoisonTurns = playerExp >= 75 ? 3 : 2;
+		numPoisonTurns = playerExp >= 1000 ? 3 : 2;
 
 		// Calculate the enemy's chance of making a critical hit
-		criticalChance = 0.015 * playerExp;
+		criticalChance = 0.00008 * playerExp+0.1;
 
 		// Calculate the enemy's chance of dodging an attack
-		dodgeChance = 0.005 * playerExp;
+		dodgeChance = 0.00003 * playerExp+0.1;
+	
 	}
 
 	/**
@@ -143,6 +145,6 @@ public class MainEnemy extends Enemy {
 	 */
 	@Override
 	public int getExperienceGainOnDeath() {
-		return (maxHealth / 1000) * 10;
+		return (int) (((double) maxHealth / 1000.0) * 70.0);
 	}
 }
