@@ -18,22 +18,26 @@ public non-sealed class PlayerAction extends Action {
     public static final PlayerAction[] PLAYER_BATTLE_ACTIONS = new PlayerAction[] {
         // These are the basic hit (attack) options the player has
         new PlayerAction("Weak Hit",   Type.HIT, 300, 0, 0,   0),
-        new PlayerAction("Medium Hit", Type.HIT, 500, 0, 150, 1),
-        new PlayerAction("Strong Hit", Type.HIT, 900, 0, 400, 4),
+        new PlayerAction("Medium Hit", Type.HIT, 500, 0, 150, 3),
+        new PlayerAction("Strong Hit", Type.HIT, 900, 0, 400, 8),
+        new PlayerAction("Very Strong Hit", Type.HIT, 1200, 0, 700, 15),
         
         // These are the poison (multi-turn damage) attack options the player has
         new PlayerAction("Weak Poison",   Type.POISON, 100, 3, 0,   0 ),
-        new PlayerAction("Medium Poison", Type.POISON, 150, 4, 300, 3 ),
-        new PlayerAction("Strong Poison", Type.POISON, 200, 5, 600, 10),
+        new PlayerAction("Medium Poison", Type.POISON, 150, 4, 300, 5 ),
+        new PlayerAction("Strong Poison", Type.POISON, 300, 5, 600, 10),
+        new PlayerAction("Strong Poison", Type.POISON, 450, 6, 800, 18),
         
         // These are the options the player has to heal themself
         new PlayerAction("Weak Healing",      Type.HEALING, 250, 0, 200, 0),
         new PlayerAction("Strong Healing",    Type.HEALING, 500, 0, 500, 6),
-        new PlayerAction("Sustained Healing", Type.HEALING, 500, 4, 700, 8),
+        new PlayerAction("Sustained Healing", Type.HEALING, 500, 4, 700, 12),
+        new PlayerAction("Miraculous Healing", Type.HEALING, 2000, 0, 1000, 16),
         
         // These are the options the player has to protect themself
-        new PlayerAction("Weak Protection",   Type.PROTECTION, 0.5, 3, 200, 0),
-        new PlayerAction("Strong Protection", Type.PROTECTION, 0.5, 5, 500, 5),
+        new PlayerAction("Weak Protection",   Type.PROTECTION, 0.5, 3, 200, 3),
+        new PlayerAction("Strong Protection", Type.PROTECTION, 0.5, 5, 500, 10),
+        new PlayerAction("Incredible Protection", Type.PROTECTION, 0.5, 7, 700, 16),
         
         // This is the player's special attack
         new PlayerAction("Special Attack", Type.SPECIAL, 0, 0, 1000, 0)
@@ -75,8 +79,11 @@ public non-sealed class PlayerAction extends Action {
      */
     @Override
     public void applyPlayerEffect(World world, Player player, IEnemy enemy) {
-        // Apply the action's effect based on its type and show a message
-        switch (type) {
+    	// Create a randomizer on the effect (+/- 100)
+    	int randomEffect = Main.RANDOM.nextInt(201)-100;
+    	
+    	// Apply the action's effect based on its type and show a message	
+    	switch (type) {
             // Healing actions give the player health back
             case HEALING:
                 // Show a different message if it was a sustaind heal
@@ -85,19 +92,19 @@ public non-sealed class PlayerAction extends Action {
                         String.format(
                             "%s will heal %d health for %d turns.",
                             player.getName(),
-                            (int)effect, numTurns
+                            (int)effect+randomEffect, numTurns
                         ),
                         3
                     );
                 } else {
                     world.showMessage(
-                        String.format("%s healed %d health.", player.getName(), (int)effect),
+                        String.format("%s healed %d health.", player.getName(), (int)effect+randomEffect),
                         3
                     );
                 }
 
                 // Apply the effect
-                player.applyHealingEffect((int)effect, numTurns);
+                player.applyHealingEffect((int)effect +randomEffect, numTurns);
                 return;
             
             // Protection actions reduce incoming damage by a multiplier
@@ -138,7 +145,10 @@ public non-sealed class PlayerAction extends Action {
      */
     @Override
     public void applyEnemyEffect(World world, IEnemy enemy, Player player) {
-        // If the enemy dodges this action then stop executing this method after showing a message
+    	// Create a randomizer on the effect (+/- 100)
+    	int randomEffect = Main.RANDOM.nextInt(201)-100;
+    	
+    	// If the enemy dodges this action then stop executing this method after showing a message
         if (Main.RANDOM.nextDouble() < enemy.getSecondaryAttributeValue(Attribute.DODGE_CHANCE)) {
             // Show a message and then return
             world.showMessage(String.format("Enemy dodged %s's attack.", player.getName()), 3);
@@ -162,7 +172,7 @@ public non-sealed class PlayerAction extends Action {
                         String.format(
                             "%s dealt a critical hit on enemy for %d damage!",
                             player.getName(),
-                            (int)(effect * damageMultiplier)
+                            (int)(effect * damageMultiplier +randomEffect)
                         ),
                         4
                     );
@@ -171,14 +181,14 @@ public non-sealed class PlayerAction extends Action {
                         String.format(
                             "%s hit enemy for %d damage!",
                             player.getName(),
-                            (int)effect
+                            (int)effect +randomEffect
                         ),
                         3
                     );
                 }
 
                 // Inflict the damage
-                enemy.inflictDamage((int)(effect * damageMultiplier));
+                enemy.inflictDamage((int)(effect * damageMultiplier +randomEffect));
                 return;
             
             // The player's special attack does an amount of damage
@@ -189,7 +199,7 @@ public non-sealed class PlayerAction extends Action {
                     world.showMessage(
                         String.format(
                             "The special attack dealt a critical hit on enemy for %d damage!",
-                            (int)(player.getSecondaryAttributeValue(Attribute.SPECIAL_DAMAGE) * damageMultiplier)
+                            (int)(player.getSecondaryAttributeValue(Attribute.SPECIAL_DAMAGE) * damageMultiplier +randomEffect)
                         ),
                         4
                     );
@@ -197,14 +207,14 @@ public non-sealed class PlayerAction extends Action {
                     world.showMessage(
                         String.format(
                             "The special attack dealt %d damage to enemy.",
-                            (int)player.getSecondaryAttributeValue(Attribute.SPECIAL_DAMAGE)
+                            (int)player.getSecondaryAttributeValue(Attribute.SPECIAL_DAMAGE) +randomEffect
                         ),
                         3
                     );
                 }
 
                 // Inflict the damage
-                enemy.inflictDamage((int)(player.getSecondaryAttributeValue(Attribute.SPECIAL_DAMAGE) * damageMultiplier));
+                enemy.inflictDamage((int)(player.getSecondaryAttributeValue(Attribute.SPECIAL_DAMAGE) * damageMultiplier +randomEffect));
                 return;
             
             // Poison actions do damage over multiple turns
@@ -214,14 +224,14 @@ public non-sealed class PlayerAction extends Action {
                     String.format(
                         "%s inflicted poison on enemy dealing %d damage for %d turns.",
                         player.getName(),
-                        (int)effect,
+                        (int)effect +randomEffect,
                         numTurns
                     ),
                     4
                 );
 
                 // Inflict the effect
-                enemy.inflictPoison((int)effect, numTurns);
+                enemy.inflictPoison((int)effect+randomEffect, numTurns);
                 return;
             
             // Actions other than hit, special, and poison have no effect

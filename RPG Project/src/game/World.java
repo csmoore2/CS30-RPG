@@ -111,6 +111,12 @@ public class World extends JComponent {
 	public Map<Zone, Integer> enemiesRemaining = new EnumMap<>(Zone.class);
 	
 	/**
+	 * This variable keeps track of how many steps the player has taken since they were
+	 * last in a random encounter.
+	 */
+	private int randomEncounterStepCounter = 0;
+	
+	/**
 	 * This constructs the world by pushing the starting screen onto the screen stack
 	 * and initializing the game's state.
 	 * 
@@ -668,27 +674,25 @@ public class World extends JComponent {
 			Tile newTile = currentArea.getTileAtPos(newY, newX);
 			
 			// If the tile is empty check for a random encounter, otherwise perform the tile's action
-			if (newTile == Tile.EMPTY_TILE) {
-				// There is a 20% chance of a random encounter
-				if ((Main.RANDOM.nextInt(100) + 1) <= 20) {
+			if (newTile == Tile.EMPTY_TILE && randomEncounterStepCounter >=4) {
+				// There is an 8% chance of a random encounter
+				if ((Main.RANDOM.nextInt(100) + 1) <= 8) {
+					// Reset the random encounter step counter
+					randomEncounterStepCounter = 0;
+					
 					// Create a new enemy
 					Enemy enemy = new RandomEncounterEnemy(this, player.getExperience());
 
 					// Set the enemy's image based on the current zone
-					enemy.setImage(
-						switch (currentZone) {
-							case GREEN_HUB -> Images.bossFireImage;
-							case FIRE      -> Images.enemyFireImage;
-							case GEM       -> Images.enemyGemImage;
-							case ICE       -> Images.enemyRockImage;
-							case ROCK      -> Images.enemyRockImage;
-						}
-					);
+					enemy.setImage(Images.randomEnemyImage);
 
 					// Start the battle
 					initiateBattle(enemy);
 				}
 			} else {
+				// Increment the random encounter step counter
+				randomEncounterStepCounter++;
+				
 				// Perform the interaction with the tile at the player's new position
 				newTile.performAction(player, this);
 			}
@@ -782,7 +786,7 @@ public class World extends JComponent {
 	 * 
 	 * @return whether or not an AreaScreen is currently being displayed
 	 */
-	public synchronized boolean isAreaDisplayed() {
+	public boolean isAreaDisplayed() {
 		return screenStack.peek() instanceof AreaScreen;
 	}
 	

@@ -203,14 +203,16 @@ public class Main {
 						  20);
 		world.showMessage("To move you must use the w, a, s, and d keys on your keyboard. If at any "  +
 		                  "time you wish to leave simply pause the game by pressing escape and exit "  +
-						  "the game. Furthermore, for every <b>50 experience points</b> you gain you " +
+						  "the game. Furthermore, for every <b>100 experience points</b> you gain you " +
 						  "level up which will give you <b>2 attribute points</b> to spend. These "    +
 						  "points can be spent by selecting \"View Attributes/Level Up\" in the "      +
 						  "pause screen. Note, though, that you cannot pause the game while a "        +
 						  "message box is being displayed.",
 						  25);
 		world.showMessage(
-			String.format("One final note: if the movement keys are not working try clicking inside "   +
+			String.format("It is important to know that the effectiveness of an effect (like an attack " +
+						  "or health potion) may differ from the attributed value, due to random variation. " +
+						  "One final note: if the movement keys are not working try clicking inside "   +
 		                  "the game's window. The time has now come for you to go out into the world. " +
 						  "The whole world is counting on you %s. May luck be on your side!",
 						  world.getPlayer().getName()

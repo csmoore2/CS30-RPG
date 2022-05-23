@@ -33,27 +33,27 @@ public class FinalBossEnemy extends Enemy {
 	@Override
 	protected void initializeAttributes(int playerExp) {
 		// Calculate the boss's maximum amount of health and start them off with full health
-		maxHealth = (Main.RANDOM.nextInt((playerExp / 25) + 1) + 1) * 4000;
+		maxHealth = 20000;
 		currentHealth = maxHealth;
 
 		// Calculate the number of healing potions the boss should have
-		originalNumHealingPotions = 1;
+		originalNumHealingPotions = 2;
 		numHealingPotions = originalNumHealingPotions;
 
 		// One healing potion should give the boss 50% of their health back
 		healingPotionHealth = (int)(0.5 * maxHealth);
 
 		// Calculate the base damage dealt by an attack from this boss
-		baseAttackDamage = (Main.RANDOM.nextInt((playerExp / 50) + 1) * 300) + (playerExp*2) + 100;
+		baseAttackDamage = 500;
 
 		// Calculate the number of turns this boss's poison attacks should last
 		numPoisonTurns = playerExp >= 300 ? 3 : 2;
 
 		// Calculate the boss's chance of making a critical hit
-		criticalChance = 0.025 * playerExp;
+		criticalChance = 0.5;
 
 		// Calculate the boss's chance of dodging an attack
-		dodgeChance = 0.01 * playerExp;
+		dodgeChance = 0.5;
 	}
 
 	/**
