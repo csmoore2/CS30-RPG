@@ -5,8 +5,14 @@
 In order to run the game:
 - Download the code
 - Extract the zip file
-- Set the directory of eclipse to be the resulting folder
-- Press the green button which says "run"
+- Set the workspace directory of Eclipse to be the resulting folder
+- Close Eclipse's welcome screen and select "Import Projects" from the pane on the left side of the screen
+- Select "General" -> "Existing Projects into Workspace"
+- Press next and then select the "Browse" button next to the box labelled "Select root directory"
+- Select the same directory that you selected as Eclipse's workspace directory
+- Ensure the "RPG Project" project is checked and press finish
+- Using the pane on the left side of the screen navigate "RPG Project" -> "src" -> "game"
+- Double click on "Main.java" under "game" and press the green run button at the top of the screen
 
 ## Attributions
 
