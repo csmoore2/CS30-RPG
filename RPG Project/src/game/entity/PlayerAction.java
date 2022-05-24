@@ -35,7 +35,7 @@ public non-sealed class PlayerAction extends Action {
         new PlayerAction("Miraculous Healing", Type.HEALING, 2000, 0, 1000, 16),
         
         // These are the options the player has to protect themself
-        new PlayerAction("Weak Protection",   Type.PROTECTION, 0.5, 3, 200, 3),
+        new PlayerAction("Weak Protection",   Type.PROTECTION, 0.5, 3, 200, 0),
         new PlayerAction("Strong Protection", Type.PROTECTION, 0.5, 5, 500, 10),
         new PlayerAction("Incredible Protection", Type.PROTECTION, 0.5, 7, 700, 16),
         
