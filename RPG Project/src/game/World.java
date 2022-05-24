@@ -93,6 +93,11 @@ public class World extends JComponent {
 	 * engaged in a battle.
 	 */
 	private boolean inBattle = false;
+	
+	/**
+	 * This indicated whether or not the player has fought the final boss yet.
+	 */
+	private boolean finalBossFought = false;
 
 	/**
 	 * This variable keeps track of how many steps the player has taken since they were
@@ -417,8 +422,10 @@ public class World extends JComponent {
 			}
 		}
 		
-		// If the player has all the keys then we should begin the final boss fight
-		if (player.hasAllKeys()) {
+		// If the player has all the keys and has not fought the final boss then we should
+		// begin the final boss fight
+		if (player.hasAllKeys() && !finalBossFought) {
+			finalBossFought = true;
 			initiateFinalBossBattle();
 		}
 	}
@@ -481,7 +488,7 @@ public class World extends JComponent {
 	 * @param timeIn    the amount of time, in seconds, to display the message for
 	 */
 	public synchronized void showMessage(String messageIn, int timeIn) {
-		// Create the message objectand wrap the message with an html tag so that the text
+		// Create the message object and wrap the message with an html tag so that the text
 		// will be formatted as HTML which will allow for the text to be formatted and so
 		// that the text will wrap to a new line if it cannot fit in a single line
 		Message message = new Message("<html>" + messageIn + "</html>", timeIn);
