@@ -188,7 +188,7 @@ public class Main {
 	 * @param world the world
 	 */
 	private static void showIntroduction(World world) {
-		/*world.showMessage("Welcome to <b>Elemental Battle of the Mages</b>!", 5);
+		world.showMessage("Welcome to <b>Elemental Battle of the Mages</b>!", 5);
 		world.showMessage("You are the last descendant of a family of powerful mages who used "     +
 		                  "their magic for good. The rest of your family was eliminated in <b>The " +
 						  "Last Great Elemental War</b> against <b>Marduk</b> and his followers.",
@@ -220,7 +220,7 @@ public class Main {
 						  "%s. May luck be on your side!",
 						  world.getPlayer().getName()
 			),
-			25);*/
+			25);
 	}
 
 	/**
