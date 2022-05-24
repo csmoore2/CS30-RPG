@@ -371,14 +371,14 @@ public class CharacterCreationScreen extends JComponent {
 	 */
 	private void selectCharacter(int index) {
 		selectedPlayer = Player.PREMADE_PLAYERS[index];
-		updateUi();
+		updateUIState();
 	}
 
 	/**
 	 * This method updates ui components that need updating when the screen's
 	 * state changes.
 	 */
-	private void updateUi() {
+	private void updateUIState() {
 		// Update the image of the currently selected character
 		characterImageView.setIcon(new ImageIcon(selectedPlayer.getImage()));
 

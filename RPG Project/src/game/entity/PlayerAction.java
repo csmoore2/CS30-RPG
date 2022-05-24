@@ -26,7 +26,7 @@ public non-sealed class PlayerAction extends Action {
         new PlayerAction("Weak Poison",   Type.POISON, 100, 3, 0,   0 ),
         new PlayerAction("Medium Poison", Type.POISON, 150, 4, 300, 5 ),
         new PlayerAction("Strong Poison", Type.POISON, 300, 5, 600, 10),
-        new PlayerAction("Strong Poison", Type.POISON, 450, 6, 800, 18),
+        new PlayerAction("Very Strong Poison", Type.POISON, 450, 6, 800, 18),
         
         // These are the options the player has to heal themself
         new PlayerAction("Weak Healing",      Type.HEALING, 250, 0, 200, 0),
@@ -85,10 +85,10 @@ public non-sealed class PlayerAction extends Action {
         }
 
         // Create a randomizer on the effect (+/- 100)
-    	  int randomEffect = Main.RANDOM.nextInt(201)-100;
-    	  
-    	  // Apply the action's effect based on its type and show a message	
-    	  switch (type) {
+        int randomEffect = Main.RANDOM.nextInt(201)-100;
+        
+        // Apply the action's effect based on its type and show a message	
+        switch (type) {
             // Healing actions give the player health back
             case HEALING:
                 // Show a different message if it was a sustaind heal
@@ -99,12 +99,12 @@ public non-sealed class PlayerAction extends Action {
                             player.getName(),
                             (int)effect+randomEffect, numTurns
                         ),
-                        3
+                        5
                     );
                 } else {
                     world.showMessage(
                         String.format("%s healed %d health.", player.getName(), (int)effect+randomEffect),
-                        3
+                        5
                     );
                 }
 
@@ -122,7 +122,7 @@ public non-sealed class PlayerAction extends Action {
                         effect * 100,
                         numTurns
                     ),
-                    4
+                    6
                 );
 
                 // Apply the effect
@@ -158,12 +158,12 @@ public non-sealed class PlayerAction extends Action {
     	  // If the enemy dodges this action then stop executing this method after showing a message
         if (Main.RANDOM.nextDouble() < enemy.getSecondaryAttributeValue(Attribute.DODGE_CHANCE)) {
             // Show a message and then return
-            world.showMessage(String.format("Enemy dodged %s's attack.", player.getName()), 3);
+            world.showMessage(String.format("Enemy dodged %s's attack.", player.getName()), 5);
             return;
         }
 
-    	  // Create a randomizer on the effect (+/- 100)
-    	  int randomEffect = Main.RANDOM.nextInt(201)-100;
+        // Create a randomizer on the effect (+/- 100)
+        int randomEffect = Main.RANDOM.nextInt(201)-100;
 
         // Determine whether this action should be treated as critical or regular
         boolean critical = Main.RANDOM.nextDouble() < player.getSecondaryAttributeValue(Attribute.CRIT_CHANCE);
@@ -184,7 +184,7 @@ public non-sealed class PlayerAction extends Action {
                             player.getName(),
                             (int)(effect * damageMultiplier +randomEffect)
                         ),
-                        4
+                        6
                     );
                 } else {
                     world.showMessage(
@@ -193,7 +193,7 @@ public non-sealed class PlayerAction extends Action {
                             player.getName(),
                             (int)effect +randomEffect
                         ),
-                        3
+                        5
                     );
                 }
 
@@ -211,7 +211,7 @@ public non-sealed class PlayerAction extends Action {
                             "The special attack dealt a critical hit on enemy for %d damage!",
                             (int)(player.getSecondaryAttributeValue(Attribute.SPECIAL_DAMAGE) * damageMultiplier +randomEffect)
                         ),
-                        4
+                        6
                     );
                 } else {
                     world.showMessage(
@@ -219,7 +219,7 @@ public non-sealed class PlayerAction extends Action {
                             "The special attack dealt %d damage to enemy.",
                             (int)player.getSecondaryAttributeValue(Attribute.SPECIAL_DAMAGE) +randomEffect
                         ),
-                        3
+                        5
                     );
                 }
 
@@ -237,7 +237,7 @@ public non-sealed class PlayerAction extends Action {
                         (int)effect +randomEffect,
                         numTurns
                     ),
-                    4
+                    6
                 );
 
                 // Inflict the effect

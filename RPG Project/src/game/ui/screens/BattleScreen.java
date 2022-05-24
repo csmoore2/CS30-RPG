@@ -37,6 +37,10 @@ import game.ui.QuantityBar;
 import static javax.swing.SpringLayout.*;
 
 public class BattleScreen implements IScreen {
+	/*************************************************************************************/
+	/*                            SIZE AND POSITION CONSTANTS                            */
+	/*************************************************************************************/
+
 	/**
 	 * This is the size that each status effect icon will be scaled to be.
 	 */
@@ -67,6 +71,10 @@ public class BattleScreen implements IScreen {
 	 * in the screen.
 	 */
 	public static final int IMAGE_Y_POS = 240;
+
+	/*************************************************************************************/
+	/*                                   TEXT CONSTANTS                                  */
+	/*************************************************************************************/
 	
 	/**
 	 * This is the default colour for text.
@@ -82,6 +90,10 @@ public class BattleScreen implements IScreen {
 	 * This is the font that will be used to display labels for objects.
 	 */
 	public static final Font LABEL_TEXT_FONT = new Font("Label Text Font", Font.BOLD, 20);
+
+	/*************************************************************************************/
+	/*                                STATUS EFFECT ICONS                                */
+	/*************************************************************************************/
 
 	/**
 	 * This is the icon that will be displayed under the player's image to
@@ -100,6 +112,10 @@ public class BattleScreen implements IScreen {
 	 * indicate they have an active poison effect.
 	 */
 	private Image poisonEffectIcon;
+
+	/*************************************************************************************/
+	/*                                   UI COMPONENTS                                   */
+	/*************************************************************************************/
 
 	/**
 	 * This is the tabbed pane that contains all the buttons representing the
@@ -148,6 +164,10 @@ public class BattleScreen implements IScreen {
 	 * This is the QuantityBar displaying the amount of health the enemy has.
 	 */
 	private QuantityBar enemyHealthBar;
+
+	/*************************************************************************************/
+	/*                                INSTANCE VARIABLES                                 */
+	/*************************************************************************************/
 
 	/**
 	 * This is the world.
@@ -594,32 +614,32 @@ public class BattleScreen implements IScreen {
 	 */
 	@Override
 	public void paint(Graphics2D g2d) {
-		// Draw background image based upon current zone
-		switch (world.getCurrentZone())
-		{
-		case GREEN_HUB:
-			g2d.setColor(new Color(178, 213, 162));
-			break;
-		case FIRE:
-			g2d.setColor(new Color(239, 156, 139));
-			break;
-		case GEM:
-			g2d.setColor(new Color(185, 176, 203));
-			break;
-		case ICE:
-			g2d.setColor(new Color(183, 223, 226));
-			break;
-		case ROCK:
-			g2d.setColor(new Color(197, 205, 206));
-			break;
+		// Select the background colour based upon the current zone
+		switch (world.getCurrentZone()) {
+			case GREEN_HUB:
+				g2d.setColor(new Color(178, 213, 162));
+				break;
+			case FIRE:
+				g2d.setColor(new Color(239, 156, 139));
+				break;
+			case GEM:
+				g2d.setColor(new Color(185, 176, 203));
+				break;
+			case ICE:
+				g2d.setColor(new Color(183, 223, 226));
+				break;
+			case ROCK:
+				g2d.setColor(new Color(197, 205, 206));
+				break;
 		}
 		
-		if (enemy instanceof FinalBossEnemy)
-		{
+		// If the player is fighting the final boss then we should use a different
+		// background colour
+		if (enemy instanceof FinalBossEnemy) {
 			g2d.setColor(new Color(48, 30, 98));
 		}
 		
-		
+		// Draw the bakground
 		g2d.fillRect(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT);
 		
 		// Draw the player
@@ -703,7 +723,7 @@ public class BattleScreen implements IScreen {
 	 */
 	private void performPlayerAction(PlayerAction action) {
 		// Display a message about the action on the screen
-		world.showMessage(String.format("Player used %s.", action.getName()), 2);
+		world.showMessage(String.format("%s used %s.", player.getName(), action.getName()), 4);
 
 		// Remove the action's mana cost from the player's mana
 		player.removeMana(action.getManaCost());
@@ -724,7 +744,7 @@ public class BattleScreen implements IScreen {
 	 */
 	private void performEnemyAction(EnemyAction action) {
 		// Display a message about the action on the screen
-		world.showMessage(String.format("Enemy used %s.", action.getName()), 2);
+		world.showMessage(String.format("Enemy used %s.", action.getName()), 4);
 
 		// Perform the action's enemy and player effects
 		action.applyPlayerEffect(world, player, enemy);
@@ -776,7 +796,6 @@ public class BattleScreen implements IScreen {
 			shouldChangeTurns = false;
 			return;
 		}
-
 		
 		// If it is the enemy's turn then pause for a second so that
 		// the enemy's turn is not over in a matter of milliseconds

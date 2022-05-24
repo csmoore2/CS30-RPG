@@ -5,6 +5,7 @@ import game.World;
 import game.entity.Action;
 import game.entity.EnemyAction;
 import game.entity.Player;
+import game.ref.Images;
 
 /**
  * This class represents the final boss that the player faces
@@ -13,7 +14,7 @@ import game.entity.Player;
  */
 public class FinalBossEnemy extends Enemy {
 	/**
-	 * This constructs a semi-randomized boss based on the amount of
+	 * This constructs a boss based on the amount of
 	 * experience the player has.
 	 * 
 	 * @param worldIn   the world
@@ -21,6 +22,9 @@ public class FinalBossEnemy extends Enemy {
 	 */
 	public FinalBossEnemy(World worldIn, int playerExp) {
 		super(worldIn, playerExp);
+
+		// Set our image to the final boss image
+		setImage(Images.finalBossImage);
 	}
 
 	/**

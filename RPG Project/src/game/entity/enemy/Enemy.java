@@ -229,7 +229,7 @@ public abstract class Enemy implements IEnemy {
 					"Enemy took %d damage from a poison effect.",
 					poisonDamagePerTurn
 				),
-				4
+				6
 			);
 
 			// Inflict the damage

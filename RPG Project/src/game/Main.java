@@ -188,39 +188,39 @@ public class Main {
 	 * @param world the world
 	 */
 	private static void showIntroduction(World world) {
-		world.showMessage("Welcome to <b>Elemental Battle of the Mages</b>!", 5);
-		world.showMessage("You are the last descendant of a family of powerful mages who used "  +
-		                  "their magic for good. The rest of your family was eliminated in the " +
-						  "last great <b>Elemental War</b> against <b>Marduk</b> and his followers.",
+		/*world.showMessage("Welcome to <b>Elemental Battle of the Mages</b>!", 5);
+		world.showMessage("You are the last descendant of a family of powerful mages who used "     +
+		                  "their magic for good. The rest of your family was eliminated in <b>The " +
+						  "Last Great Elemental War</b> against <b>Marduk</b> and his followers.",
 						  15);
 		world.showMessage("It is now up to you to to defeat all of <b>Marduk's</b> followers and " +
 		                  "then <b>Marduk</b> himself. By doing so you will free the world from "  +
 						  "the evil that grips it and usher in a golden age of magic.",
-						  15);
+						  20);
 		world.showMessage("Go now! In the areas surrounding this place you will find <b>Marduk's</b> "  +
 		                  "followers and the keys to the realm where <b>Marduk</b> himself dwells. Be " +
 						  "careful though, there are minor mages along your path who will try to "      +
 						  "defeat you to gain favour with <b>Marduk</b>.",
 						  20);
-		world.showMessage("To move you must use the w, a, s, and d keys on your keyboard. If at any "  +
-		                  "time you wish to leave simply pause the game by pressing escape and exit "  +
+		world.showMessage("To move you must use the w, a, s, and d keys on your keyboard. If at any "   +
+		                  "time you wish to leave simply pause the game by pressing escape and exit "   +
 						  "the game. Furthermore, for every <b>100 experience points</b> you gain you " +
-						  "level up which will give you <b>1 attribute point</b> to spend. These "    +
-						  "the game. Furthermore, for every <b>100 experience points</b> you gain you " +
-						  "level up which will give you <b>2 attribute points</b> to spend. These "    +
-						  "points can be spent by selecting \"View Attributes/Level Up\" in the "      +
-						  "pause screen. Note, though, that you cannot pause the game while a "        +
+						  "level up which will give you <b>1 attribute point</b> to spend. These "      +
+						  "points can be spent by selecting \"View Attributes/Level Up\" in the "       +
+						  "pause screen. Note, though, that you cannot pause the game while a "         +
 						  "message box is being displayed.",
-						  25);
+						  30);
 		world.showMessage(
-			String.format("It is important to know that the effectiveness of an effect (like an attack " +
-						  "or health potion) may differ from the attributed value, due to random variation. " +
-						  "One final note: if the movement keys are not working try clicking inside "   +
-		                  "the game's window. The time has now come for you to go out into the world. " +
-						  "The whole world is counting on you %s. May luck be on your side!",
+			String.format("It is important to know that the effectiveness of an effect (like an attack "       +
+						  "or health potion) may differ from the attributed value, due to random variation. "  +
+						  "Also a tip: if you are having trouble with an enemy try wandering around to world " +
+						  "to encounter some random enemies and gain experience points. One final note: if "   +
+						  "the movement keys are not working try clicking inside the game's window. The time " +
+						  "has now come for you to go out into the world. The whole world is counting on you " +
+						  "%s. May luck be on your side!",
 						  world.getPlayer().getName()
 			),
-			15);
+			25);*/
 	}
 
 	/**

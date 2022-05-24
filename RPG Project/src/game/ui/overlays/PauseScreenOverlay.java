@@ -373,9 +373,8 @@ public class PauseScreenOverlay extends Overlay {
 			incrementButton.setPreferredSize(ATTRIBUTE_PANEL_DEC_INC_BUTTON_SIZE);
 			incrementButton.addActionListener((a) -> incrementAttribute(attr));
 
-			// Only enable the increment button if the player can level up and
-			// is not in a battle
-			incrementButton.setEnabled(player.canLevelUp() && !world.inBattle());
+			// Only enable the increment button if the player can level up
+			incrementButton.setEnabled(player.canLevelUp());
 
 			// Align the decrement button to be next to the attribute value
 			panelLayout.putConstraint(VERTICAL_CENTER, decrementButton, 0, VERTICAL_CENTER, attrValue);
@@ -700,8 +699,8 @@ public class PauseScreenOverlay extends Overlay {
 			PrimaryAttributeUIData attrUIData = primaryAttributeUIDataMap.get(attr);
 
 			// Only enable the increment button if the player has attribute
-			// points to spend and the player is not in a battle
-			attrUIData.incrementButton.setEnabled(availableAttrPoints > 0 && !world.inBattle());
+			// points to spend
+			attrUIData.incrementButton.setEnabled(availableAttrPoints > 0);
 		}
 	}
 

@@ -118,12 +118,6 @@ public class World extends JComponent {
 	public Map<Zone, Integer> enemiesRemaining = new EnumMap<>(Zone.class);
 	
 	/**
-	 * This variable keeps track of how many steps the player has taken since they were
-	 * last in a random encounter.
-	 */
-	private int randomEncounterStepCounter = 0;
-	
-	/**
 	 * This constructs the world by pushing the starting screen onto the screen stack
 	 * and initializing the game's state.
 	 * 
@@ -443,9 +437,9 @@ public class World extends JComponent {
 		            "down from the sky: <i>I AM <b>MARDUK</b>! You think you can defeat me you puny " +
 					"mage?</i>",
 					15);
-		showMessage("<i>Face me then and meet your doom...</i>", 5);
-		showMessage("A shadowy figure appears in the sky and slowly descends towards you. As it "  +
-					"approaches you begin to sense the dark magicaly power that seems to emanate " +
+		showMessage("<i>Face me then and meet your doom...</i>", 8);
+		showMessage("A shadowy figure appears in the sky and slowly descends towards you. As it " +
+					"approaches you begin to sense the dark magical power that seems to emanate " +
 					"from it.",
 					15);
 		showMessage("When <b>Marduk</b> reaches you he attacks and you begin battling for your life...", 10);
@@ -460,16 +454,16 @@ public class World extends JComponent {
 	 */
 	private void concludeGame() {
 		// Show some story dialog
-		showMessage("As you deal the killing blow to <b>Marduk</b> his voice fills your head. " +
+		showMessage("As you deal the killing blow to <b>Marduk</b> his voice fills your head: " +
 	                "<i>Noooooo this cannot be happening............</i>.",
-	                5);
+	                15);
 		showMessage("At once everything around you seems to become lighter as the last remnant "   +
-	                "of dark magic leaves the world. People being to celebrate and cheer as they " +
+	                "of dark magic leaves the world. People begin to celebrate and cheer as they " +
 				    "realize <b>Marduk</b> is no more and they can live their lives in peace.",
-				    10);
+				    18);
 		
 		// Show the win screen
-		showScreen(new WinScreen());
+		showScreen(new WinScreen(this));
 	}
 
 	/*************************************************************************************/
@@ -571,7 +565,7 @@ public class World extends JComponent {
 					"You defeated the enemy and gained %d experience!",
 					experienceGain
 				),
-				4
+				7
 			);
 
 			// Give the player their experience
@@ -585,7 +579,7 @@ public class World extends JComponent {
 				showMessage("As <b>Marduk's</b> lieutenant collapses and turns to ashes you hear a "   +
 			                "distant rumble of thunder as though <b>Marduk</b> himself is expressing " +
 						    "displeasure at your victory.",
-						    10);
+						    15);
 			}
 			
 			// If the enemy was a main enemy then decrement the number of main enemies
@@ -600,7 +594,7 @@ public class World extends JComponent {
 					showMessage("As you defeat the final of <b>Marduk's</b> followers in the area " +
 					            "you hear a sound like shattering glass and a barrier breaks, "    +
 								"revealing one of <b>Marduk's</b> lieutenants.",
-								10);
+								15);
 					
 					// Open up the boss
 					switch (currentZone) {

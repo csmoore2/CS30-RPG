@@ -487,7 +487,7 @@ public class Player implements ILivingEntity {
 					name,
 					poisonDamagePerTurn
 				),
-				4
+				6
 			);
 
 			// Inflict the damage
@@ -505,7 +505,7 @@ public class Player implements ILivingEntity {
 					name,
 					healingPerTurn
 				),
-				4
+				6
 			);
 
 			// Add the health
@@ -526,7 +526,7 @@ public class Player implements ILivingEntity {
                 name,
 				(int)getSecondaryAttributeValue(Attribute.MANA_REGEN)
 			),
-			4
+			6
 		);
 
 		// Regenerate part of the player's mana
@@ -612,7 +612,7 @@ public class Player implements ILivingEntity {
 					"A protection effect reduced the damage to %d.",
 					damage
 				),
-				2
+				6
 			);
 		}
 

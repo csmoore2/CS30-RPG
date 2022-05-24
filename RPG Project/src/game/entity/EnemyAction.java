@@ -51,7 +51,7 @@ public non-sealed class EnemyAction extends Action {
         // If the player dodges this action then stop executing this method after showing a message
         if (Main.RANDOM.nextDouble() < player.getSecondaryAttributeValue(Attribute.DODGE_CHANCE)) {
             // Show a message and then return
-            world.showMessage("Player dodged enemy's attack.", 2);
+            world.showMessage("Player dodged enemy's attack.", 4);
             return;
         }
 
@@ -74,7 +74,7 @@ public non-sealed class EnemyAction extends Action {
                             player.getName(),
                             (int)(effect * damageMultiplier)
                         ),
-                        4
+                        6
                     );
                 } else {
                     world.showMessage(
@@ -83,7 +83,7 @@ public non-sealed class EnemyAction extends Action {
                             player.getName(),
                             (int)effect
                         ),
-                        3
+                        5
                     );
                 }
 
@@ -101,7 +101,7 @@ public non-sealed class EnemyAction extends Action {
                         (int)effect,
                         numTurns
                     ),
-                    4
+                    6
                 );
 
                 // Inflict the effect
@@ -144,7 +144,7 @@ public non-sealed class EnemyAction extends Action {
                         "Enemy healed %d health.",
                         (int)effect
                     ),
-                    3
+                    5
                 );
 
                 // Give the enemy the health
